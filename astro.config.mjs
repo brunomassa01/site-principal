@@ -1,15 +1,15 @@
 import { defineConfig } from 'astro/config';
 import tailwind from '@astrojs/tailwind';
+import react from '@astrojs/react';
+import vercel from '@astrojs/vercel/serverless';
+import keystatic from '@keystatic/astro';
 
-
-// https://astro.build/config
 export default defineConfig({
   site: 'https://brunomassa.online',
+  output: 'hybrid',
+  adapter: vercel(),
   server: { host: true },
-  integrations: [
-    tailwind(),
-
-  ],
+  integrations: [tailwind(), react(), keystatic()],
   i18n: {
     defaultLocale: 'pt',
     locales: ['pt', 'en'],
