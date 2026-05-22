@@ -22,7 +22,7 @@ export default async function handler(req, res) {
   const token = data.access_token;
 
   if (!token) {
-    return res.status(401).send('Authentication failed');
+    return res.status(401).send(`Authentication failed: ${JSON.stringify(data)}`);
   }
 
   const tokenPayload = JSON.stringify({ token, provider: 'github' });
