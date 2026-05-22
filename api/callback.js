@@ -40,9 +40,15 @@ export default async function handler(req, res) {
 <script>
 (function() {
   var data = ${JSON.stringify(tokenData)};
+  function receiveMessage(e) {
+    window.opener.postMessage(
+      "authorization:github:success:" + data,
+      e.origin
+    );
+    setTimeout(function() { window.close(); }, 200);
+  }
+  window.addEventListener("message", receiveMessage, { once: true });
   window.opener.postMessage("authorizing:github", "*");
-  window.opener.postMessage("authorization:github:success:" + data, "*");
-  setTimeout(function() { window.close(); }, 500);
 })();
 </script>
 </body>
