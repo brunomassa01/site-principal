@@ -18,28 +18,75 @@ interface Props {
 
 const { post } = Astro.props;
 const { Content } = await post.render();
+
+const fmtData = (d: Date) => d.toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' });
 ---
 <BaseLayout title={post.data.titulo} descricao={post.data.resumo}>
   <Header />
   <main>
-    <article>
-      <p><a href="/posts">← Voltar para conteúdo</a></p>
-      <h1>{post.data.titulo}</h1>
-      <p><time>{post.data.data.toLocaleDateString('pt-BR')}</time></p>
-      <p><em>{post.data.resumo}</em></p>
-      <Content />
-      {post.data.fonte_externa_url && (
-        <p>
-          <small>
-            Originalmente publicado em
-            {' '}
-            <a href={post.data.fonte_externa_url} target="_blank" rel="noopener">
-              {post.data.fonte_externa_nome ?? 'fonte externa'}
-            </a>.
-          </small>
+    <!-- Post header -->
+    <section class="bg-white py-16 md:py-20">
+      <div class="max-w-3xl mx-auto px-6">
+        <a href="/posts" class="inline-flex items-center gap-1.5 text-[13px] text-apple-secondary hover:text-apple-label transition-colors mb-8">
+          ← Conteúdo
+        </a>
+
+        <div class="flex flex-wrap items-center gap-2 mb-4">
+          <time class="text-[12px] font-semibold uppercase tracking-wider text-apple-tertiary">
+            {fmtData(post.data.data)}
+          </time>
+          {post.data.idioma === 'en' && (
+            <span class="px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-apple-fill text-apple-secondary border border-apple-separator-light">
+              English
+            </span>
+          )}
+        </div>
+
+        <h1 class="text-4xl md:text-5xl font-bold text-apple-label tracking-tight leading-tight mb-4 text-balance">
+          {post.data.titulo}
+        </h1>
+
+        <p class="text-[20px] text-apple-secondary font-normal leading-relaxed mb-4 text-balance">
+          {post.data.resumo}
         </p>
-      )}
-    </article>
+
+        {post.data.fonte_externa_url && (
+          <div class="mt-4 pt-4 border-t border-apple-separator-light">
+            <p class="text-[13px] text-apple-tertiary">
+              Originalmente publicado em{' '}
+              <a href={post.data.fonte_externa_url} target="_blank" rel="noopener" class="text-apple-accent hover:underline">
+                {post.data.fonte_externa_nome ?? 'fonte externa'} ↗
+              </a>
+            </p>
+          </div>
+        )}
+
+        {post.data.tags && post.data.tags.length > 0 && (
+          <div class="flex flex-wrap gap-2 mt-6">
+            {post.data.tags.map((tag) => (
+              <span class="px-3 py-1 rounded-full text-[12px] font-medium bg-apple-fill text-apple-secondary border border-apple-separator-light">
+                {tag}
+              </span>
+            ))}
+          </div>
+        )}
+      </div>
+    </section>
+
+    <!-- Post body -->
+    <section class="py-12">
+      <div class="max-w-3xl mx-auto px-6">
+        <article class="bg-apple-surface rounded-2xl shadow-card p-8 md:p-10">
+          <div class="prose-content">
+            <Content />
+          </div>
+        </article>
+
+        <div class="mt-8 pt-8 border-t border-apple-separator-light">
+          <a href="/posts" class="text-[15px] text-apple-accent hover:underline">← Voltar para conteúdo</a>
+        </div>
+      </div>
+    </section>
   </main>
   <Footer />
 </BaseLayout>

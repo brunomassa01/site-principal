@@ -7,22 +7,52 @@ import { getCollection } from 'astro:content';
 const todas = await getCollection('agora');
 const pagina = todas[0];
 const Content = pagina ? (await pagina.render()).Content : null;
+
+const dataFormatada = pagina?.data.atualizado_em
+  ? pagina.data.atualizado_em.toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' })
+  : null;
 ---
 <BaseLayout title="Agora" descricao="O que Bruno Massa está focando neste momento.">
   <Header />
   <main>
-    <article>
-      <h1>Agora</h1>
-      <p><small>O que estou focando neste momento. Inspirado em <a href="https://nownownow.com/about" target="_blank" rel="noopener">/now</a>.</small></p>
-      {pagina && Content ? (
-        <>
-          <p><small>Atualizado em {pagina.data.atualizado_em.toLocaleDateString('pt-BR')}</small></p>
-          <Content />
-        </>
-      ) : (
-        <p>Em construção.</p>
-      )}
-    </article>
+    <!-- Page header -->
+    <section class="bg-white py-16 md:py-20">
+      <div class="max-w-3xl mx-auto px-6">
+        <p class="text-[12px] font-semibold uppercase tracking-[0.08em] text-apple-accent mb-4">Momento atual</p>
+        <h1 class="text-4xl md:text-5xl font-bold text-apple-label tracking-tight leading-tight mb-4">
+          Agora
+        </h1>
+        <p class="text-[17px] text-apple-secondary leading-relaxed">
+          O que estou focando neste momento. Inspirado em{' '}
+          <a href="https://nownownow.com/about" target="_blank" rel="noopener" class="text-apple-accent hover:underline">
+            /now
+          </a>.
+        </p>
+        {dataFormatada && (
+          <p class="text-[13px] text-apple-tertiary mt-4 flex items-center gap-1.5">
+            <span class="w-1.5 h-1.5 rounded-full bg-green-500 inline-block"></span>
+            Atualizado em {dataFormatada}
+          </p>
+        )}
+      </div>
+    </section>
+
+    <!-- Content -->
+    <section class="py-12">
+      <div class="max-w-3xl mx-auto px-6">
+        {pagina && Content ? (
+          <article class="bg-apple-surface rounded-2xl shadow-card p-8 md:p-10">
+            <div class="prose-content">
+              <Content />
+            </div>
+          </article>
+        ) : (
+          <div class="bg-apple-surface rounded-2xl shadow-card p-8 text-center">
+            <p class="text-apple-secondary">Em construção.</p>
+          </div>
+        )}
+      </div>
+    </section>
   </main>
   <Footer />
 </BaseLayout>

@@ -7,40 +7,123 @@ import { getCollection } from 'astro:content';
 const items = (await getCollection('timeline'))
   .sort((a, b) => b.data.inicio.valueOf() - a.data.inicio.valueOf());
 
-const formatarMesAno = (d: Date) =>
-  d.toLocaleDateString('pt-BR', { year: 'numeric', month: 'short' });
+const tipoLabel: Record<string, string> = {
+  clt: 'CLT', pj: 'PJ', socio: 'Sócio',
+  consultoria: 'Consultoria', freelancer: 'Freelancer', voluntario: 'Voluntário',
+};
+
+const fmtMesAno = (d: Date) => d.toLocaleDateString('pt-BR', { month: 'short', year: 'numeric' });
 ---
-<BaseLayout title="Trajetória">
+<BaseLayout title="Trajetória" descricao="Trajetória profissional de Bruno Massa — cargos, empresas e conquistas ao longo da carreira.">
   <Header />
   <main>
-    <h1>Trajetória profissional</h1>
-    {items.length === 0 ? (
-      <p>Em construção.</p>
-    ) : (
-      <ol>
-        {items.map((item) => (
-          <li>
-            <h2>{item.data.cargo}</h2>
-            <p>
-              <strong>{item.data.empresa}</strong>
-              {item.data.local && <span> · {item.data.local}</span>}
-              {item.data.tipo && <span> · {item.data.tipo}</span>}
-            </p>
-            <p>
-              <time>{formatarMesAno(item.data.inicio)}</time>
-              {' — '}
-              <time>{item.data.fim ? formatarMesAno(item.data.fim) : 'Atual'}</time>
-            </p>
-            <p>{item.data.resumo}</p>
-            {item.data.destaques && item.data.destaques.length > 0 && (
-              <ul>
-                {item.data.destaques.map((d) => <li>{d}</li>)}
-              </ul>
-            )}
-          </li>
-        ))}
-      </ol>
-    )}
+    <!-- Page header -->
+    <section class="bg-white py-16 md:py-20">
+      <div class="max-w-5xl mx-auto px-6">
+        <p class="text-[12px] font-semibold uppercase tracking-[0.08em] text-apple-accent mb-4">Carreira</p>
+        <h1 class="text-4xl md:text-5xl font-bold text-apple-label tracking-tight leading-tight mb-4 text-balance">
+          Trajetória profissional
+        </h1>
+        <p class="text-[17px] text-apple-secondary max-w-2xl">
+          Uma linha do tempo de experiências, empresas e entregas. Em ordem cronológica inversa.
+        </p>
+      </div>
+    </section>
+
+    <!-- Timeline -->
+    <section class="py-16">
+      <div class="max-w-3xl mx-auto px-6">
+        {items.length === 0 ? (
+          <p class="text-apple-secondary">Em construção.</p>
+        ) : (
+          <div class="relative">
+            <div class="absolute left-0 top-2 bottom-2 w-px bg-apple-separator-light"></div>
+            <ol class="space-y-12">
+              {items.map((item) => (
+                <li class="relative pl-8">
+                  <!-- Dot -->
+                  <div class={`absolute left-0 top-1.5 w-2 h-2 rounded-full border-2 -translate-x-[3.5px] ${
+                    !item.data.fim ? 'bg-apple-accent border-apple-accent' : 'bg-white border-apple-separator'
+                  }`}></div>
+
+                  <!-- Date range -->
+                  <p class="text-[12px] font-semibold uppercase tracking-[0.06em] text-apple-tertiary mb-2">
+                    <time>{fmtMesAno(item.data.inicio)}</time>
+                    {' – '}
+                    <time>{item.data.fim ? fmtMesAno(item.data.fim) : 'Atual'}</time>
+                  </p>
+
+                  <!-- Card -->
+                  <div class="bg-apple-surface rounded-2xl shadow-card p-6">
+                    <div class="flex flex-wrap items-start justify-between gap-3 mb-3">
+                      <div>
+                        <h2 class="text-[20px] font-bold text-apple-label tracking-tight leading-tight">
+                          {item.data.cargo}
+                        </h2>
+                        <div class="flex flex-wrap items-center gap-2 mt-1">
+                          {item.data.empresa_url ? (
+                            <a
+                              href={item.data.empresa_url}
+                              target="_blank"
+                              rel="noopener"
+                              class="text-[15px] text-apple-accent font-medium hover:underline"
+                            >
+                              {item.data.empresa}
+                            </a>
+                          ) : (
+                            <span class="text-[15px] text-apple-accent font-medium">{item.data.empresa}</span>
+                          )}
+                          {item.data.local && (
+                            <span class="text-[13px] text-apple-tertiary">· {item.data.local}</span>
+                          )}
+                        </div>
+                      </div>
+                      <div class="flex flex-wrap gap-1.5">
+                        {!item.data.fim && (
+                          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-green-50 text-green-700 border border-green-200">
+                            Atual
+                          </span>
+                        )}
+                        {item.data.tipo && item.data.tipo !== '' && (
+                          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-apple-fill text-apple-secondary border border-apple-separator-light">
+                            {tipoLabel[item.data.tipo] ?? item.data.tipo}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    {item.data.resumo && (
+                      <p class="text-[15px] text-apple-secondary leading-relaxed mb-4">{item.data.resumo}</p>
+                    )}
+
+                    {item.data.destaques && item.data.destaques.length > 0 && (
+                      <ul class="space-y-1.5">
+                        {item.data.destaques.map((d) => (
+                          <li class="flex items-start gap-2 text-[14px] text-apple-secondary">
+                            <span class="flex-none text-apple-accent font-bold leading-none mt-[3px]">–</span>
+                            <span>{d}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+
+                    {item.data.tags && item.data.tags.length > 0 && (
+                      <div class="flex flex-wrap gap-1.5 mt-4 pt-4 border-t border-apple-separator-light">
+                        {item.data.tags.map((tag) => (
+                          <span class="px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-apple-fill text-apple-tertiary">
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </li>
+              ))}
+            </ol>
+          </div>
+        )}
+      </div>
+    </section>
   </main>
   <Footer />
 </BaseLayout>

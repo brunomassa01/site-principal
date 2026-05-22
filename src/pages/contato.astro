@@ -3,15 +3,59 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 ---
-<BaseLayout title="Contato">
+<BaseLayout title="Contato" descricao="Entre em contato com Bruno Massa.">
   <Header />
   <main>
-    <h1>Contato</h1>
-    <p>Formulário em construção. Por enquanto, fale comigo por:</p>
-    <ul>
-      <li>E-mail: <a href="mailto:brunobrm@gmail.com">brunobrm@gmail.com</a></li>
-      <li>LinkedIn: <a href="https://linkedin.com/in/" target="_blank" rel="noopener">linkedin.com/in/SEU-PERFIL</a> <small>(editar link)</small></li>
-    </ul>
+    <!-- Page header -->
+    <section class="bg-white py-16 md:py-20">
+      <div class="max-w-3xl mx-auto px-6">
+        <p class="text-[12px] font-semibold uppercase tracking-[0.08em] text-apple-accent mb-4">Contato</p>
+        <h1 class="text-4xl md:text-5xl font-bold text-apple-label tracking-tight leading-tight mb-4 text-balance">
+          Vamos conversar
+        </h1>
+        <p class="text-[17px] text-apple-secondary max-w-xl leading-relaxed">
+          Aberto a projetos, oportunidades e boas conversas sobre marketing, produto e negócios.
+        </p>
+      </div>
+    </section>
+
+    <!-- Contact options -->
+    <section class="py-12">
+      <div class="max-w-3xl mx-auto px-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <a
+            href="mailto:brunobrm@gmail.com"
+            class="group bg-apple-surface rounded-2xl shadow-card p-6 transition-all duration-300 hover:shadow-card-hover hover:-translate-y-0.5"
+          >
+            <p class="text-[12px] font-semibold uppercase tracking-[0.08em] text-apple-tertiary mb-3">E-mail</p>
+            <p class="text-[20px] font-semibold text-apple-label tracking-tight mb-2 group-hover:text-apple-accent transition-colors">
+              brunobrm@gmail.com
+            </p>
+            <p class="text-[14px] text-apple-secondary">Respondo em até 24h em dias úteis.</p>
+          </a>
+
+          <a
+            href="https://linkedin.com/in/brunormassa"
+            target="_blank"
+            rel="noopener"
+            class="group bg-apple-surface rounded-2xl shadow-card p-6 transition-all duration-300 hover:shadow-card-hover hover:-translate-y-0.5"
+          >
+            <p class="text-[12px] font-semibold uppercase tracking-[0.08em] text-apple-tertiary mb-3">LinkedIn</p>
+            <p class="text-[20px] font-semibold text-apple-label tracking-tight mb-2 group-hover:text-apple-accent transition-colors">
+              /in/brunormassa ↗
+            </p>
+            <p class="text-[14px] text-apple-secondary">Conecte-se ou envie uma mensagem direta.</p>
+          </a>
+        </div>
+
+        <div class="mt-8 bg-apple-fill rounded-2xl p-6">
+          <p class="text-[15px] text-apple-secondary leading-relaxed">
+            Prefiro uma conversa direta sobre o que você tem em mente — seja uma oportunidade de trabalho,
+            uma parceria em projeto ou uma troca de ideias. Sem formulários, sem burocracia.
+          </p>
+        </div>
+      </div>
+    </section>
   </main>
   <Footer />
 </BaseLayout>

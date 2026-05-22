@@ -6,27 +6,76 @@ import { getCollection } from 'astro:content';
 
 const posts = (await getCollection('posts', ({ data }) => !data.rascunho))
   .sort((a, b) => b.data.data.valueOf() - a.data.data.valueOf());
+
+const fmtData = (d: Date) => d.toLocaleDateString('pt-BR', { day: 'numeric', month: 'short', year: 'numeric' });
 ---
-<BaseLayout title="Conteúdo autoral">
+<BaseLayout title="Conteúdo autoral" descricao="Artigos e reflexões de Bruno Massa sobre marketing, produto e negócios.">
   <Header />
   <main>
-    <h1>Conteúdo autoral</h1>
-    {posts.length === 0 ? (
-      <p>Em breve.</p>
-    ) : (
-      <ul>
-        {posts.map((p) => (
-          <li>
-            <h2><a href={`/posts/${p.slug}`}>{p.data.titulo}</a></h2>
-            <p><time>{p.data.data.toLocaleDateString('pt-BR')}</time></p>
-            <p>{p.data.resumo}</p>
-            {p.data.fonte_externa_url && (
-              <p><small>Originalmente publicado em {p.data.fonte_externa_nome ?? 'fonte externa'}.</small></p>
-            )}
-          </li>
-        ))}
-      </ul>
-    )}
+    <!-- Page header -->
+    <section class="bg-white py-16 md:py-20">
+      <div class="max-w-3xl mx-auto px-6">
+        <p class="text-[12px] font-semibold uppercase tracking-[0.08em] text-apple-accent mb-4">Publicações</p>
+        <h1 class="text-4xl md:text-5xl font-bold text-apple-label tracking-tight leading-tight mb-4 text-balance">
+          Conteúdo autoral
+        </h1>
+        <p class="text-[17px] text-apple-secondary max-w-2xl">
+          Artigos, reflexões e anotações sobre marketing, produto, gestão e carreira.
+        </p>
+      </div>
+    </section>
+
+    <!-- Posts list -->
+    <section class="py-12">
+      <div class="max-w-3xl mx-auto px-6">
+        {posts.length === 0 ? (
+          <div class="bg-apple-surface rounded-2xl shadow-card p-8 text-center">
+            <p class="text-[17px] font-semibold text-apple-label mb-2">Em breve</p>
+            <p class="text-[15px] text-apple-secondary">Os artigos serão publicados em breve.</p>
+          </div>
+        ) : (
+          <div class="space-y-4">
+            {posts.map((p) => (
+              <a
+                href={`/posts/${p.slug}`}
+                class="group block bg-apple-surface rounded-2xl shadow-card p-6 transition-all duration-300 hover:shadow-card-hover hover:-translate-y-0.5"
+              >
+                <div class="flex flex-wrap items-center gap-3 mb-2">
+                  <time class="text-[12px] font-medium text-apple-tertiary uppercase tracking-wide">
+                    {fmtData(p.data.data)}
+                  </time>
+                  {p.data.idioma === 'en' && (
+                    <span class="px-2 py-0.5 rounded-full text-[11px] font-medium bg-apple-fill text-apple-tertiary">
+                      EN
+                    </span>
+                  )}
+                  {p.data.fonte_externa_url && (
+                    <span class="px-2 py-0.5 rounded-full text-[11px] font-medium bg-apple-fill text-apple-tertiary">
+                      {p.data.fonte_externa_nome ?? 'Republicação'}
+                    </span>
+                  )}
+                </div>
+                <h2 class="text-[20px] font-bold text-apple-label tracking-tight leading-snug mb-2 group-hover:text-apple-accent transition-colors text-balance">
+                  {p.data.titulo}
+                </h2>
+                <p class="text-[14px] text-apple-secondary leading-relaxed line-clamp-2">
+                  {p.data.resumo}
+                </p>
+                {p.data.tags && p.data.tags.length > 0 && (
+                  <div class="flex flex-wrap gap-1.5 mt-3">
+                    {p.data.tags.slice(0, 4).map((tag) => (
+                      <span class="px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-apple-fill text-apple-tertiary">
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </a>
+            ))}
+          </div>
+        )}
+      </div>
+    </section>
   </main>
   <Footer />
 </BaseLayout>

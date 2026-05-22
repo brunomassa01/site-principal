@@ -23,33 +23,106 @@ const titulos: Record<Status, string> = {
   'arquivado': 'Arquivados',
 };
 
+const badgeClass: Record<Status, string> = {
+  'em-andamento': 'bg-green-50 text-green-700 border-green-200',
+  'concluido': 'bg-blue-50 text-blue-600 border-blue-200',
+  'em-pausa': 'bg-yellow-50 text-yellow-700 border-yellow-200',
+  'arquivado': 'bg-gray-50 text-gray-500 border-gray-200',
+};
+
 const ordem: Status[] = ['em-andamento', 'concluido', 'em-pausa', 'arquivado'];
+
+const fmtAno = (d: Date) => d.getFullYear();
 ---
-<BaseLayout title="Projetos">
+<BaseLayout title="Projetos" descricao="Projetos e trabalhos de Bruno Massa — cases, campanhas e iniciativas.">
   <Header />
   <main>
-    <h1>Projetos</h1>
-    {todos.length === 0 ? (
-      <p>Em construção.</p>
-    ) : (
-      ordem.map((status) => grupos[status].length > 0 && (
-        <section>
-          <h2>{titulos[status]}</h2>
-          <ul>
-            {grupos[status].map((p) => (
-              <li>
-                <a href={`/projetos/${p.slug}`}><strong>{p.data.titulo}</strong></a>
-                {p.data.subtitulo && <span> — {p.data.subtitulo}</span>}
-                <p>{p.data.resumo}</p>
-                {p.data.tags && p.data.tags.length > 0 && (
-                  <p>{p.data.tags.map((t) => <span>#{t} </span>)}</p>
-                )}
-              </li>
+    <!-- Page header -->
+    <section class="bg-white py-16 md:py-20">
+      <div class="max-w-5xl mx-auto px-6">
+        <p class="text-[12px] font-semibold uppercase tracking-[0.08em] text-apple-accent mb-4">Portfolio</p>
+        <h1 class="text-4xl md:text-5xl font-bold text-apple-label tracking-tight leading-tight mb-4 text-balance">
+          Projetos
+        </h1>
+        <p class="text-[17px] text-apple-secondary max-w-2xl">
+          Cases, campanhas, produtos e iniciativas. Cada projeto tem um problema, uma abordagem e um resultado.
+        </p>
+      </div>
+    </section>
+
+    <!-- Project groups -->
+    <section class="py-16">
+      <div class="max-w-5xl mx-auto px-6">
+        {todos.length === 0 ? (
+          <p class="text-apple-secondary">Em construção.</p>
+        ) : (
+          <div class="space-y-16">
+            {ordem.map((status) => grupos[status].length > 0 && (
+              <div>
+                <div class="flex items-center gap-3 mb-6">
+                  <h2 class="text-[22px] font-bold text-apple-label tracking-tight">{titulos[status]}</h2>
+                  <span class={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold border ${badgeClass[status]}`}>
+                    {grupos[status].length}
+                  </span>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {grupos[status].map((p) => (
+                    <a
+                      href={`/projetos/${p.slug}`}
+                      class="group bg-apple-surface rounded-2xl shadow-card p-6 flex flex-col transition-all duration-300 hover:shadow-card-hover hover:-translate-y-0.5"
+                    >
+                      <div class="flex items-start justify-between gap-2 mb-3">
+                        <h3 class="text-[17px] font-semibold text-apple-label tracking-tight leading-snug group-hover:text-apple-accent transition-colors">
+                          {p.data.titulo}
+                        </h3>
+                        {p.data.destaque && (
+                          <span class="flex-none text-apple-accent text-[18px] leading-none" title="Destaque">★</span>
+                        )}
+                      </div>
+
+                      {p.data.subtitulo && (
+                        <p class="text-[13px] text-apple-tertiary mb-2">{p.data.subtitulo}</p>
+                      )}
+
+                      <p class="text-[14px] text-apple-secondary leading-relaxed flex-1 line-clamp-3 mb-4">
+                        {p.data.resumo}
+                      </p>
+
+                      <div class="mt-auto">
+                        <div class="flex items-center gap-2 mb-3">
+                          {p.data.papel && (
+                            <span class="text-[12px] text-apple-tertiary">{p.data.papel}</span>
+                          )}
+                          {p.data.inicio && (
+                            <span class="text-[12px] text-apple-tertiary">
+                              · {fmtAno(p.data.inicio)}{p.data.fim ? `–${fmtAno(p.data.fim)}` : ''}
+                            </span>
+                          )}
+                        </div>
+                        {p.data.tags && p.data.tags.length > 0 && (
+                          <div class="flex flex-wrap gap-1.5">
+                            {p.data.tags.slice(0, 3).map((tag) => (
+                              <span class="px-2 py-0.5 rounded-full text-[11px] font-medium bg-apple-fill text-apple-tertiary">
+                                {tag}
+                              </span>
+                            ))}
+                            {p.data.tags.length > 3 && (
+                              <span class="px-2 py-0.5 rounded-full text-[11px] font-medium bg-apple-fill text-apple-tertiary">
+                                +{p.data.tags.length - 3}
+                              </span>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </a>
+                  ))}
+                </div>
+              </div>
             ))}
-          </ul>
-        </section>
-      ))
-    )}
+          </div>
+        )}
+      </div>
+    </section>
   </main>
   <Footer />
 </BaseLayout>

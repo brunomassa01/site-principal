@@ -1,4 +1,6 @@
 ---
+import '../styles/global.css';
+
 interface Props {
   title: string;
   descricao?: string;
@@ -20,7 +22,9 @@ const tituloCompleto = title === 'Bruno Massa' ? title : `${title} — Bruno Mas
     <meta property="og:description" content={descricao} />
     <meta property="og:type" content="website" />
     <meta property="og:url" content={Astro.url.href} />
-    <link rel="sitemap" href="/sitemap-index.xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   </head>
   <body>
     <slot />

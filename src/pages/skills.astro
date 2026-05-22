@@ -4,7 +4,8 @@ import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import { getCollection } from 'astro:content';
 
-const todas = await getCollection('skills');
+const todas = (await getCollection('skills'))
+  .sort((a, b) => (b.data.ano ?? 0) - (a.data.ano ?? 0));
 
 type Cat = 'habilidade' | 'certificacao' | 'formacao' | 'idioma';
 
@@ -22,36 +23,202 @@ const titulos: Record<Cat, string> = {
   idioma: 'Idiomas',
 };
 
+const nivelLabel: Record<string, string> = {
+  basico: 'Básico', intermediario: 'Intermediário',
+  avancado: 'Avançado', especialista: 'Especialista',
+};
+
+const nivelWidth: Record<string, string> = {
+  basico: 'w-1/4', intermediario: 'w-2/4', avancado: 'w-3/4', especialista: 'w-full',
+};
+
 const ordem: Cat[] = ['habilidade', 'certificacao', 'formacao', 'idioma'];
 ---
-<BaseLayout title="Skills, certificações e formação">
+<BaseLayout title="Skills, certificações e formação" descricao="Habilidades, certificações, formação e idiomas de Bruno Massa.">
   <Header />
   <main>
-    <h1>Skills, certificações e formação</h1>
-    {todas.length === 0 ? (
-      <p>Em construção.</p>
-    ) : (
-      ordem.map((cat) => porCategoria[cat].length > 0 && (
-        <section>
-          <h2>{titulos[cat]}</h2>
-          <ul>
-            {porCategoria[cat].map((s) => (
-              <li>
-                <strong>{s.data.nome}</strong>
-                {s.data.area && <span> · {s.data.area}</span>}
-                {s.data.instituicao && <span> · {s.data.instituicao}</span>}
-                {s.data.ano && <span> · {s.data.ano}</span>}
-                {s.data.nivel && <span> · {s.data.nivel}</span>}
-                {s.data.credencial_url && (
-                  <> · <a href={s.data.credencial_url} target="_blank" rel="noopener">credencial</a></>
-                )}
-                {s.data.descricao && <p>{s.data.descricao}</p>}
-              </li>
-            ))}
-          </ul>
-        </section>
-      ))
-    )}
+    <!-- Page header -->
+    <section class="bg-white py-16 md:py-20">
+      <div class="max-w-5xl mx-auto px-6">
+        <p class="text-[12px] font-semibold uppercase tracking-[0.08em] text-apple-accent mb-4">Competências</p>
+        <h1 class="text-4xl md:text-5xl font-bold text-apple-label tracking-tight leading-tight mb-4 text-balance">
+          Skills &amp; Formação
+        </h1>
+        <p class="text-[17px] text-apple-secondary max-w-2xl">
+          Habilidades, certificações, formação acadêmica e idiomas.
+        </p>
+      </div>
+    </section>
+
+    <section class="py-16">
+      <div class="max-w-5xl mx-auto px-6 space-y-16">
+        {/* Habilidades — tag cloud por área */}
+        {porCategoria.habilidade.length > 0 && (() => {
+          const areas = [...new Set(porCategoria.habilidade.map(s => s.data.area).filter(Boolean))];
+          return (
+            <div>
+              <h2 class="text-[22px] font-bold text-apple-label tracking-tight mb-6">{titulos.habilidade}</h2>
+              {areas.length > 0 ? (
+                <div class="space-y-6">
+                  {areas.map((area) => {
+                    const skills = porCategoria.habilidade.filter(s => s.data.area === area);
+                    return (
+                      <div>
+                        <p class="text-[12px] font-semibold uppercase tracking-[0.07em] text-apple-tertiary mb-3">{area}</p>
+                        <div class="flex flex-wrap gap-2">
+                          {skills.map((s) => (
+                            <span class={`px-3.5 py-1.5 rounded-full text-[13px] font-medium border transition-colors ${
+                              s.data.destaque
+                                ? 'bg-apple-accent text-white border-apple-accent'
+                                : 'bg-apple-surface text-apple-secondary border-apple-separator-light hover:border-apple-separator'
+                            }`}>
+                              {s.data.nome}
+                              {s.data.nivel && s.data.nivel !== '' && (
+                                <span class="ml-1.5 opacity-60 text-[11px]">
+                                  {nivelLabel[s.data.nivel]}
+                                </span>
+                              )}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div class="flex flex-wrap gap-2">
+                  {porCategoria.habilidade.map((s) => (
+                    <span class="px-3.5 py-1.5 rounded-full text-[13px] font-medium bg-apple-fill text-apple-secondary border border-apple-separator-light">
+                      {s.data.nome}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+          );
+        })()}
+
+        {/* Idiomas — level bars */}
+        {porCategoria.idioma.length > 0 && (
+          <div>
+            <h2 class="text-[22px] font-bold text-apple-label tracking-tight mb-6">{titulos.idioma}</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {porCategoria.idioma.map((s) => (
+                <div class="bg-apple-surface rounded-2xl shadow-card p-5">
+                  <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-[17px] font-semibold text-apple-label">{s.data.nome}</h3>
+                    {s.data.nivel && s.data.nivel !== '' && (
+                      <span class="text-[13px] text-apple-secondary font-medium">{nivelLabel[s.data.nivel]}</span>
+                    )}
+                  </div>
+                  {s.data.nivel && s.data.nivel !== '' && (
+                    <div class="h-1.5 bg-apple-fill rounded-full overflow-hidden">
+                      <div class={`h-full bg-apple-accent rounded-full ${nivelWidth[s.data.nivel] ?? 'w-1/2'}`}></div>
+                    </div>
+                  )}
+                  {s.data.descricao && (
+                    <p class="text-[13px] text-apple-tertiary mt-2">{s.data.descricao}</p>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Certificações */}
+        {porCategoria.certificacao.length > 0 && (
+          <div>
+            <h2 class="text-[22px] font-bold text-apple-label tracking-tight mb-6">{titulos.certificacao}</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {porCategoria.certificacao.map((s) => (
+                <div class="bg-apple-surface rounded-2xl shadow-card p-5">
+                  <div class="flex items-start justify-between gap-3">
+                    <div class="flex-1">
+                      <h3 class="text-[15px] font-semibold text-apple-label leading-snug mb-1">{s.data.nome}</h3>
+                      <div class="flex flex-wrap items-center gap-x-2 gap-y-0.5">
+                        {s.data.instituicao && (
+                          s.data.instituicao_url ? (
+                            <a href={s.data.instituicao_url} target="_blank" rel="noopener" class="text-[13px] text-apple-accent hover:underline">
+                              {s.data.instituicao}
+                            </a>
+                          ) : (
+                            <span class="text-[13px] text-apple-secondary">{s.data.instituicao}</span>
+                          )
+                        )}
+                        {s.data.ano && (
+                          <span class="text-[12px] text-apple-tertiary">· {s.data.ano}</span>
+                        )}
+                      </div>
+                      {s.data.descricao && (
+                        <p class="text-[13px] text-apple-tertiary mt-1.5 leading-relaxed">{s.data.descricao}</p>
+                      )}
+                    </div>
+                    {s.data.credencial_url && (
+                      <a
+                        href={s.data.credencial_url}
+                        target="_blank"
+                        rel="noopener"
+                        class="flex-none inline-flex items-center px-3 py-1 rounded-full text-[12px] font-medium bg-apple-accent/10 text-apple-accent hover:bg-apple-accent hover:text-white transition-colors"
+                      >
+                        Credencial ↗
+                      </a>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Formação */}
+        {porCategoria.formacao.length > 0 && (
+          <div>
+            <h2 class="text-[22px] font-bold text-apple-label tracking-tight mb-6">{titulos.formacao}</h2>
+            <div class="space-y-4">
+              {porCategoria.formacao.map((s) => (
+                <div class="bg-apple-surface rounded-2xl shadow-card p-6">
+                  <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                    <div>
+                      <h3 class="text-[17px] font-semibold text-apple-label leading-snug mb-1">{s.data.nome}</h3>
+                      <div class="flex flex-wrap items-center gap-x-2">
+                        {s.data.instituicao && (
+                          s.data.instituicao_url ? (
+                            <a href={s.data.instituicao_url} target="_blank" rel="noopener" class="text-[15px] text-apple-accent hover:underline">
+                              {s.data.instituicao}
+                            </a>
+                          ) : (
+                            <span class="text-[15px] text-apple-secondary">{s.data.instituicao}</span>
+                          )
+                        )}
+                        {s.data.ano && (
+                          <span class="text-[13px] text-apple-tertiary">· {s.data.ano}</span>
+                        )}
+                        {s.data.area && (
+                          <span class="text-[13px] text-apple-tertiary">· {s.data.area}</span>
+                        )}
+                      </div>
+                      {s.data.descricao && (
+                        <p class="text-[14px] text-apple-secondary mt-2 leading-relaxed">{s.data.descricao}</p>
+                      )}
+                    </div>
+                    {s.data.credencial_url && (
+                      <a
+                        href={s.data.credencial_url}
+                        target="_blank"
+                        rel="noopener"
+                        class="flex-none inline-flex items-center px-3 py-1 rounded-full text-[12px] font-medium bg-apple-fill text-apple-secondary hover:bg-apple-separator-light transition-colors"
+                      >
+                        Ver diploma ↗
+                      </a>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </section>
   </main>
   <Footer />
 </BaseLayout>

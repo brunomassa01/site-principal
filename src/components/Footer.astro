@@ -1,6 +1,33 @@
 ---
 const ano = new Date().getFullYear();
 ---
-<footer>
-  <p>© {ano} Bruno Massa · Currículo vivo, sempre em construção.</p>
+<footer class="bg-apple-fill border-t border-apple-separator-light mt-20">
+  <div class="max-w-5xl mx-auto px-6 py-12">
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+      <div>
+        <p class="text-[15px] font-semibold text-apple-label">Bruno Massa</p>
+        <p class="text-[13px] text-apple-tertiary mt-0.5">Marketing · Produto · Negócios</p>
+      </div>
+      <nav aria-label="Links do rodapé">
+        <ul class="flex flex-wrap gap-x-6 gap-y-2">
+          <li><a href="/timeline" class="text-[13px] text-apple-secondary hover:text-apple-label transition-colors">Trajetória</a></li>
+          <li><a href="/projetos" class="text-[13px] text-apple-secondary hover:text-apple-label transition-colors">Projetos</a></li>
+          <li><a href="/skills" class="text-[13px] text-apple-secondary hover:text-apple-label transition-colors">Skills</a></li>
+          <li><a href="/agora" class="text-[13px] text-apple-secondary hover:text-apple-label transition-colors">Agora</a></li>
+          <li><a href="/contato" class="text-[13px] text-apple-secondary hover:text-apple-label transition-colors">Contato</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="mt-8 pt-6 border-t border-apple-separator-light flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+      <p class="text-[12px] text-apple-tertiary">© {ano} Bruno Massa. Currículo vivo, sempre em construção.</p>
+      <a
+        href="https://linkedin.com/in/brunormassa"
+        target="_blank"
+        rel="noopener"
+        class="text-[12px] text-apple-secondary hover:text-apple-accent transition-colors"
+      >
+        LinkedIn ↗
+      </a>
+    </div>
+  </div>
 </footer>
