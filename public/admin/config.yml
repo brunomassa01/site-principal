@@ -1,0 +1,159 @@
+backend:
+  name: github
+  repo: brunomassa01/site-principal
+  branch: main
+  base_url: https://brunomassa.online
+  auth_endpoint: /api/auth
+
+locale: pt
+media_folder: public/images
+public_folder: /images
+
+collections:
+  - name: timeline
+    label: "Trajetória"
+    label_singular: "Cargo / Marco"
+    folder: src/content/timeline
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - { label: "Cargo", name: cargo, widget: string }
+      - { label: "Empresa", name: empresa, widget: string }
+      - { label: "URL da Empresa", name: empresa_url, widget: string, required: false }
+      - { label: "Início", name: inicio, widget: date, format: "YYYY-MM-DD", date_format: "DD/MM/YYYY" }
+      - { label: "Fim (vazio = atual)", name: fim, widget: date, format: "YYYY-MM-DD", date_format: "DD/MM/YYYY", required: false }
+      - { label: "Local", name: local, widget: string, required: false, hint: "Ex: São Paulo / Remoto" }
+      - label: "Tipo"
+        name: tipo
+        widget: select
+        required: false
+        options:
+          - { label: "CLT", value: clt }
+          - { label: "PJ", value: pj }
+          - { label: "Sócio", value: socio }
+          - { label: "Consultoria", value: consultoria }
+          - { label: "Freelancer", value: freelancer }
+          - { label: "Voluntário", value: voluntario }
+      - { label: "Resumo", name: resumo, widget: string, hint: "1-2 frases" }
+      - { label: "Destaques", name: destaques, widget: list, required: false, hint: "Bullets de entregas e conquistas" }
+      - { label: "Tags", name: tags, widget: list, required: false }
+      - { label: "Destaque na home", name: destaque, widget: boolean, default: false }
+      - { label: "Texto longo (opcional)", name: body, widget: markdown, required: false }
+
+  - name: projetos
+    label: "Projetos"
+    label_singular: "Projeto"
+    folder: src/content/projetos
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - { label: "Título", name: titulo, widget: string }
+      - { label: "Subtítulo", name: subtitulo, widget: string, required: false }
+      - label: "Status"
+        name: status
+        widget: select
+        options:
+          - { label: "Em andamento", value: em-andamento }
+          - { label: "Concluído", value: concluido }
+          - { label: "Em pausa", value: em-pausa }
+          - { label: "Arquivado", value: arquivado }
+      - { label: "Início", name: inicio, widget: date, format: "YYYY-MM-DD", date_format: "DD/MM/YYYY" }
+      - { label: "Fim", name: fim, widget: date, format: "YYYY-MM-DD", date_format: "DD/MM/YYYY", required: false }
+      - { label: "Cliente", name: cliente, widget: string, required: false }
+      - { label: "Papel", name: papel, widget: string, hint: "Ex: Líder de projeto, Consultor, Idealizador" }
+      - { label: "Resumo", name: resumo, widget: string, hint: "1-3 frases (aparece no card)" }
+      - { label: "Problema", name: problema, widget: text, required: false }
+      - { label: "Abordagem", name: abordagem, widget: text, required: false }
+      - { label: "Resultado", name: resultado, widget: text, required: false }
+      - { label: "Link", name: link, widget: string, required: false }
+      - { label: "Repositório", name: repo, widget: string, required: false }
+      - { label: "Tags", name: tags, widget: list, required: false }
+      - { label: "Destaque", name: destaque, widget: boolean, default: false }
+      - { label: "Case completo", name: body, widget: markdown, required: false }
+
+  - name: skills
+    label: "Skills"
+    label_singular: "Skill"
+    folder: src/content/skills
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - { label: "Nome", name: nome, widget: string }
+      - label: "Categoria"
+        name: categoria
+        widget: select
+        options:
+          - { label: "Habilidade", value: habilidade }
+          - { label: "Certificação", value: certificacao }
+          - { label: "Formação", value: formacao }
+          - { label: "Idioma", value: idioma }
+      - { label: "Área", name: area, widget: string, hint: "Ex: Gestão, Dados, Finanças, Tecnologia" }
+      - label: "Nível"
+        name: nivel
+        widget: select
+        required: false
+        options:
+          - { label: "Básico", value: basico }
+          - { label: "Intermediário", value: intermediario }
+          - { label: "Avançado", value: avancado }
+          - { label: "Especialista", value: especialista }
+      - { label: "Instituição", name: instituicao, widget: string, required: false }
+      - { label: "URL da Instituição", name: instituicao_url, widget: string, required: false }
+      - { label: "Ano", name: ano, widget: number, required: false }
+      - { label: "URL da Credencial", name: credencial_url, widget: string, required: false }
+      - { label: "Descrição", name: descricao, widget: text, required: false }
+      - { label: "Destaque", name: destaque, widget: boolean, default: false }
+
+  - name: posts
+    label: "Posts"
+    label_singular: "Post"
+    folder: src/content/posts
+    create: true
+    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
+    fields:
+      - { label: "Título", name: titulo, widget: string }
+      - { label: "Resumo", name: resumo, widget: text }
+      - { label: "Data", name: data, widget: date, format: "YYYY-MM-DD", date_format: "DD/MM/YYYY" }
+      - { label: "Tags", name: tags, widget: list, required: false }
+      - { label: "URL Externa", name: fonte_externa_url, widget: string, required: false, hint: "Se for republicação de LinkedIn/Medium" }
+      - { label: "Nome da Fonte", name: fonte_externa_nome, widget: string, required: false }
+      - label: "Idioma"
+        name: idioma
+        widget: select
+        default: pt
+        options:
+          - { label: "Português", value: pt }
+          - { label: "English", value: en }
+      - { label: "Rascunho", name: rascunho, widget: boolean, default: false }
+      - { label: "Conteúdo", name: body, widget: markdown }
+
+  - name: agora
+    label: "Página Agora"
+    files:
+      - label: "Agora"
+        name: index
+        file: src/content/agora/index.md
+        fields:
+          - { label: "Atualizado em", name: atualizado_em, widget: date, format: "YYYY-MM-DD", date_format: "DD/MM/YYYY" }
+          - { label: "Conteúdo", name: body, widget: markdown }
+
+  - name: atualizacoes
+    label: "Atualizações"
+    label_singular: "Atualização"
+    folder: src/content/atualizacoes
+    create: true
+    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
+    fields:
+      - { label: "Data", name: data, widget: date, format: "YYYY-MM-DD", date_format: "DD/MM/YYYY" }
+      - label: "Tipo"
+        name: tipo
+        widget: select
+        options:
+          - { label: "Projeto", value: projeto }
+          - { label: "Certificação", value: certificacao }
+          - { label: "Cargo", value: cargo }
+          - { label: "Post", value: post }
+          - { label: "Marco", value: marco }
+          - { label: "Outro", value: outro }
+      - { label: "Título", name: titulo, widget: string }
+      - { label: "Referência (slug)", name: referencia_slug, widget: string, required: false }
