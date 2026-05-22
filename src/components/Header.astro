@@ -1,0 +1,26 @@
+---
+const links = [
+  { href: '/', label: 'Início' },
+  { href: '/timeline', label: 'Trajetória' },
+  { href: '/projetos', label: 'Projetos' },
+  { href: '/skills', label: 'Skills' },
+  { href: '/posts', label: 'Conteúdo' },
+  { href: '/agora', label: 'Agora' },
+  { href: '/contato', label: 'Contato' },
+];
+
+const pathname = Astro.url.pathname;
+const ehAtual = (href: string) => href === '/' ? pathname === '/' : pathname.startsWith(href);
+---
+<header>
+  <a href="/"><strong>Bruno Massa</strong></a>
+  <nav aria-label="Menu principal">
+    <ul>
+      {links.map((l) => (
+        <li>
+          <a href={l.href} aria-current={ehAtual(l.href) ? 'page' : undefined}>{l.label}</a>
+        </li>
+      ))}
+    </ul>
+  </nav>
+</header>

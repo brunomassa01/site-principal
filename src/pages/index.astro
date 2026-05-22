@@ -1,0 +1,62 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { getCollection } from 'astro:content';
+
+const atualizacoes = (await getCollection('atualizacoes'))
+  .sort((a, b) => b.data.data.valueOf() - a.data.data.valueOf());
+
+const projetosAtivos = (await getCollection('projetos'))
+  .filter((p) => p.data.status === 'em-andamento')
+  .sort((a, b) => b.data.inicio.valueOf() - a.data.inicio.valueOf());
+
+const ultimaAtualizacao = atualizacoes[0]?.data.data;
+
+const formatador = new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' });
+---
+<BaseLayout title="Bruno Massa">
+  <Header />
+  <main>
+    <section>
+      <h1>Bruno Massa</h1>
+      <p>Currículo vivo — em movimento, não em PDF.</p>
+      {ultimaAtualizacao && (
+        <p><small>Última atualização: {formatador.format(ultimaAtualizacao)}</small></p>
+      )}
+    </section>
+
+    <section>
+      <h2>Acontecendo agora</h2>
+      {projetosAtivos.length === 0 ? (
+        <p>Nenhum projeto ativo no momento.</p>
+      ) : (
+        <ul>
+          {projetosAtivos.map((p) => (
+            <li>
+              <a href={`/projetos/${p.slug}`}><strong>{p.data.titulo}</strong></a>
+              {' — '}{p.data.resumo}
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+
+    <section>
+      <h2>Linha do tempo recente</h2>
+      {atualizacoes.length === 0 ? (
+        <p>Em breve.</p>
+      ) : (
+        <ol>
+          {atualizacoes.slice(0, 10).map((a) => (
+            <li>
+              <time datetime={a.data.data.toISOString()}>{formatador.format(a.data.data)}</time>
+              {' — '}<strong>{a.data.titulo}</strong> <em>({a.data.tipo})</em>
+            </li>
+          ))}
+        </ol>
+      )}
+    </section>
+  </main>
+  <Footer />
+</BaseLayout>

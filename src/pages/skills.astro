@@ -1,0 +1,57 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { getCollection } from 'astro:content';
+
+const todas = await getCollection('skills');
+
+type Cat = 'habilidade' | 'certificacao' | 'formacao' | 'idioma';
+
+const porCategoria: Record<Cat, typeof todas> = {
+  habilidade: todas.filter((s) => s.data.categoria === 'habilidade'),
+  certificacao: todas.filter((s) => s.data.categoria === 'certificacao'),
+  formacao: todas.filter((s) => s.data.categoria === 'formacao'),
+  idioma: todas.filter((s) => s.data.categoria === 'idioma'),
+};
+
+const titulos: Record<Cat, string> = {
+  habilidade: 'Habilidades',
+  certificacao: 'Certificações',
+  formacao: 'Formação',
+  idioma: 'Idiomas',
+};
+
+const ordem: Cat[] = ['habilidade', 'certificacao', 'formacao', 'idioma'];
+---
+<BaseLayout title="Skills, certificações e formação">
+  <Header />
+  <main>
+    <h1>Skills, certificações e formação</h1>
+    {todas.length === 0 ? (
+      <p>Em construção.</p>
+    ) : (
+      ordem.map((cat) => porCategoria[cat].length > 0 && (
+        <section>
+          <h2>{titulos[cat]}</h2>
+          <ul>
+            {porCategoria[cat].map((s) => (
+              <li>
+                <strong>{s.data.nome}</strong>
+                {s.data.area && <span> · {s.data.area}</span>}
+                {s.data.instituicao && <span> · {s.data.instituicao}</span>}
+                {s.data.ano && <span> · {s.data.ano}</span>}
+                {s.data.nivel && <span> · {s.data.nivel}</span>}
+                {s.data.credencial_url && (
+                  <> · <a href={s.data.credencial_url} target="_blank" rel="noopener">credencial</a></>
+                )}
+                {s.data.descricao && <p>{s.data.descricao}</p>}
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))
+    )}
+  </main>
+  <Footer />
+</BaseLayout>

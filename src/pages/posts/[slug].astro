@@ -1,0 +1,45 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import { getCollection, type CollectionEntry } from 'astro:content';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('posts', ({ data }) => !data.rascunho);
+  return posts.map((p) => ({
+    params: { slug: p.slug },
+    props: { post: p },
+  }));
+}
+
+interface Props {
+  post: CollectionEntry<'posts'>;
+}
+
+const { post } = Astro.props;
+const { Content } = await post.render();
+---
+<BaseLayout title={post.data.titulo} descricao={post.data.resumo}>
+  <Header />
+  <main>
+    <article>
+      <p><a href="/posts">← Voltar para conteúdo</a></p>
+      <h1>{post.data.titulo}</h1>
+      <p><time>{post.data.data.toLocaleDateString('pt-BR')}</time></p>
+      <p><em>{post.data.resumo}</em></p>
+      <Content />
+      {post.data.fonte_externa_url && (
+        <p>
+          <small>
+            Originalmente publicado em
+            {' '}
+            <a href={post.data.fonte_externa_url} target="_blank" rel="noopener">
+              {post.data.fonte_externa_nome ?? 'fonte externa'}
+            </a>.
+          </small>
+        </p>
+      )}
+    </article>
+  </main>
+  <Footer />
+</BaseLayout>

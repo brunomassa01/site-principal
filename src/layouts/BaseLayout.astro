@@ -1,0 +1,28 @@
+---
+interface Props {
+  title: string;
+  descricao?: string;
+}
+
+const { title, descricao = 'Currículo vivo do Bruno Massa — trajetória profissional em tempo real.' } = Astro.props;
+const tituloCompleto = title === 'Bruno Massa' ? title : `${title} — Bruno Massa`;
+---
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={descricao} />
+    <meta name="generator" content={Astro.generator} />
+    <title>{tituloCompleto}</title>
+    <link rel="canonical" href={Astro.url.href} />
+    <meta property="og:title" content={tituloCompleto} />
+    <meta property="og:description" content={descricao} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={Astro.url.href} />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+  </head>
+  <body>
+    <slot />
+  </body>
+</html>

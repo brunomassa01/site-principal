@@ -1,0 +1,62 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import { getCollection, type CollectionEntry } from 'astro:content';
+
+export async function getStaticPaths() {
+  const projetos = await getCollection('projetos');
+  return projetos.map((p) => ({
+    params: { slug: p.slug },
+    props: { projeto: p },
+  }));
+}
+
+interface Props {
+  projeto: CollectionEntry<'projetos'>;
+}
+
+const { projeto } = Astro.props;
+const { Content } = await projeto.render();
+const d = projeto.data;
+
+const fmt = (date: Date) => date.toLocaleDateString('pt-BR', { year: 'numeric', month: 'short' });
+---
+<BaseLayout title={d.titulo} descricao={d.resumo}>
+  <Header />
+  <main>
+    <article>
+      <p><a href="/projetos">← Voltar para projetos</a></p>
+      <h1>{d.titulo}</h1>
+      {d.subtitulo && <p><em>{d.subtitulo}</em></p>}
+
+      <p>
+        <strong>Status:</strong> {d.status}
+        {' · '}<strong>Papel:</strong> {d.papel}
+        {d.cliente && <> · <strong>Cliente:</strong> {d.cliente}</>}
+      </p>
+      <p>
+        <time>{fmt(d.inicio)}</time>
+        {' — '}
+        <time>{d.fim ? fmt(d.fim) : 'Em andamento'}</time>
+      </p>
+
+      <p>{d.resumo}</p>
+
+      {d.problema && (<><h2>Problema</h2><p>{d.problema}</p></>)}
+      {d.abordagem && (<><h2>Abordagem</h2><p>{d.abordagem}</p></>)}
+      {d.resultado && (<><h2>Resultado</h2><p>{d.resultado}</p></>)}
+
+      <h2>Detalhes</h2>
+      <Content />
+
+      {d.link && <p><a href={d.link} target="_blank" rel="noopener">→ Acessar projeto</a></p>}
+      {d.repo && <p><a href={d.repo} target="_blank" rel="noopener">→ Repositório</a></p>}
+
+      {d.tags && d.tags.length > 0 && (
+        <p>{d.tags.map((t) => <span>#{t} </span>)}</p>
+      )}
+    </article>
+  </main>
+  <Footer />
+</BaseLayout>

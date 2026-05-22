@@ -1,0 +1,46 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { getCollection } from 'astro:content';
+
+const items = (await getCollection('timeline'))
+  .sort((a, b) => b.data.inicio.valueOf() - a.data.inicio.valueOf());
+
+const formatarMesAno = (d: Date) =>
+  d.toLocaleDateString('pt-BR', { year: 'numeric', month: 'short' });
+---
+<BaseLayout title="Trajetória">
+  <Header />
+  <main>
+    <h1>Trajetória profissional</h1>
+    {items.length === 0 ? (
+      <p>Em construção.</p>
+    ) : (
+      <ol>
+        {items.map((item) => (
+          <li>
+            <h2>{item.data.cargo}</h2>
+            <p>
+              <strong>{item.data.empresa}</strong>
+              {item.data.local && <span> · {item.data.local}</span>}
+              {item.data.tipo && <span> · {item.data.tipo}</span>}
+            </p>
+            <p>
+              <time>{formatarMesAno(item.data.inicio)}</time>
+              {' — '}
+              <time>{item.data.fim ? formatarMesAno(item.data.fim) : 'Atual'}</time>
+            </p>
+            <p>{item.data.resumo}</p>
+            {item.data.destaques && item.data.destaques.length > 0 && (
+              <ul>
+                {item.data.destaques.map((d) => <li>{d}</li>)}
+              </ul>
+            )}
+          </li>
+        ))}
+      </ol>
+    )}
+  </main>
+  <Footer />
+</BaseLayout>

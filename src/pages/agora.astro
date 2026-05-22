@@ -1,0 +1,28 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { getCollection } from 'astro:content';
+
+const todas = await getCollection('agora');
+const pagina = todas[0];
+const Content = pagina ? (await pagina.render()).Content : null;
+---
+<BaseLayout title="Agora" descricao="O que Bruno Massa está focando neste momento.">
+  <Header />
+  <main>
+    <article>
+      <h1>Agora</h1>
+      <p><small>O que estou focando neste momento. Inspirado em <a href="https://nownownow.com/about" target="_blank" rel="noopener">/now</a>.</small></p>
+      {pagina && Content ? (
+        <>
+          <p><small>Atualizado em {pagina.data.atualizado_em.toLocaleDateString('pt-BR')}</small></p>
+          <Content />
+        </>
+      ) : (
+        <p>Em construção.</p>
+      )}
+    </article>
+  </main>
+  <Footer />
+</BaseLayout>

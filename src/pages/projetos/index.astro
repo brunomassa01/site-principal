@@ -1,0 +1,55 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import { getCollection } from 'astro:content';
+
+const todos = (await getCollection('projetos'))
+  .sort((a, b) => b.data.inicio.valueOf() - a.data.inicio.valueOf());
+
+type Status = 'em-andamento' | 'concluido' | 'em-pausa' | 'arquivado';
+
+const grupos: Record<Status, typeof todos> = {
+  'em-andamento': todos.filter((p) => p.data.status === 'em-andamento'),
+  'concluido': todos.filter((p) => p.data.status === 'concluido'),
+  'em-pausa': todos.filter((p) => p.data.status === 'em-pausa'),
+  'arquivado': todos.filter((p) => p.data.status === 'arquivado'),
+};
+
+const titulos: Record<Status, string> = {
+  'em-andamento': 'Em andamento',
+  'concluido': 'Concluídos',
+  'em-pausa': 'Em pausa',
+  'arquivado': 'Arquivados',
+};
+
+const ordem: Status[] = ['em-andamento', 'concluido', 'em-pausa', 'arquivado'];
+---
+<BaseLayout title="Projetos">
+  <Header />
+  <main>
+    <h1>Projetos</h1>
+    {todos.length === 0 ? (
+      <p>Em construção.</p>
+    ) : (
+      ordem.map((status) => grupos[status].length > 0 && (
+        <section>
+          <h2>{titulos[status]}</h2>
+          <ul>
+            {grupos[status].map((p) => (
+              <li>
+                <a href={`/projetos/${p.slug}`}><strong>{p.data.titulo}</strong></a>
+                {p.data.subtitulo && <span> — {p.data.subtitulo}</span>}
+                <p>{p.data.resumo}</p>
+                {p.data.tags && p.data.tags.length > 0 && (
+                  <p>{p.data.tags.map((t) => <span>#{t} </span>)}</p>
+                )}
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))
+    )}
+  </main>
+  <Footer />
+</BaseLayout>
