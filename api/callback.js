@@ -5,6 +5,13 @@ export default async function handler(req, res) {
     return res.status(400).send('Missing code parameter');
   }
 
+  const clientId = process.env.OAUTH_CLIENT_ID;
+  const clientSecret = process.env.OAUTH_CLIENT_SECRET;
+
+  if (!clientId || !clientSecret) {
+    return res.status(500).send(`Env vars ausentes — clientId: ${!!clientId}, clientSecret: ${!!clientSecret}`);
+  }
+
   const response = await fetch('https://github.com/login/oauth/access_token', {
     method: 'POST',
     headers: {
@@ -12,8 +19,8 @@ export default async function handler(req, res) {
       'Accept': 'application/json',
     },
     body: JSON.stringify({
-      client_id: process.env.OAUTH_CLIENT_ID,
-      client_secret: process.env.OAUTH_CLIENT_SECRET,
+      client_id: clientId,
+      client_secret: clientSecret,
       code,
     }),
   });
