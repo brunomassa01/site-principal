@@ -17,7 +17,7 @@ export default config({
     timeline: collection({
       label: 'Trajetória',
       slugField: 'cargo',
-      path: 'src/content/timeline/*',
+      path: 'src/content/timeline/*.md',
       format: { contentField: 'body' },
       schema: {
         cargo: fields.text({ label: 'Cargo' }),
@@ -61,7 +61,7 @@ export default config({
     projetos: collection({
       label: 'Projetos',
       slugField: 'titulo',
-      path: 'src/content/projetos/*',
+      path: 'src/content/projetos/*.md',
       format: { contentField: 'body' },
       schema: {
         titulo: fields.text({ label: 'Título' }),
@@ -103,7 +103,8 @@ export default config({
     skills: collection({
       label: 'Skills',
       slugField: 'nome',
-      path: 'src/content/skills/*',
+      path: 'src/content/skills/*.md',
+      format: { contentField: 'body' },
       schema: {
         nome: fields.text({ label: 'Nome' }),
         categoria: fields.select({
@@ -134,13 +135,14 @@ export default config({
         credencial_url: fields.text({ label: 'URL da Credencial', validation: { length: { min: 0 } } }),
         descricao: fields.text({ label: 'Descrição', multiline: true, validation: { length: { min: 0 } } }),
         destaque: fields.checkbox({ label: 'Destaque', defaultValue: false }),
+        body: fields.document({ label: 'Notas adicionais', formatting: true, dividers: true, links: true }),
       },
     }),
 
     posts: collection({
       label: 'Posts',
       slugField: 'titulo',
-      path: 'src/content/posts/*',
+      path: 'src/content/posts/*.md',
       format: { contentField: 'body' },
       schema: {
         titulo: fields.text({ label: 'Título' }),
@@ -173,7 +175,8 @@ export default config({
     atualizacoes: collection({
       label: 'Atualizações',
       slugField: 'titulo',
-      path: 'src/content/atualizacoes/*',
+      path: 'src/content/atualizacoes/*.md',
+      format: { contentField: 'body' },
       schema: {
         data: fields.date({ label: 'Data' }),
         tipo: fields.select({
@@ -190,6 +193,7 @@ export default config({
         }),
         titulo: fields.text({ label: 'Título' }),
         referencia_slug: fields.text({ label: 'Referência (slug)', validation: { length: { min: 0 } } }),
+        body: fields.document({ label: 'Detalhes', formatting: true, dividers: true, links: true }),
       },
     }),
   },
@@ -197,7 +201,7 @@ export default config({
   singletons: {
     agora: singleton({
       label: 'Página Agora',
-      path: 'src/content/agora/index',
+      path: 'src/content/agora/index.md',
       format: { contentField: 'body' },
       schema: {
         atualizado_em: fields.date({ label: 'Atualizado em' }),
