@@ -32,14 +32,12 @@ export default async function handler(req, res) {
 <body>
 <script>
 (function() {
-  function receiveMessage(e) {
-    window.opener.postMessage(
-      'authorization:github:success:${tokenPayload}',
-      e.origin
-    );
-  }
-  window.addEventListener("message", receiveMessage, false);
   window.opener.postMessage("authorizing:github", "*");
+  window.opener.postMessage(
+    "authorization:github:success:${tokenPayload}",
+    "*"
+  );
+  setTimeout(function() { window.close(); }, 500);
 })();
 </script>
 </body>
