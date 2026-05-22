@@ -32,18 +32,16 @@ export default async function handler(req, res) {
     return res.status(401).send(`Authentication failed: ${JSON.stringify(data)}`);
   }
 
-  const tokenPayload = JSON.stringify({ token, provider: 'github' });
+  const tokenData = JSON.stringify({ token, provider: 'github' });
 
   res.send(`<!DOCTYPE html>
 <html>
 <body>
 <script>
 (function() {
+  var data = ${JSON.stringify(tokenData)};
   window.opener.postMessage("authorizing:github", "*");
-  window.opener.postMessage(
-    "authorization:github:success:${tokenPayload}",
-    "*"
-  );
+  window.opener.postMessage("authorization:github:success:" + data, "*");
   setTimeout(function() { window.close(); }, 500);
 })();
 </script>
