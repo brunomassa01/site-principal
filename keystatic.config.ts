@@ -17,7 +17,7 @@ export default config({
     timeline: collection({
       label: 'Trajetória',
       slugField: 'cargo',
-      path: 'src/content/timeline/*.md',
+      path: 'src/content/timeline/*',
       format: { contentField: 'body' },
       schema: {
         cargo: fields.text({ label: 'Cargo' }),
@@ -61,7 +61,7 @@ export default config({
     projetos: collection({
       label: 'Projetos',
       slugField: 'titulo',
-      path: 'src/content/projetos/*.md',
+      path: 'src/content/projetos/*',
       format: { contentField: 'body' },
       schema: {
         titulo: fields.text({ label: 'Título' }),
@@ -103,7 +103,7 @@ export default config({
     skills: collection({
       label: 'Skills',
       slugField: 'nome',
-      path: 'src/content/skills/*.md',
+      path: 'src/content/skills/*',
       format: { contentField: 'body' },
       schema: {
         nome: fields.text({ label: 'Nome' }),
@@ -142,7 +142,7 @@ export default config({
     posts: collection({
       label: 'Posts',
       slugField: 'titulo',
-      path: 'src/content/posts/*.md',
+      path: 'src/content/posts/*',
       format: { contentField: 'body' },
       schema: {
         titulo: fields.text({ label: 'Título' }),
@@ -175,7 +175,7 @@ export default config({
     atualizacoes: collection({
       label: 'Atualizações',
       slugField: 'titulo',
-      path: 'src/content/atualizacoes/*.md',
+      path: 'src/content/atualizacoes/*',
       format: { contentField: 'body' },
       schema: {
         data: fields.date({ label: 'Data' }),
@@ -201,7 +201,7 @@ export default config({
   singletons: {
     agora: singleton({
       label: 'Página Agora',
-      path: 'src/content/agora/index.md',
+      path: 'src/content/agora/index',
       format: { contentField: 'body' },
       schema: {
         atualizado_em: fields.date({ label: 'Atualizado em' }),
