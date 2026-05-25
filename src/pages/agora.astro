@@ -8,51 +8,104 @@ const todas = await getCollection('agora');
 const pagina = todas[0];
 const Content = pagina ? (await pagina.render()).Content : null;
 
-const dataFormatada = pagina?.data.atualizado_em
+const dataAgora = pagina?.data.atualizado_em
   ? pagina.data.atualizado_em.toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' })
   : null;
+
+const posts = (await getCollection('posts', ({ data }) => !data.rascunho))
+  .sort((a, b) => b.data.data.valueOf() - a.data.data.valueOf());
+
+const fmtData = (d: Date) => d.toLocaleDateString('pt-BR', { day: 'numeric', month: 'short', year: 'numeric' });
 ---
-<BaseLayout title="Agora" descricao="O que Bruno Massa está focando neste momento.">
+<BaseLayout title="Agora" descricao="O que Bruno Massa está focando neste momento — e o que escreve sobre marketing, produto e negócios.">
   <Header />
   <main>
+
     <!-- Page header -->
     <section class="bg-white py-16 md:py-20">
       <div class="max-w-3xl mx-auto px-6">
-        <p class="text-[12px] font-semibold uppercase tracking-[0.08em] text-apple-accent mb-4">Momento atual</p>
+        <p class="text-[12px] font-semibold uppercase tracking-[0.08em] text-apple-accent mb-4">Agora</p>
         <h1 class="text-4xl md:text-5xl font-bold text-apple-label tracking-tight leading-tight mb-4">
-          Agora
+          O que estou fazendo
         </h1>
-        <p class="text-[17px] text-apple-secondary leading-relaxed">
-          O que estou focando neste momento. Inspirado em{' '}
+        <p class="text-[17px] text-apple-secondary leading-relaxed max-w-xl">
+          Foco atual, publicações e anotações. Inspirado em{' '}
           <a href="https://nownownow.com/about" target="_blank" rel="noopener" class="text-apple-accent hover:underline">
             /now
           </a>.
         </p>
-        {dataFormatada && (
-          <p class="text-[13px] text-apple-tertiary mt-4 flex items-center gap-1.5">
-            <span class="w-1.5 h-1.5 rounded-full bg-green-500 inline-block"></span>
-            Atualizado em {dataFormatada}
-          </p>
-        )}
       </div>
     </section>
 
-    <!-- Content -->
-    <section class="py-12">
-      <div class="max-w-3xl mx-auto px-6">
-        {pagina && Content ? (
+    <!-- Conteúdo /agora -->
+    {pagina && Content && (
+      <section class="pt-4 pb-12">
+        <div class="max-w-3xl mx-auto px-6">
+          {dataAgora && (
+            <p class="text-[13px] text-apple-tertiary mb-4 flex items-center gap-1.5">
+              <span class="w-1.5 h-1.5 rounded-full bg-green-500 inline-block"></span>
+              Atualizado em {dataAgora}
+            </p>
+          )}
           <article class="bg-apple-surface rounded-2xl shadow-card p-8 md:p-10">
             <div class="prose-content">
               <Content />
             </div>
           </article>
-        ) : (
+        </div>
+      </section>
+    )}
+
+    <!-- Posts -->
+    <section class="py-12">
+      <div class="max-w-3xl mx-auto px-6">
+        <h2 class="text-[22px] font-bold text-apple-label tracking-tight mb-6">Publicações</h2>
+        {posts.length === 0 ? (
           <div class="bg-apple-surface rounded-2xl shadow-card p-8 text-center">
-            <p class="text-apple-secondary">Em construção.</p>
+            <p class="text-[15px] text-apple-secondary">Em breve.</p>
+          </div>
+        ) : (
+          <div class="space-y-4">
+            {posts.map((p) => (
+              <a
+                href={`/posts/${p.slug}`}
+                class="group block bg-apple-surface rounded-2xl shadow-card p-6 transition-all duration-300 hover:shadow-card-hover hover:-translate-y-0.5"
+              >
+                <div class="flex flex-wrap items-center gap-3 mb-2">
+                  <time class="text-[12px] font-medium text-apple-tertiary uppercase tracking-wide">
+                    {fmtData(p.data.data)}
+                  </time>
+                  {p.data.idioma === 'en' && (
+                    <span class="px-2 py-0.5 rounded-full text-[11px] font-medium bg-apple-fill text-apple-tertiary">EN</span>
+                  )}
+                  {p.data.fonte_externa_url && (
+                    <span class="px-2 py-0.5 rounded-full text-[11px] font-medium bg-apple-fill text-apple-tertiary">
+                      {p.data.fonte_externa_nome ?? 'Republicação'}
+                    </span>
+                  )}
+                </div>
+                <h3 class="text-[20px] font-bold text-apple-label tracking-tight leading-snug mb-2 group-hover:text-apple-accent transition-colors text-balance">
+                  {p.data.titulo}
+                </h3>
+                <p class="text-[14px] text-apple-secondary leading-relaxed line-clamp-2">
+                  {p.data.resumo}
+                </p>
+                {p.data.tags && p.data.tags.length > 0 && (
+                  <div class="flex flex-wrap gap-1.5 mt-3">
+                    {p.data.tags.slice(0, 4).map((tag) => (
+                      <span class="px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-apple-fill text-apple-tertiary">
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </a>
+            ))}
           </div>
         )}
       </div>
     </section>
+
   </main>
   <Footer />
 </BaseLayout>
