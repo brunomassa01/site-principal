@@ -29,4 +29,4 @@ Thumbs.db
 .vercel
 
 # Fotos de referência local (não vão para o repo)
-images/
+/images/
