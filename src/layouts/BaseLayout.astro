@@ -18,10 +18,13 @@ const tituloCompleto = title === 'Bruno Massa' ? title : `${title} — Bruno Mas
     <meta name="generator" content={Astro.generator} />
     <title>{tituloCompleto}</title>
     <link rel="canonical" href={Astro.url.href} />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <link rel="apple-touch-icon" href="/favicon.png" />
     <meta property="og:title" content={tituloCompleto} />
     <meta property="og:description" content={descricao} />
     <meta property="og:type" content="website" />
     <meta property="og:url" content={Astro.url.href} />
+    <meta property="og:image" content="https://brunomassa.online/images/bruno.jpg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
