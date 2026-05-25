@@ -28,56 +28,118 @@ const fmtMesAno = (d: Date) => d.toLocaleDateString('pt-BR', { month: 'short', y
 <BaseLayout title="Bruno Massa" descricao="Bruno Massa — profissional de marketing, produto e negócios. Currículo vivo em movimento.">
   <Header />
   <main>
-    <!-- Hero -->
-    <section class="bg-white py-20 md:py-28">
-      <div class="max-w-5xl mx-auto px-6">
-        <div class="flex flex-col md:flex-row md:items-center md:gap-16">
-          <!-- Texto -->
-          <div class="flex-1 order-2 md:order-1">
-            {cargoAtual && (
-              <p class="text-[12px] font-semibold uppercase tracking-[0.08em] text-apple-accent mb-5">
-                {cargoAtual.data.cargo} · {cargoAtual.data.empresa}
+    <!-- Hero: scroll-driven video -->
+    <div id="hero-wrapper" style="height:400vh;position:relative;">
+      <section id="hero-sticky" class="sticky top-0 h-screen overflow-hidden bg-black">
+
+        <!-- Vídeo de fundo -->
+        <video
+          id="hero-video"
+          class="absolute inset-0 w-full h-full object-cover object-center"
+          preload="auto"
+          muted
+          playsinline
+          disablepictureinpicture
+          aria-hidden="true"
+        >
+          <source src="/videos/hero.mp4" type="video/mp4" />
+        </video>
+
+        <!-- Gradiente de legibilidade: escuro à esquerda -->
+        <div class="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-black/10 pointer-events-none"></div>
+        <!-- Gradiente de rodapé -->
+        <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent pointer-events-none"></div>
+
+        <!-- Conteúdo -->
+        <div class="relative z-10 h-full flex items-center">
+          <div class="max-w-5xl mx-auto px-6 w-full">
+            <div class="max-w-lg">
+              {cargoAtual && (
+                <p class="text-[12px] font-semibold uppercase tracking-[0.08em] text-blue-300 mb-5">
+                  {cargoAtual.data.cargo} · {cargoAtual.data.empresa}
+                </p>
+              )}
+              <h1 class="text-5xl md:text-6xl font-bold text-white tracking-tight leading-none mb-5">
+                Bruno Massa
+              </h1>
+              <p class="text-xl md:text-2xl font-normal text-white/80 tracking-tight leading-snug mb-5">
+                Marketing · Produto · Negócios
               </p>
-            )}
-            <h1 class="text-5xl md:text-6xl font-bold text-apple-label tracking-tight leading-none mb-5">
-              Bruno Massa
-            </h1>
-            <p class="text-xl md:text-2xl font-normal text-apple-secondary tracking-tight leading-snug mb-5">
-              Marketing · Produto · Negócios
-            </p>
-            <p class="text-[17px] text-apple-secondary leading-relaxed max-w-lg mb-8">
-              Construindo marcas, times e resultados com estratégia, dados e visão de produto.
-              Currículo vivo — em movimento, não em PDF.
-            </p>
-            <div class="flex flex-wrap gap-3">
-              <a
-                href="/timeline"
-                class="inline-flex items-center gap-2 px-6 py-3 bg-apple-accent text-white rounded-full text-[15px] font-medium transition-colors duration-200 hover:bg-apple-accent-dark"
-              >
-                Ver trajetória
-              </a>
-              <a
-                href="/projetos"
-                class="inline-flex items-center gap-2 px-6 py-3 bg-apple-fill text-apple-label rounded-full text-[15px] font-medium transition-colors duration-200 hover:bg-apple-separator-light"
-              >
-                Ver projetos
-              </a>
-            </div>
-          </div>
-          <!-- Foto -->
-          <div class="order-1 md:order-2 mb-10 md:mb-0 flex-none">
-            <div class="w-48 h-48 md:w-72 md:h-72 rounded-3xl overflow-hidden shadow-card mx-auto md:mx-0">
-              <img
-                src="/images/bruno.jpg"
-                alt="Bruno Massa"
-                class="w-full h-full object-cover object-top"
-                loading="eager"
-              />
+              <p class="text-[17px] text-white/70 leading-relaxed max-w-md mb-8">
+                Construindo marcas, times e resultados com estratégia, dados e visão de produto.
+                Currículo vivo — em movimento, não em PDF.
+              </p>
+              <div class="flex flex-wrap gap-3">
+                <a
+                  href="/timeline"
+                  class="inline-flex items-center gap-2 px-6 py-3 bg-white text-gray-900 rounded-full text-[15px] font-medium transition-colors duration-200 hover:bg-white/90"
+                >
+                  Ver trajetória
+                </a>
+                <a
+                  href="/projetos"
+                  class="inline-flex items-center gap-2 px-6 py-3 bg-white/15 text-white rounded-full text-[15px] font-medium border border-white/30 transition-colors duration-200 hover:bg-white/25"
+                >
+                  Ver projetos
+                </a>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    </section>
+
+        <!-- Barra de progresso do vídeo -->
+        <div class="absolute bottom-0 left-0 right-0 h-0.5 bg-white/10">
+          <div id="hero-progress" class="h-full bg-white/50" style="width:0%;transition:none;"></div>
+        </div>
+
+        <!-- Indicador de scroll -->
+        <div id="scroll-cue" class="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 transition-opacity duration-500 pointer-events-none">
+          <span class="text-white/40 text-[11px] uppercase tracking-widest">Scroll</span>
+          <svg class="w-4 h-4 text-white/40 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 9l-7 7-7-7"/>
+          </svg>
+        </div>
+
+      </section>
+    </div>
+
+    <script>
+      (function () {
+        var wrapper = document.getElementById('hero-wrapper');
+        var video = document.getElementById('hero-video');
+        var bar = document.getElementById('hero-progress');
+        var cue = document.getElementById('scroll-cue');
+        if (!wrapper || !video) return;
+
+        // Garante vídeo parado — scroll controla currentTime
+        video.pause();
+
+        function seek(pct) {
+          var dur = video.duration;
+          if (!isFinite(dur) || dur <= 0) return;
+          var t = pct * dur;
+          if (Math.abs(video.currentTime - t) > 0.016) video.currentTime = t;
+          if (bar) bar.style.width = (pct * 100).toFixed(1) + '%';
+          if (cue) cue.style.opacity = pct < 0.03 ? '1' : '0';
+        }
+
+        function onScroll() {
+          var rect = wrapper.getBoundingClientRect();
+          var scrollable = wrapper.offsetHeight - window.innerHeight;
+          if (scrollable <= 0) return;
+          var pct = Math.min(1, Math.max(0, -rect.top / scrollable));
+          seek(pct);
+        }
+
+        video.addEventListener('loadedmetadata', function () {
+          video.pause();
+          video.currentTime = 0;
+        });
+
+        window.addEventListener('scroll', onScroll, { passive: true });
+        onScroll();
+      })();
+    </script>
 
     <!-- Trajetória em destaque -->
     {carreiraDestaque.length > 0 && (
