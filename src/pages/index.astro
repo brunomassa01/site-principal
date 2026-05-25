@@ -30,19 +30,19 @@ const fmtMesAno = (d: Date) => d.toLocaleDateString('pt-BR', { month: 'short', y
   <main>
     <!-- Hero: scroll-driven video -->
     <div id="hero-wrapper" style="height:400vh;position:relative;">
-      <section id="hero-sticky" class="sticky top-0 h-screen overflow-hidden bg-black">
+      <section id="hero-sticky" class="sticky top-0 h-screen overflow-hidden" style="background:#141414;">
 
         <!--
           Vídeo retrato (720×1280) em tela paisagem:
-          Desktop → container direito com largura = 56.25vh (= 100vh × 720/1280)
-                     → personagem 100% visível, sem crop vertical
-          Mobile  → full-width com object-position top para mostrar o rosto
+          Desktop → container 50% da largura do viewport (mín 56.25vh = 100vh×720/1280)
+                     → object-contain mostra personagem completo; bg #141414 preenche as bordas
+          Mobile  → full-width
         -->
-        <div id="hero-video-wrap" class="absolute inset-y-0 right-0" style="width:min(56.25vh,100%);">
+        <div id="hero-video-wrap" class="absolute inset-y-0 right-0" style="width:clamp(56.25vh,50%,100%);">
           <video
             id="hero-video"
             class="w-full h-full"
-            style="object-fit:cover;object-position:center top;"
+            style="object-fit:contain;object-position:center;"
             preload="auto"
             muted
             playsinline
@@ -53,10 +53,10 @@ const fmtMesAno = (d: Date) => d.toLocaleDateString('pt-BR', { month: 'short', y
           </video>
         </div>
 
-        <!-- Gradiente: preto sólido à esquerda (texto), esmaece até o vídeo -->
-        <div class="absolute inset-0 pointer-events-none" style="background:linear-gradient(to right, #000 30%, rgba(0,0,0,0.75) 52%, rgba(0,0,0,0.15) 72%, transparent 88%);"></div>
+        <!-- Gradiente: fundo #141414 sólido à esquerda (texto), esmaece até o vídeo -->
+        <div class="absolute inset-0 pointer-events-none" style="background:linear-gradient(to right, #141414 30%, rgba(20,20,20,0.85) 48%, rgba(20,20,20,0.2) 66%, transparent 80%);"></div>
         <!-- Gradiente de rodapé -->
-        <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent pointer-events-none"></div>
+        <div class="absolute inset-0 pointer-events-none" style="background:linear-gradient(to top, rgba(20,20,20,0.5) 0%, transparent 30%);"></div>
 
         <!-- Conteúdo -->
         <div class="relative z-10 h-full flex items-center">
