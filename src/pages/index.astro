@@ -29,37 +29,51 @@ const fmtMesAno = (d: Date) => d.toLocaleDateString('pt-BR', { month: 'short', y
   <Header />
   <main>
     <!-- Hero -->
-    <section class="bg-white py-24 md:py-32">
+    <section class="bg-white py-20 md:py-28">
       <div class="max-w-5xl mx-auto px-6">
-        <div class="max-w-3xl">
-          {cargoAtual && (
-            <p class="text-[12px] font-semibold uppercase tracking-[0.08em] text-apple-accent mb-6">
-              {cargoAtual.data.cargo} · {cargoAtual.data.empresa}
+        <div class="flex flex-col md:flex-row md:items-center md:gap-16">
+          <!-- Texto -->
+          <div class="flex-1 order-2 md:order-1">
+            {cargoAtual && (
+              <p class="text-[12px] font-semibold uppercase tracking-[0.08em] text-apple-accent mb-5">
+                {cargoAtual.data.cargo} · {cargoAtual.data.empresa}
+              </p>
+            )}
+            <h1 class="text-5xl md:text-6xl font-bold text-apple-label tracking-tight leading-none mb-5">
+              Bruno Massa
+            </h1>
+            <p class="text-xl md:text-2xl font-normal text-apple-secondary tracking-tight leading-snug mb-5">
+              Marketing · Produto · Negócios
             </p>
-          )}
-          <h1 class="text-5xl md:text-7xl font-bold text-apple-label tracking-tight leading-none mb-6 text-balance">
-            Bruno Massa
-          </h1>
-          <p class="text-2xl md:text-3xl font-normal text-apple-secondary tracking-tight leading-snug mb-6 text-balance">
-            Marketing · Produto · Negócios
-          </p>
-          <p class="text-lg text-apple-secondary leading-relaxed max-w-xl mb-10 text-balance">
-            Construindo marcas, times e resultados com estratégia, dados e visão de produto.
-            Currículo vivo — em movimento, não em PDF.
-          </p>
-          <div class="flex flex-wrap gap-3">
-            <a
-              href="/timeline"
-              class="inline-flex items-center gap-2 px-6 py-3 bg-apple-accent text-white rounded-full text-[15px] font-medium transition-colors duration-200 hover:bg-apple-accent-dark"
-            >
-              Ver trajetória
-            </a>
-            <a
-              href="/projetos"
-              class="inline-flex items-center gap-2 px-6 py-3 bg-apple-fill text-apple-label rounded-full text-[15px] font-medium transition-colors duration-200 hover:bg-apple-separator-light"
-            >
-              Ver projetos
-            </a>
+            <p class="text-[17px] text-apple-secondary leading-relaxed max-w-lg mb-8">
+              Construindo marcas, times e resultados com estratégia, dados e visão de produto.
+              Currículo vivo — em movimento, não em PDF.
+            </p>
+            <div class="flex flex-wrap gap-3">
+              <a
+                href="/timeline"
+                class="inline-flex items-center gap-2 px-6 py-3 bg-apple-accent text-white rounded-full text-[15px] font-medium transition-colors duration-200 hover:bg-apple-accent-dark"
+              >
+                Ver trajetória
+              </a>
+              <a
+                href="/projetos"
+                class="inline-flex items-center gap-2 px-6 py-3 bg-apple-fill text-apple-label rounded-full text-[15px] font-medium transition-colors duration-200 hover:bg-apple-separator-light"
+              >
+                Ver projetos
+              </a>
+            </div>
+          </div>
+          <!-- Foto -->
+          <div class="order-1 md:order-2 mb-10 md:mb-0 flex-none">
+            <div class="w-48 h-48 md:w-72 md:h-72 rounded-3xl overflow-hidden shadow-card mx-auto md:mx-0">
+              <img
+                src="/images/bruno.jpg"
+                alt="Bruno Massa"
+                class="w-full h-full object-cover object-top"
+                loading="eager"
+              />
+            </div>
           </div>
         </div>
       </div>

@@ -9,13 +9,22 @@ import Footer from '../components/Footer.astro';
     <!-- Page header -->
     <section class="bg-white py-16 md:py-20">
       <div class="max-w-3xl mx-auto px-6">
-        <p class="text-[12px] font-semibold uppercase tracking-[0.08em] text-apple-accent mb-4">Contato</p>
-        <h1 class="text-4xl md:text-5xl font-bold text-apple-label tracking-tight leading-tight mb-4 text-balance">
-          Vamos conversar
-        </h1>
-        <p class="text-[17px] text-apple-secondary max-w-xl leading-relaxed">
-          Aberto a projetos, oportunidades e boas conversas sobre marketing, produto e negócios.
-        </p>
+        <div class="flex flex-col sm:flex-row sm:items-center sm:gap-8 mb-2">
+          <div class="flex-none mb-6 sm:mb-0">
+            <div class="w-20 h-20 rounded-2xl overflow-hidden shadow-card">
+              <img src="/images/bruno.jpg" alt="Bruno Massa" class="w-full h-full object-cover object-top" />
+            </div>
+          </div>
+          <div>
+            <p class="text-[12px] font-semibold uppercase tracking-[0.08em] text-apple-accent mb-3">Contato</p>
+            <h1 class="text-4xl md:text-5xl font-bold text-apple-label tracking-tight leading-tight mb-3">
+              Vamos conversar
+            </h1>
+            <p class="text-[17px] text-apple-secondary max-w-xl leading-relaxed">
+              Aberto a projetos, oportunidades e boas conversas sobre marketing, produto e negócios.
+            </p>
+          </div>
+        </div>
       </div>
     </section>
 
