@@ -1,0 +1,116 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+
+const amazonUrl = 'https://www.amazon.com.br/dp/B0DVZCQZP8?tag=lojadomassa-20';
+---
+<BaseLayout
+  title="Marketing na Era da Inteligência Artificial"
+  descricao="O livro de Bruno Massa sobre como a inteligência artificial está redesenhando o marketing corporativo. Disponível na Amazon."
+>
+  <Header />
+  <main>
+
+    <!-- Hero do livro -->
+    <section class="bg-white py-16 md:py-24">
+      <div class="max-w-5xl mx-auto px-6">
+        <div class="flex flex-col md:flex-row md:items-center gap-12">
+
+          <!-- Capa -->
+          <div class="flex-none mx-auto md:mx-0">
+            <div class="w-48 md:w-56 rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.18)] overflow-hidden bg-apple-fill aspect-[2/3] flex items-center justify-center">
+              <!-- Troque pela tag <img> quando tiver a capa: -->
+              <!-- <img src="/images/livro-capa.jpg" alt="Capa do livro" class="w-full h-full object-cover" /> -->
+              <div class="p-6 text-center">
+                <p class="text-[11px] font-semibold uppercase tracking-widest text-apple-accent mb-3">Bruno Massa</p>
+                <p class="text-[15px] font-bold text-apple-label leading-snug tracking-tight">Marketing na Era da Inteligência Artificial</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Texto -->
+          <div class="flex-1">
+            <p class="text-[12px] font-semibold uppercase tracking-[0.1em] text-apple-accent mb-4">Livro</p>
+            <h1 class="text-4xl md:text-5xl font-bold text-apple-label tracking-tight leading-tight mb-4 text-balance">
+              Marketing na Era da<br class="hidden md:block" /> Inteligência Artificial
+            </h1>
+            <p class="text-[18px] text-apple-secondary leading-relaxed mb-6 max-w-xl">
+              Os movimentos práticos que estão redesenhando o marketing corporativo — liderança, estratégia e execução em um ambiente onde a IA mudou as regras.
+            </p>
+            <a
+              href={amazonUrl}
+              target="_blank"
+              rel="noopener"
+              class="inline-flex items-center gap-2 px-8 py-4 bg-[#FF9900] text-white rounded-full text-[16px] font-semibold transition-all duration-200 hover:bg-[#e68a00] hover:shadow-lg"
+            >
+              Comprar na Amazon
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+              </svg>
+            </a>
+            <p class="text-[13px] text-apple-tertiary mt-3">Disponível em formato digital e físico.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Sobre o livro -->
+    <section class="py-16">
+      <div class="max-w-3xl mx-auto px-6 space-y-8">
+
+        <div class="bg-apple-surface rounded-2xl shadow-card p-8">
+          <h2 class="text-[22px] font-bold text-apple-label tracking-tight mb-4">Sobre o livro</h2>
+          <div class="space-y-4 text-[16px] text-apple-secondary leading-relaxed">
+            <p>
+              A maioria das empresas não tem um problema de marketing. Tem um problema de arquitetura. Produzem campanhas, contratam ferramentas, montam times — e continuam sem crescimento consistente porque nunca definiram o papel real do marketing dentro do negócio.
+            </p>
+            <p>
+              Com a chegada da inteligência artificial, esse problema ficou mais urgente e a janela de vantagem ficou mais curta. Quem aprender a operar marketing com IA de forma responsável — não como truque, mas como método — vai ter uma distância crescente de quem ainda trata a tecnologia como enfeite de apresentação.
+            </p>
+            <p>
+              Este livro é sobre os movimentos práticos que estão redesenhando o marketing corporativo: liderança de times, gestão de orçamento com ROI mensurável, uso real de IA nas rotinas de produção e o modelo que transforma marketing em função estratégica de negócio.
+            </p>
+          </div>
+        </div>
+
+        <div class="bg-apple-surface rounded-2xl shadow-card p-8">
+          <h2 class="text-[22px] font-bold text-apple-label tracking-tight mb-4">Para quem é</h2>
+          <ul class="space-y-3">
+            {[
+              'Gestores e diretores de marketing que precisam justificar investimento com resultado',
+              'Profissionais de marketing que querem entender como a IA muda o trabalho no dia a dia',
+              'Líderes de negócio que querem transformar marketing em vantagem competitiva real',
+              'Quem quer sair da retórica de IA e entrar na operação prática',
+            ].map((item) => (
+              <li class="flex items-start gap-3 text-[15px] text-apple-secondary">
+                <span class="flex-none w-5 h-5 rounded-full bg-apple-accent/10 text-apple-accent text-[11px] font-bold flex items-center justify-center mt-0.5">✓</span>
+                {item}
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div class="bg-apple-surface rounded-2xl shadow-card p-8">
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
+            <div>
+              <h2 class="text-[22px] font-bold text-apple-label tracking-tight mb-1">Disponível agora</h2>
+              <p class="text-[15px] text-apple-secondary">Amazon.com.br — e-book e impresso.</p>
+            </div>
+            <a
+              href={amazonUrl}
+              target="_blank"
+              rel="noopener"
+              class="flex-none inline-flex items-center gap-2 px-7 py-3.5 bg-[#FF9900] text-white rounded-full text-[15px] font-semibold transition-all duration-200 hover:bg-[#e68a00] hover:shadow-lg"
+            >
+              Comprar na Amazon ↗
+            </a>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+  <Footer />
+</BaseLayout>
