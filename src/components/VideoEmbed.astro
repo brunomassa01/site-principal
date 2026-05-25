@@ -1,0 +1,21 @@
+---
+interface Props {
+  src: string;
+  legenda?: string;
+}
+const { src, legenda } = Astro.props;
+---
+<figure class="my-8">
+  <video
+    controls
+    playsinline
+    preload="metadata"
+    class="w-full rounded-2xl shadow-card bg-black"
+    style="max-height:540px;"
+  >
+    <source src={src} type="video/mp4" />
+  </video>
+  {legenda && (
+    <figcaption class="mt-2 text-center text-[13px] text-apple-tertiary">{legenda}</figcaption>
+  )}
+</figure>
