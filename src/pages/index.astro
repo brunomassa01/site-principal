@@ -149,6 +149,42 @@ const fmtMesAno = (d: Date) => d.toLocaleDateString('pt-BR', { month: 'short', y
       })();
     </script>
 
+    <!-- Carrossel de empresas -->
+    <div class="bg-white border-y border-apple-separator/30 py-10 overflow-hidden select-none" aria-hidden="true">
+      <p class="text-center text-[11px] font-semibold uppercase tracking-[0.1em] text-apple-tertiary mb-7">Empresas onde trabalhei</p>
+      <div class="relative">
+        <!-- Fade esquerda -->
+        <div class="absolute inset-y-0 left-0 w-24 z-10 pointer-events-none" style="background:linear-gradient(to right,#fff,transparent);"></div>
+        <!-- Fade direita -->
+        <div class="absolute inset-y-0 right-0 w-24 z-10 pointer-events-none" style="background:linear-gradient(to left,#fff,transparent);"></div>
+        <div class="marquee-track flex gap-16 items-center w-max">
+          {[
+            'Office Paper','Sequencia 1','MCF Consultoria','Boucinhas & Campos','Tokka Simultânea',
+            'Sab Group','SindusCon-SP','Selo7','Seconci-SP','Ultralinks','Grupo Quali',
+            'Office Paper','Sequencia 1','MCF Consultoria','Boucinhas & Campos','Tokka Simultânea',
+            'Sab Group','SindusCon-SP','Selo7','Seconci-SP','Ultralinks','Grupo Quali',
+          ].map((nome) => (
+            <span class="text-[15px] font-medium text-apple-tertiary whitespace-nowrap hover:text-apple-secondary transition-colors duration-200 cursor-default">
+              {nome}
+            </span>
+          ))}
+        </div>
+      </div>
+    </div>
+
+    <style>
+      .marquee-track {
+        animation: marquee 30s linear infinite;
+      }
+      .marquee-track:hover {
+        animation-play-state: paused;
+      }
+      @keyframes marquee {
+        0%   { transform: translateX(0); }
+        100% { transform: translateX(-50%); }
+      }
+    </style>
+
     <!-- Trajetória em destaque -->
     {carreiraDestaque.length > 0 && (
       <section class="py-20">
