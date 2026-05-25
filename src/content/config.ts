@@ -75,6 +75,7 @@ const posts = defineCollection({
     data: z.date(),
     autor: z.string().default('Bruno Massa'),
     capa: image().optional(),
+    capa_url: z.string().optional(), // path público, ex: /images/posts/nome.jpg
     tags: z.array(z.string()).optional(),
     fonte_externa_url: z.string().url().optional(), // se for republicação de LinkedIn/Medium
     fonte_externa_nome: z.string().optional(),

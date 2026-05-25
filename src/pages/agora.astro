@@ -37,10 +37,64 @@ const fmtData = (d: Date) => d.toLocaleDateString('pt-BR', { day: 'numeric', mon
       </div>
     </section>
 
-    <!-- Conteúdo /agora -->
-    {pagina && Content && (
+    <!-- Posts (mais recentes primeiro) -->
+    {posts.length > 0 && (
       <section class="pt-4 pb-12">
         <div class="max-w-3xl mx-auto px-6">
+          <h2 class="text-[22px] font-bold text-apple-label tracking-tight mb-6">Publicações</h2>
+          <div class="space-y-4">
+            {posts.map((p) => (
+              <a
+                href={`/posts/${p.slug}`}
+                class="group flex gap-5 bg-apple-surface rounded-2xl shadow-card overflow-hidden transition-all duration-300 hover:shadow-card-hover hover:-translate-y-0.5"
+              >
+                {p.data.capa_url && (
+                  <div class="flex-none w-28 sm:w-36 bg-black overflow-hidden">
+                    <img
+                      src={p.data.capa_url}
+                      alt=""
+                      class="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity"
+                      aria-hidden="true"
+                    />
+                  </div>
+                )}
+                <div class={`flex flex-col justify-center py-5 pr-6 ${p.data.capa_url ? '' : 'pl-6'}`}>
+                  <div class="flex flex-wrap items-center gap-2 mb-2">
+                    <time class="text-[11px] font-semibold uppercase tracking-wide text-apple-tertiary">
+                      {fmtData(p.data.data)}
+                    </time>
+                    {p.data.idioma === 'en' && (
+                      <span class="px-2 py-0.5 rounded-full text-[10px] font-medium bg-apple-fill text-apple-tertiary">EN</span>
+                    )}
+                  </div>
+                  <h3 class="text-[17px] font-bold text-apple-label tracking-tight leading-snug mb-2 group-hover:text-apple-accent transition-colors text-balance">
+                    {p.data.titulo}
+                  </h3>
+                  <p class="text-[13px] text-apple-secondary leading-relaxed line-clamp-2 hidden sm:block">
+                    {p.data.resumo}
+                  </p>
+                  {p.data.tags && p.data.tags.length > 0 && (
+                    <div class="flex flex-wrap gap-1.5 mt-3">
+                      {p.data.tags.slice(0, 3).map((tag) => (
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-medium bg-apple-fill text-apple-tertiary">
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </a>
+            ))}
+          </div>
+        </div>
+      </section>
+    )}
+
+    <!-- Conteúdo /agora -->
+    {pagina && Content && (
+      <section class="py-12 border-t border-apple-separator-light">
+        <div class="max-w-3xl mx-auto px-6">
+          <h2 class="text-[22px] font-bold text-apple-label tracking-tight mb-4">Momento atual</h2>
           {dataAgora && (
             <p class="text-[13px] text-apple-tertiary mb-4 flex items-center gap-1.5">
               <span class="w-1.5 h-1.5 rounded-full bg-green-500 inline-block"></span>
@@ -55,56 +109,6 @@ const fmtData = (d: Date) => d.toLocaleDateString('pt-BR', { day: 'numeric', mon
         </div>
       </section>
     )}
-
-    <!-- Posts -->
-    <section class="py-12">
-      <div class="max-w-3xl mx-auto px-6">
-        <h2 class="text-[22px] font-bold text-apple-label tracking-tight mb-6">Publicações</h2>
-        {posts.length === 0 ? (
-          <div class="bg-apple-surface rounded-2xl shadow-card p-8 text-center">
-            <p class="text-[15px] text-apple-secondary">Em breve.</p>
-          </div>
-        ) : (
-          <div class="space-y-4">
-            {posts.map((p) => (
-              <a
-                href={`/posts/${p.slug}`}
-                class="group block bg-apple-surface rounded-2xl shadow-card p-6 transition-all duration-300 hover:shadow-card-hover hover:-translate-y-0.5"
-              >
-                <div class="flex flex-wrap items-center gap-3 mb-2">
-                  <time class="text-[12px] font-medium text-apple-tertiary uppercase tracking-wide">
-                    {fmtData(p.data.data)}
-                  </time>
-                  {p.data.idioma === 'en' && (
-                    <span class="px-2 py-0.5 rounded-full text-[11px] font-medium bg-apple-fill text-apple-tertiary">EN</span>
-                  )}
-                  {p.data.fonte_externa_url && (
-                    <span class="px-2 py-0.5 rounded-full text-[11px] font-medium bg-apple-fill text-apple-tertiary">
-                      {p.data.fonte_externa_nome ?? 'Republicação'}
-                    </span>
-                  )}
-                </div>
-                <h3 class="text-[20px] font-bold text-apple-label tracking-tight leading-snug mb-2 group-hover:text-apple-accent transition-colors text-balance">
-                  {p.data.titulo}
-                </h3>
-                <p class="text-[14px] text-apple-secondary leading-relaxed line-clamp-2">
-                  {p.data.resumo}
-                </p>
-                {p.data.tags && p.data.tags.length > 0 && (
-                  <div class="flex flex-wrap gap-1.5 mt-3">
-                    {p.data.tags.slice(0, 4).map((tag) => (
-                      <span class="px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-apple-fill text-apple-tertiary">
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </a>
-            ))}
-          </div>
-        )}
-      </div>
-    </section>
 
   </main>
   <Footer />
