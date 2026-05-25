@@ -32,21 +32,29 @@ const fmtMesAno = (d: Date) => d.toLocaleDateString('pt-BR', { month: 'short', y
     <div id="hero-wrapper" style="height:400vh;position:relative;">
       <section id="hero-sticky" class="sticky top-0 h-screen overflow-hidden bg-black">
 
-        <!-- Vídeo de fundo -->
-        <video
-          id="hero-video"
-          class="absolute inset-0 w-full h-full object-cover object-center"
-          preload="auto"
-          muted
-          playsinline
-          disablepictureinpicture
-          aria-hidden="true"
-        >
-          <source src="/videos/hero.mp4" type="video/mp4" />
-        </video>
+        <!--
+          Vídeo retrato (720×1280) em tela paisagem:
+          Desktop → container direito com largura = 56.25vh (= 100vh × 720/1280)
+                     → personagem 100% visível, sem crop vertical
+          Mobile  → full-width com object-position top para mostrar o rosto
+        -->
+        <div id="hero-video-wrap" class="absolute inset-y-0 right-0" style="width:min(56.25vh,100%);">
+          <video
+            id="hero-video"
+            class="w-full h-full"
+            style="object-fit:cover;object-position:center top;"
+            preload="auto"
+            muted
+            playsinline
+            disablepictureinpicture
+            aria-hidden="true"
+          >
+            <source src="/videos/hero.mp4" type="video/mp4" />
+          </video>
+        </div>
 
-        <!-- Gradiente de legibilidade: escuro à esquerda -->
-        <div class="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-black/10 pointer-events-none"></div>
+        <!-- Gradiente: preto sólido à esquerda (texto), esmaece até o vídeo -->
+        <div class="absolute inset-0 pointer-events-none" style="background:linear-gradient(to right, #000 30%, rgba(0,0,0,0.75) 52%, rgba(0,0,0,0.15) 72%, transparent 88%);"></div>
         <!-- Gradiente de rodapé -->
         <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent pointer-events-none"></div>
 
