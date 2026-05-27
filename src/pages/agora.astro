@@ -12,8 +12,10 @@ const dataAgora = pagina?.data.atualizado_em
   ? pagina.data.atualizado_em.toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' })
   : null;
 
-const posts = (await getCollection('posts', ({ data }) => !data.rascunho))
-  .sort((a, b) => b.data.data.valueOf() - a.data.data.valueOf());
+const agora_dt = new Date();
+const posts = (await getCollection('posts', ({ data }) =>
+  !data.rascunho && (!data.publicar_em || data.publicar_em <= agora_dt)
+)).sort((a, b) => b.data.data.valueOf() - a.data.data.valueOf());
 
 const fmtData = (d: Date) => d.toLocaleDateString('pt-BR', { day: 'numeric', month: 'short', year: 'numeric' });
 ---

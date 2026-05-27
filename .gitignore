@@ -28,5 +28,8 @@ Thumbs.db
 # Vercel
 .vercel
 
+# TinaCMS — admin gerado no build (não commitar)
+/public/admin
+
 # Fotos de referência local (não vão para o repo)
 /images/

@@ -1,0 +1,79 @@
+fragment TimelineParts on Timeline {
+  __typename
+  cargo
+  empresa
+  empresa_url
+  inicio
+  fim
+  local
+  tipo
+  resumo
+  destaques
+  tags
+  destaque
+  body
+}
+
+fragment ProjetosParts on Projetos {
+  __typename
+  titulo
+  subtitulo
+  status
+  inicio
+  fim
+  cliente
+  papel
+  resumo
+  problema
+  abordagem
+  resultado
+  link
+  tags
+  destaque
+  body
+}
+
+fragment SkillsParts on Skills {
+  __typename
+  nome
+  categoria
+  area
+  nivel
+  instituicao
+  instituicao_url
+  ano
+  credencial_url
+  descricao
+  destaque
+  body
+}
+
+fragment PostsParts on Posts {
+  __typename
+  titulo
+  resumo
+  data
+  publicar_em
+  capa_url
+  tags
+  fonte_externa_url
+  fonte_externa_nome
+  idioma
+  rascunho
+  body
+}
+
+fragment AtualizacoesParts on Atualizacoes {
+  __typename
+  data
+  tipo
+  titulo
+  referencia_slug
+  body
+}
+
+fragment AgoraParts on Agora {
+  __typename
+  atualizado_em
+  body
+}
