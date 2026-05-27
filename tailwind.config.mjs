@@ -30,7 +30,13 @@ export default {
         tighter: '-0.04em',
       },
       transitionTimingFunction: {
-        apple: 'cubic-bezier(0.4, 0, 0.2, 1)',
+        apple: 'cubic-bezier(0.25, 0.1, 0.25, 1)',
+      },
+      lineHeight: {
+        apple: '1.47',
+      },
+      borderRadius: {
+        pill: '980px',
       },
     },
   },
