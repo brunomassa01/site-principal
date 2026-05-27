@@ -1,5 +1,7 @@
 import { config, collection, singleton, fields } from '@keystatic/core';
 
+const SITE = 'https://brunomassa.online';
+
 export default config({
   storage: {
     kind: 'cloud',
@@ -19,15 +21,23 @@ export default config({
       slugField: 'cargo',
       path: 'src/content/timeline/*',
       format: { contentField: 'body' },
+      previewUrl: `${SITE}/timeline`,
       schema: {
         cargo: fields.text({ label: 'Cargo' }),
         empresa: fields.text({ label: 'Empresa' }),
-        empresa_url: fields.text({ label: 'URL da Empresa', validation: { length: { min: 0 } } }),
+        empresa_url: fields.url({
+          label: 'URL da Empresa',
+          validation: { isRequired: false },
+        }),
         inicio: fields.date({ label: 'Início' }),
         fim: fields.date({ label: 'Fim (vazio = atual)' }),
-        local: fields.text({ label: 'Local', description: 'Ex: São Paulo / Remoto', validation: { length: { min: 0 } } }),
+        local: fields.text({
+          label: 'Local',
+          description: 'Ex: São Paulo / Remoto',
+          validation: { length: { min: 0 } },
+        }),
         tipo: fields.select({
-          label: 'Tipo',
+          label: 'Tipo de contrato',
           options: [
             { label: '—', value: '' },
             { label: 'CLT', value: 'clt' },
@@ -39,16 +49,27 @@ export default config({
           ],
           defaultValue: '',
         }),
-        resumo: fields.text({ label: 'Resumo', description: '1-2 frases', multiline: true }),
+        resumo: fields.text({
+          label: 'Resumo',
+          description: '1-2 frases — aparece no card da trajetória',
+          multiline: true,
+        }),
         destaques: fields.array(
           fields.text({ label: 'Item' }),
-          { label: 'Destaques', description: 'Bullets de entregas e conquistas', itemLabel: props => props.value ?? 'Item' }
+          {
+            label: 'Destaques',
+            description: 'Entregas e conquistas em bullet points',
+            itemLabel: props => props.value ?? 'Novo item',
+          }
         ),
         tags: fields.array(
           fields.text({ label: 'Tag' }),
           { label: 'Tags', itemLabel: props => props.value ?? 'Tag' }
         ),
-        destaque: fields.checkbox({ label: 'Destaque na home', defaultValue: false }),
+        destaque: fields.checkbox({
+          label: 'Aparecer em destaque na home',
+          defaultValue: false,
+        }),
         body: fields.document({
           label: 'Texto longo (opcional)',
           formatting: true,
@@ -63,9 +84,13 @@ export default config({
       slugField: 'titulo',
       path: 'src/content/projetos/*',
       format: { contentField: 'body' },
+      previewUrl: `${SITE}/projetos/{slug}`,
       schema: {
         titulo: fields.text({ label: 'Título' }),
-        subtitulo: fields.text({ label: 'Subtítulo', validation: { length: { min: 0 } } }),
+        subtitulo: fields.text({
+          label: 'Subtítulo',
+          validation: { length: { min: 0 } },
+        }),
         status: fields.select({
           label: 'Status',
           options: [
@@ -78,24 +103,55 @@ export default config({
         }),
         inicio: fields.date({ label: 'Início' }),
         fim: fields.date({ label: 'Fim' }),
-        cliente: fields.text({ label: 'Cliente', validation: { length: { min: 0 } } }),
-        papel: fields.text({ label: 'Papel', description: 'Ex: Líder de projeto, Consultor, Idealizador' }),
-        resumo: fields.text({ label: 'Resumo', description: '1-3 frases (aparece no card)', multiline: true }),
-        problema: fields.text({ label: 'Problema', multiline: true, validation: { length: { min: 0 } } }),
-        abordagem: fields.text({ label: 'Abordagem', multiline: true, validation: { length: { min: 0 } } }),
-        resultado: fields.text({ label: 'Resultado', multiline: true, validation: { length: { min: 0 } } }),
-        link: fields.text({ label: 'Link', validation: { length: { min: 0 } } }),
-        repo: fields.text({ label: 'Repositório', validation: { length: { min: 0 } } }),
+        cliente: fields.text({
+          label: 'Cliente / Empresa',
+          validation: { length: { min: 0 } },
+        }),
+        papel: fields.text({
+          label: 'Papel',
+          description: 'Ex: Líder de projeto, Consultor, Idealizador',
+        }),
+        resumo: fields.text({
+          label: 'Resumo',
+          description: '1-3 frases — aparece no card',
+          multiline: true,
+        }),
+        problema: fields.text({
+          label: 'Problema',
+          description: 'Qual problema o projeto resolve',
+          multiline: true,
+          validation: { length: { min: 0 } },
+        }),
+        abordagem: fields.text({
+          label: 'Abordagem',
+          description: 'Como foi executado',
+          multiline: true,
+          validation: { length: { min: 0 } },
+        }),
+        resultado: fields.text({
+          label: 'Resultado',
+          description: 'Resultados concretos com números',
+          multiline: true,
+          validation: { length: { min: 0 } },
+        }),
+        link: fields.url({
+          label: 'Link externo',
+          validation: { isRequired: false },
+        }),
         tags: fields.array(
           fields.text({ label: 'Tag' }),
           { label: 'Tags', itemLabel: props => props.value ?? 'Tag' }
         ),
-        destaque: fields.checkbox({ label: 'Destaque', defaultValue: false }),
+        destaque: fields.checkbox({
+          label: 'Aparecer em destaque na home',
+          defaultValue: false,
+        }),
         body: fields.document({
           label: 'Case completo',
           formatting: true,
           dividers: true,
           links: true,
+          images: true,
         }),
       },
     }),
@@ -105,6 +161,7 @@ export default config({
       slugField: 'nome',
       path: 'src/content/skills/*',
       format: { contentField: 'body' },
+      previewUrl: `${SITE}/skills`,
       schema: {
         nome: fields.text({ label: 'Nome' }),
         categoria: fields.select({
@@ -117,7 +174,10 @@ export default config({
           ],
           defaultValue: 'habilidade',
         }),
-        area: fields.text({ label: 'Área', description: 'Ex: Gestão, Dados, Finanças, Tecnologia' }),
+        area: fields.text({
+          label: 'Área',
+          description: 'Ex: Gestão, Dados, Performance, Tecnologia',
+        }),
         nivel: fields.select({
           label: 'Nível',
           options: [
@@ -129,13 +189,34 @@ export default config({
           ],
           defaultValue: '',
         }),
-        instituicao: fields.text({ label: 'Instituição', validation: { length: { min: 0 } } }),
-        instituicao_url: fields.text({ label: 'URL da Instituição', validation: { length: { min: 0 } } }),
+        instituicao: fields.text({
+          label: 'Instituição',
+          validation: { length: { min: 0 } },
+        }),
+        instituicao_url: fields.url({
+          label: 'URL da Instituição',
+          validation: { isRequired: false },
+        }),
         ano: fields.integer({ label: 'Ano' }),
-        credencial_url: fields.text({ label: 'URL da Credencial', validation: { length: { min: 0 } } }),
-        descricao: fields.text({ label: 'Descrição', multiline: true, validation: { length: { min: 0 } } }),
-        destaque: fields.checkbox({ label: 'Destaque', defaultValue: false }),
-        body: fields.document({ label: 'Notas adicionais', formatting: true, dividers: true, links: true }),
+        credencial_url: fields.url({
+          label: 'URL da Credencial',
+          validation: { isRequired: false },
+        }),
+        descricao: fields.text({
+          label: 'Descrição',
+          multiline: true,
+          validation: { length: { min: 0 } },
+        }),
+        destaque: fields.checkbox({
+          label: 'Destaque',
+          defaultValue: false,
+        }),
+        body: fields.document({
+          label: 'Notas adicionais',
+          formatting: true,
+          dividers: true,
+          links: true,
+        }),
       },
     }),
 
@@ -144,16 +225,34 @@ export default config({
       slugField: 'titulo',
       path: 'src/content/posts/*',
       format: { contentField: 'body' },
+      previewUrl: `${SITE}/posts/{slug}`,
       schema: {
         titulo: fields.text({ label: 'Título' }),
-        resumo: fields.text({ label: 'Resumo', multiline: true }),
-        data: fields.date({ label: 'Data' }),
+        resumo: fields.text({
+          label: 'Resumo',
+          description: 'Aparece no card e no meta description',
+          multiline: true,
+        }),
+        data: fields.date({ label: 'Data de publicação' }),
+        capa_url: fields.text({
+          label: 'Imagem de capa',
+          description: 'Caminho da imagem em /public — ex: /images/posts/nome.jpg',
+          validation: { length: { min: 0 } },
+        }),
         tags: fields.array(
           fields.text({ label: 'Tag' }),
           { label: 'Tags', itemLabel: props => props.value ?? 'Tag' }
         ),
-        fonte_externa_url: fields.text({ label: 'URL Externa', description: 'Se for republicação de LinkedIn/Medium', validation: { length: { min: 0 } } }),
-        fonte_externa_nome: fields.text({ label: 'Nome da Fonte', validation: { length: { min: 0 } } }),
+        fonte_externa_url: fields.url({
+          label: 'URL da fonte externa',
+          description: 'Se for republicação de LinkedIn, Medium etc.',
+          validation: { isRequired: false },
+        }),
+        fonte_externa_nome: fields.text({
+          label: 'Nome da fonte',
+          description: 'Ex: LinkedIn, Medium',
+          validation: { length: { min: 0 } },
+        }),
         idioma: fields.select({
           label: 'Idioma',
           options: [
@@ -162,12 +261,16 @@ export default config({
           ],
           defaultValue: 'pt',
         }),
-        rascunho: fields.checkbox({ label: 'Rascunho', defaultValue: false }),
+        rascunho: fields.checkbox({
+          label: 'Salvar como rascunho (não aparece no site)',
+          defaultValue: false,
+        }),
         body: fields.document({
           label: 'Conteúdo',
           formatting: true,
           dividers: true,
           links: true,
+          images: true,
         }),
       },
     }),
@@ -177,6 +280,7 @@ export default config({
       slugField: 'titulo',
       path: 'src/content/atualizacoes/*',
       format: { contentField: 'body' },
+      previewUrl: `${SITE}/agora`,
       schema: {
         data: fields.date({ label: 'Data' }),
         tipo: fields.select({
@@ -192,8 +296,17 @@ export default config({
           defaultValue: 'outro',
         }),
         titulo: fields.text({ label: 'Título' }),
-        referencia_slug: fields.text({ label: 'Referência (slug)', validation: { length: { min: 0 } } }),
-        body: fields.document({ label: 'Detalhes', formatting: true, dividers: true, links: true }),
+        referencia_slug: fields.text({
+          label: 'Referência (slug)',
+          description: 'Slug do projeto, post ou cargo relacionado',
+          validation: { length: { min: 0 } },
+        }),
+        body: fields.document({
+          label: 'Detalhes',
+          formatting: true,
+          dividers: true,
+          links: true,
+        }),
       },
     }),
   },
@@ -203,6 +316,7 @@ export default config({
       label: 'Página Agora',
       path: 'src/content/agora/index',
       format: { contentField: 'body' },
+      previewUrl: `${SITE}/agora`,
       schema: {
         atualizado_em: fields.date({ label: 'Atualizado em' }),
         body: fields.document({
