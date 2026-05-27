@@ -14,10 +14,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
 
       - name: Install dependencies (with native build)
-        run: npm ci
+        run: npm install --legacy-peer-deps
 
       - name: Run tinacms dev briefly to register schema and generate tina-lock.json
         env:
