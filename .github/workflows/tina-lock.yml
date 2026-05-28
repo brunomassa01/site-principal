@@ -22,7 +22,14 @@ jobs:
         env:
           TINA_CLIENT_ID: ${{ secrets.TINA_CLIENT_ID }}
           TINA_TOKEN: ${{ secrets.TINA_TOKEN }}
-        run: npx tinacms build --skip-cloud-checks
+        run: |
+          echo "TINA_CLIENT_ID definido: $( [ -n "$TINA_CLIENT_ID" ] && echo 'sim' || echo 'NAO' )"
+          echo "TINA_TOKEN definido: $( [ -n "$TINA_TOKEN" ] && echo 'sim' || echo 'NAO' )"
+          npx tinacms build --skip-cloud-checks
+          echo "--- arquivos em tina/ apos build ---"
+          ls -la tina/
+          echo "--- find tina-lock ---"
+          find . -name "tina-lock.json" 2>/dev/null || echo "(nenhum encontrado)"
 
       - name: Verify tina-lock.json was generated
         run: |
