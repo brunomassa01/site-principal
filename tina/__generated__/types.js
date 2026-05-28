@@ -84,6 +84,19 @@ export const AtualizacoesPartsFragmentDoc = gql`
   body
 }
     `;
+export const IdentidadePartsFragmentDoc = gql`
+    fragment IdentidadeParts on Identidade {
+  __typename
+  nome
+  tagline
+  slogan
+  bio_curta
+  descricao_meta
+  email
+  linkedin_url
+  og_image
+}
+    `;
 export const AgoraPartsFragmentDoc = gql`
     fragment AgoraParts on Agora {
   __typename
@@ -376,6 +389,63 @@ export const AtualizacoesConnectionDocument = gql`
   }
 }
     ${AtualizacoesPartsFragmentDoc}`;
+export const IdentidadeDocument = gql`
+    query identidade($relativePath: String!) {
+  identidade(relativePath: $relativePath) {
+    ... on Document {
+      _sys {
+        filename
+        basename
+        hasReferences
+        breadcrumbs
+        path
+        relativePath
+        extension
+      }
+      id
+    }
+    ...IdentidadeParts
+  }
+}
+    ${IdentidadePartsFragmentDoc}`;
+export const IdentidadeConnectionDocument = gql`
+    query identidadeConnection($before: String, $after: String, $first: Float, $last: Float, $sort: String, $filter: IdentidadeFilter) {
+  identidadeConnection(
+    before: $before
+    after: $after
+    first: $first
+    last: $last
+    sort: $sort
+    filter: $filter
+  ) {
+    pageInfo {
+      hasPreviousPage
+      hasNextPage
+      startCursor
+      endCursor
+    }
+    totalCount
+    edges {
+      cursor
+      node {
+        ... on Document {
+          _sys {
+            filename
+            basename
+            hasReferences
+            breadcrumbs
+            path
+            relativePath
+            extension
+          }
+          id
+        }
+        ...IdentidadeParts
+      }
+    }
+  }
+}
+    ${IdentidadePartsFragmentDoc}`;
 export const AgoraDocument = gql`
     query agora($relativePath: String!) {
   agora(relativePath: $relativePath) {
@@ -465,6 +535,12 @@ export function getSdk(requester) {
     atualizacoesConnection(variables, options) {
       return requester(AtualizacoesConnectionDocument, variables, options);
     },
+    identidade(variables, options) {
+      return requester(IdentidadeDocument, variables, options);
+    },
+    identidadeConnection(variables, options) {
+      return requester(IdentidadeConnectionDocument, variables, options);
+    },
     agora(variables, options) {
       return requester(AgoraDocument, variables, options);
     },
@@ -493,7 +569,7 @@ const generateRequester = (client) => {
 export const ExperimentalGetTinaClient = () => getSdk(
   generateRequester(
     createClient({
-      url: "https://content.tinajs.io/2.4/content/d2190664-7e6a-4cbe-b628-14fb41d87433/github/main",
+      url: "https://content.tinajs.io/2.4/content/dummy/github/main",
       queries
     })
   )

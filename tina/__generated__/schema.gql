@@ -64,6 +64,8 @@ type Query {
   postsConnection(before: String, after: String, first: Float, last: Float, sort: String, filter: PostsFilter): PostsConnection!
   atualizacoes(relativePath: String): Atualizacoes!
   atualizacoesConnection(before: String, after: String, first: Float, last: Float, sort: String, filter: AtualizacoesFilter): AtualizacoesConnection!
+  identidade(relativePath: String): Identidade!
+  identidadeConnection(before: String, after: String, first: Float, last: Float, sort: String, filter: IdentidadeFilter): IdentidadeConnection!
   agora(relativePath: String): Agora!
   agoraConnection(before: String, after: String, first: Float, last: Float, sort: String, filter: AgoraFilter): AgoraConnection!
 }
@@ -74,6 +76,7 @@ input DocumentFilter {
   skills: SkillsFilter
   posts: PostsFilter
   atualizacoes: AtualizacoesFilter
+  identidade: IdentidadeFilter
   agora: AgoraFilter
 }
 
@@ -100,7 +103,7 @@ type Collection {
   documents(before: String, after: String, first: Float, last: Float, sort: String, filter: DocumentFilter, folder: String): DocumentConnection!
 }
 
-union DocumentNode = Timeline | Projetos | Skills | Posts | Atualizacoes | Agora | Folder
+union DocumentNode = Timeline | Projetos | Skills | Posts | Atualizacoes | Identidade | Agora | Folder
 
 type Timeline implements Node & Document {
   cargo: String!
@@ -371,6 +374,42 @@ type AtualizacoesConnection implements Connection {
   edges: [AtualizacoesConnectionEdges]
 }
 
+type Identidade implements Node & Document {
+  nome: String!
+  tagline: String
+  slogan: String
+  bio_curta: String
+  descricao_meta: String
+  email: String
+  linkedin_url: String
+  og_image: String
+  id: ID!
+  _sys: SystemInfo!
+  _values: JSON!
+}
+
+input IdentidadeFilter {
+  nome: StringFilter
+  tagline: StringFilter
+  slogan: StringFilter
+  bio_curta: StringFilter
+  descricao_meta: StringFilter
+  email: StringFilter
+  linkedin_url: StringFilter
+  og_image: ImageFilter
+}
+
+type IdentidadeConnectionEdges {
+  cursor: String!
+  node: Identidade
+}
+
+type IdentidadeConnection implements Connection {
+  pageInfo: PageInfo!
+  totalCount: Float!
+  edges: [IdentidadeConnectionEdges]
+}
+
 type Agora implements Node & Document {
   atualizado_em: String!
   body: JSON
@@ -411,6 +450,8 @@ type Mutation {
   createPosts(relativePath: String!, params: PostsMutation!): Posts!
   updateAtualizacoes(relativePath: String!, params: AtualizacoesMutation!): Atualizacoes!
   createAtualizacoes(relativePath: String!, params: AtualizacoesMutation!): Atualizacoes!
+  updateIdentidade(relativePath: String!, params: IdentidadeMutation!): Identidade!
+  createIdentidade(relativePath: String!, params: IdentidadeMutation!): Identidade!
   updateAgora(relativePath: String!, params: AgoraMutation!): Agora!
   createAgora(relativePath: String!, params: AgoraMutation!): Agora!
 }
@@ -421,6 +462,7 @@ input DocumentUpdateMutation {
   skills: SkillsMutation
   posts: PostsMutation
   atualizacoes: AtualizacoesMutation
+  identidade: IdentidadeMutation
   agora: AgoraMutation
   relativePath: String
 }
@@ -431,6 +473,7 @@ input DocumentMutation {
   skills: SkillsMutation
   posts: PostsMutation
   atualizacoes: AtualizacoesMutation
+  identidade: IdentidadeMutation
   agora: AgoraMutation
 }
 
@@ -501,6 +544,17 @@ input AtualizacoesMutation {
   titulo: String
   referencia_slug: String
   body: JSON
+}
+
+input IdentidadeMutation {
+  nome: String
+  tagline: String
+  slogan: String
+  bio_curta: String
+  descricao_meta: String
+  email: String
+  linkedin_url: String
+  og_image: String
 }
 
 input AgoraMutation {

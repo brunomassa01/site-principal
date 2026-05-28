@@ -92,6 +92,8 @@ export type Query = {
   postsConnection: PostsConnection;
   atualizacoes: Atualizacoes;
   atualizacoesConnection: AtualizacoesConnection;
+  identidade: Identidade;
+  identidadeConnection: IdentidadeConnection;
   agora: Agora;
   agoraConnection: AgoraConnection;
 };
@@ -193,6 +195,21 @@ export type QueryAtualizacoesConnectionArgs = {
 };
 
 
+export type QueryIdentidadeArgs = {
+  relativePath?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryIdentidadeConnectionArgs = {
+  before?: InputMaybe<Scalars['String']['input']>;
+  after?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Float']['input']>;
+  last?: InputMaybe<Scalars['Float']['input']>;
+  sort?: InputMaybe<Scalars['String']['input']>;
+  filter?: InputMaybe<IdentidadeFilter>;
+};
+
+
 export type QueryAgoraArgs = {
   relativePath?: InputMaybe<Scalars['String']['input']>;
 };
@@ -213,6 +230,7 @@ export type DocumentFilter = {
   skills?: InputMaybe<SkillsFilter>;
   posts?: InputMaybe<PostsFilter>;
   atualizacoes?: InputMaybe<AtualizacoesFilter>;
+  identidade?: InputMaybe<IdentidadeFilter>;
   agora?: InputMaybe<AgoraFilter>;
 };
 
@@ -253,7 +271,7 @@ export type CollectionDocumentsArgs = {
   folder?: InputMaybe<Scalars['String']['input']>;
 };
 
-export type DocumentNode = Timeline | Projetos | Skills | Posts | Atualizacoes | Agora | Folder;
+export type DocumentNode = Timeline | Projetos | Skills | Posts | Atualizacoes | Identidade | Agora | Folder;
 
 export type Timeline = Node & Document & {
   __typename?: 'Timeline';
@@ -539,6 +557,45 @@ export type AtualizacoesConnection = Connection & {
   edges?: Maybe<Array<Maybe<AtualizacoesConnectionEdges>>>;
 };
 
+export type Identidade = Node & Document & {
+  __typename?: 'Identidade';
+  nome: Scalars['String']['output'];
+  tagline?: Maybe<Scalars['String']['output']>;
+  slogan?: Maybe<Scalars['String']['output']>;
+  bio_curta?: Maybe<Scalars['String']['output']>;
+  descricao_meta?: Maybe<Scalars['String']['output']>;
+  email?: Maybe<Scalars['String']['output']>;
+  linkedin_url?: Maybe<Scalars['String']['output']>;
+  og_image?: Maybe<Scalars['String']['output']>;
+  id: Scalars['ID']['output'];
+  _sys: SystemInfo;
+  _values: Scalars['JSON']['output'];
+};
+
+export type IdentidadeFilter = {
+  nome?: InputMaybe<StringFilter>;
+  tagline?: InputMaybe<StringFilter>;
+  slogan?: InputMaybe<StringFilter>;
+  bio_curta?: InputMaybe<StringFilter>;
+  descricao_meta?: InputMaybe<StringFilter>;
+  email?: InputMaybe<StringFilter>;
+  linkedin_url?: InputMaybe<StringFilter>;
+  og_image?: InputMaybe<ImageFilter>;
+};
+
+export type IdentidadeConnectionEdges = {
+  __typename?: 'IdentidadeConnectionEdges';
+  cursor: Scalars['String']['output'];
+  node?: Maybe<Identidade>;
+};
+
+export type IdentidadeConnection = Connection & {
+  __typename?: 'IdentidadeConnection';
+  pageInfo: PageInfo;
+  totalCount: Scalars['Float']['output'];
+  edges?: Maybe<Array<Maybe<IdentidadeConnectionEdges>>>;
+};
+
 export type Agora = Node & Document & {
   __typename?: 'Agora';
   atualizado_em: Scalars['String']['output'];
@@ -583,6 +640,8 @@ export type Mutation = {
   createPosts: Posts;
   updateAtualizacoes: Atualizacoes;
   createAtualizacoes: Atualizacoes;
+  updateIdentidade: Identidade;
+  createIdentidade: Identidade;
   updateAgora: Agora;
   createAgora: Agora;
 };
@@ -681,6 +740,18 @@ export type MutationCreateAtualizacoesArgs = {
 };
 
 
+export type MutationUpdateIdentidadeArgs = {
+  relativePath: Scalars['String']['input'];
+  params: IdentidadeMutation;
+};
+
+
+export type MutationCreateIdentidadeArgs = {
+  relativePath: Scalars['String']['input'];
+  params: IdentidadeMutation;
+};
+
+
 export type MutationUpdateAgoraArgs = {
   relativePath: Scalars['String']['input'];
   params: AgoraMutation;
@@ -698,6 +769,7 @@ export type DocumentUpdateMutation = {
   skills?: InputMaybe<SkillsMutation>;
   posts?: InputMaybe<PostsMutation>;
   atualizacoes?: InputMaybe<AtualizacoesMutation>;
+  identidade?: InputMaybe<IdentidadeMutation>;
   agora?: InputMaybe<AgoraMutation>;
   relativePath?: InputMaybe<Scalars['String']['input']>;
 };
@@ -708,6 +780,7 @@ export type DocumentMutation = {
   skills?: InputMaybe<SkillsMutation>;
   posts?: InputMaybe<PostsMutation>;
   atualizacoes?: InputMaybe<AtualizacoesMutation>;
+  identidade?: InputMaybe<IdentidadeMutation>;
   agora?: InputMaybe<AgoraMutation>;
 };
 
@@ -780,6 +853,17 @@ export type AtualizacoesMutation = {
   body?: InputMaybe<Scalars['JSON']['input']>;
 };
 
+export type IdentidadeMutation = {
+  nome?: InputMaybe<Scalars['String']['input']>;
+  tagline?: InputMaybe<Scalars['String']['input']>;
+  slogan?: InputMaybe<Scalars['String']['input']>;
+  bio_curta?: InputMaybe<Scalars['String']['input']>;
+  descricao_meta?: InputMaybe<Scalars['String']['input']>;
+  email?: InputMaybe<Scalars['String']['input']>;
+  linkedin_url?: InputMaybe<Scalars['String']['input']>;
+  og_image?: InputMaybe<Scalars['String']['input']>;
+};
+
 export type AgoraMutation = {
   atualizado_em?: InputMaybe<Scalars['String']['input']>;
   body?: InputMaybe<Scalars['JSON']['input']>;
@@ -794,6 +878,8 @@ export type SkillsPartsFragment = { __typename: 'Skills', nome: string, categori
 export type PostsPartsFragment = { __typename: 'Posts', titulo: string, resumo: string, data: string, publicar_em?: string | null, capa_url?: string | null, tags?: Array<string | null> | null, fonte_externa_url?: string | null, fonte_externa_nome?: string | null, idioma?: string | null, rascunho?: boolean | null, body?: any | null };
 
 export type AtualizacoesPartsFragment = { __typename: 'Atualizacoes', data: string, tipo: string, titulo: string, referencia_slug?: string | null, body?: any | null };
+
+export type IdentidadePartsFragment = { __typename: 'Identidade', nome: string, tagline?: string | null, slogan?: string | null, bio_curta?: string | null, descricao_meta?: string | null, email?: string | null, linkedin_url?: string | null, og_image?: string | null };
 
 export type AgoraPartsFragment = { __typename: 'Agora', atualizado_em: string, body?: any | null };
 
@@ -892,6 +978,25 @@ export type AtualizacoesConnectionQueryVariables = Exact<{
 
 export type AtualizacoesConnectionQuery = { __typename?: 'Query', atualizacoesConnection: { __typename?: 'AtualizacoesConnection', totalCount: number, pageInfo: { __typename?: 'PageInfo', hasPreviousPage: boolean, hasNextPage: boolean, startCursor: string, endCursor: string }, edges?: Array<{ __typename?: 'AtualizacoesConnectionEdges', cursor: string, node?: { __typename: 'Atualizacoes', id: string, data: string, tipo: string, titulo: string, referencia_slug?: string | null, body?: any | null, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string } } | null } | null> | null } };
 
+export type IdentidadeQueryVariables = Exact<{
+  relativePath: Scalars['String']['input'];
+}>;
+
+
+export type IdentidadeQuery = { __typename?: 'Query', identidade: { __typename: 'Identidade', id: string, nome: string, tagline?: string | null, slogan?: string | null, bio_curta?: string | null, descricao_meta?: string | null, email?: string | null, linkedin_url?: string | null, og_image?: string | null, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string } } };
+
+export type IdentidadeConnectionQueryVariables = Exact<{
+  before?: InputMaybe<Scalars['String']['input']>;
+  after?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Float']['input']>;
+  last?: InputMaybe<Scalars['Float']['input']>;
+  sort?: InputMaybe<Scalars['String']['input']>;
+  filter?: InputMaybe<IdentidadeFilter>;
+}>;
+
+
+export type IdentidadeConnectionQuery = { __typename?: 'Query', identidadeConnection: { __typename?: 'IdentidadeConnection', totalCount: number, pageInfo: { __typename?: 'PageInfo', hasPreviousPage: boolean, hasNextPage: boolean, startCursor: string, endCursor: string }, edges?: Array<{ __typename?: 'IdentidadeConnectionEdges', cursor: string, node?: { __typename: 'Identidade', id: string, nome: string, tagline?: string | null, slogan?: string | null, bio_curta?: string | null, descricao_meta?: string | null, email?: string | null, linkedin_url?: string | null, og_image?: string | null, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string } } | null } | null> | null } };
+
 export type AgoraQueryVariables = Exact<{
   relativePath: Scalars['String']['input'];
 }>;
@@ -988,6 +1093,19 @@ export const AtualizacoesPartsFragmentDoc = gql`
   titulo
   referencia_slug
   body
+}
+    `;
+export const IdentidadePartsFragmentDoc = gql`
+    fragment IdentidadeParts on Identidade {
+  __typename
+  nome
+  tagline
+  slogan
+  bio_curta
+  descricao_meta
+  email
+  linkedin_url
+  og_image
 }
     `;
 export const AgoraPartsFragmentDoc = gql`
@@ -1282,6 +1400,63 @@ export const AtualizacoesConnectionDocument = gql`
   }
 }
     ${AtualizacoesPartsFragmentDoc}`;
+export const IdentidadeDocument = gql`
+    query identidade($relativePath: String!) {
+  identidade(relativePath: $relativePath) {
+    ... on Document {
+      _sys {
+        filename
+        basename
+        hasReferences
+        breadcrumbs
+        path
+        relativePath
+        extension
+      }
+      id
+    }
+    ...IdentidadeParts
+  }
+}
+    ${IdentidadePartsFragmentDoc}`;
+export const IdentidadeConnectionDocument = gql`
+    query identidadeConnection($before: String, $after: String, $first: Float, $last: Float, $sort: String, $filter: IdentidadeFilter) {
+  identidadeConnection(
+    before: $before
+    after: $after
+    first: $first
+    last: $last
+    sort: $sort
+    filter: $filter
+  ) {
+    pageInfo {
+      hasPreviousPage
+      hasNextPage
+      startCursor
+      endCursor
+    }
+    totalCount
+    edges {
+      cursor
+      node {
+        ... on Document {
+          _sys {
+            filename
+            basename
+            hasReferences
+            breadcrumbs
+            path
+            relativePath
+            extension
+          }
+          id
+        }
+        ...IdentidadeParts
+      }
+    }
+  }
+}
+    ${IdentidadePartsFragmentDoc}`;
 export const AgoraDocument = gql`
     query agora($relativePath: String!) {
   agora(relativePath: $relativePath) {
@@ -1372,6 +1547,12 @@ export type Requester<C= {}> = <R, V>(doc: DocumentNode, vars?: V, options?: C) 
     atualizacoesConnection(variables?: AtualizacoesConnectionQueryVariables, options?: C): Promise<{data: AtualizacoesConnectionQuery, errors?: { message: string, locations: { line: number, column: number }[], path: string[] }[], variables: AtualizacoesConnectionQueryVariables, query: string}> {
         return requester<{data: AtualizacoesConnectionQuery, errors?: { message: string, locations: { line: number, column: number }[], path: string[] }[], variables: AtualizacoesConnectionQueryVariables, query: string}, AtualizacoesConnectionQueryVariables>(AtualizacoesConnectionDocument, variables, options);
       },
+    identidade(variables: IdentidadeQueryVariables, options?: C): Promise<{data: IdentidadeQuery, errors?: { message: string, locations: { line: number, column: number }[], path: string[] }[], variables: IdentidadeQueryVariables, query: string}> {
+        return requester<{data: IdentidadeQuery, errors?: { message: string, locations: { line: number, column: number }[], path: string[] }[], variables: IdentidadeQueryVariables, query: string}, IdentidadeQueryVariables>(IdentidadeDocument, variables, options);
+      },
+    identidadeConnection(variables?: IdentidadeConnectionQueryVariables, options?: C): Promise<{data: IdentidadeConnectionQuery, errors?: { message: string, locations: { line: number, column: number }[], path: string[] }[], variables: IdentidadeConnectionQueryVariables, query: string}> {
+        return requester<{data: IdentidadeConnectionQuery, errors?: { message: string, locations: { line: number, column: number }[], path: string[] }[], variables: IdentidadeConnectionQueryVariables, query: string}, IdentidadeConnectionQueryVariables>(IdentidadeConnectionDocument, variables, options);
+      },
     agora(variables: AgoraQueryVariables, options?: C): Promise<{data: AgoraQuery, errors?: { message: string, locations: { line: number, column: number }[], path: string[] }[], variables: AgoraQueryVariables, query: string}> {
         return requester<{data: AgoraQuery, errors?: { message: string, locations: { line: number, column: number }[], path: string[] }[], variables: AgoraQueryVariables, query: string}, AgoraQueryVariables>(AgoraDocument, variables, options);
       },
@@ -1425,7 +1606,7 @@ export const ExperimentalGetTinaClient = () =>
   getSdk(
     generateRequester(
       createClient({
-        url: "https://content.tinajs.io/2.4/content/d2190664-7e6a-4cbe-b628-14fb41d87433/github/main",
+        url: "https://content.tinajs.io/2.4/content/dummy/github/main",
         queries,
       })
     )

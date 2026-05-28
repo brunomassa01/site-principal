@@ -72,6 +72,18 @@ fragment AtualizacoesParts on Atualizacoes {
   body
 }
 
+fragment IdentidadeParts on Identidade {
+  __typename
+  nome
+  tagline
+  slogan
+  bio_curta
+  descricao_meta
+  email
+  linkedin_url
+  og_image
+}
+
 fragment AgoraParts on Agora {
   __typename
   atualizado_em
