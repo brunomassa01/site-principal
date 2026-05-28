@@ -26,18 +26,18 @@ jobs:
 
       - name: Verify tina-lock.json was generated
         run: |
-          if [ ! -f tina-lock.json ]; then
-            echo "ERROR: tina-lock.json was not generated"
+          if [ ! -f tina/tina-lock.json ]; then
+            echo "ERROR: tina/tina-lock.json was not generated"
             exit 1
           fi
-          echo "tina-lock.json OK:"
-          cat tina-lock.json | head -10
+          echo "tina/tina-lock.json OK:"
+          cat tina/tina-lock.json | head -10
 
       - name: Commit tina-lock.json
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add tina-lock.json
-          git diff --staged --quiet && echo "tina-lock.json unchanged — nothing to commit" || \
+          git add tina/tina-lock.json
+          git diff --staged --quiet && echo "tina/tina-lock.json unchanged — nothing to commit" || \
             git commit -m "chore: generate tina-lock.json [skip ci]"
           git push
