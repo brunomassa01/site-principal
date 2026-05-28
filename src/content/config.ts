@@ -1,5 +1,19 @@
 import { defineCollection, z } from 'astro:content';
 
+const identidade = defineCollection({
+  type: 'data',
+  schema: z.object({
+    nome: z.string(),
+    tagline: z.string().optional(),
+    slogan: z.string().optional(),
+    bio_curta: z.string().optional(),
+    descricao_meta: z.string().optional(),
+    email: z.string().optional(),
+    linkedin_url: z.string().url().optional(),
+    og_image: z.string().optional(),
+  }),
+});
+
 const timeline = defineCollection({
   type: 'content',
   schema: z.object({
@@ -93,4 +107,5 @@ export const collections = {
   posts,
   agora,
   atualizacoes,
+  identidade,
 };

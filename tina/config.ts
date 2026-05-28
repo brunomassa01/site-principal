@@ -371,6 +371,56 @@ export default defineConfig({
       },
 
       {
+        name: 'identidade',
+        label: 'Identidade',
+        path: 'src/content/identidade',
+        format: 'json',
+        ui: {
+          allowedActions: {
+            create: false,
+            delete: false,
+          },
+        },
+        fields: [
+          { type: 'string', name: 'nome', label: 'Nome', required: true },
+          {
+            type: 'string',
+            name: 'tagline',
+            label: 'Tagline',
+            description: 'Ex: Marketing · Produto · Negócios',
+          },
+          {
+            type: 'string',
+            name: 'slogan',
+            label: 'Frase de efeito',
+            ui: { component: 'textarea' },
+          },
+          {
+            type: 'string',
+            name: 'bio_curta',
+            label: 'Bio curta',
+            description: 'Subtítulo no hero da home',
+            ui: { component: 'textarea' },
+          },
+          {
+            type: 'string',
+            name: 'descricao_meta',
+            label: 'Descrição (SEO)',
+            description: 'Aparece nos resultados de busca e ao compartilhar o site',
+            ui: { component: 'textarea' },
+          },
+          { type: 'string', name: 'email', label: 'E-mail' },
+          { type: 'string', name: 'linkedin_url', label: 'URL do LinkedIn' },
+          {
+            type: 'image',
+            name: 'og_image',
+            label: 'Imagem OG (compartilhamento)',
+            description: 'Imagem exibida ao compartilhar o site nas redes sociais',
+          },
+        ],
+      },
+
+      {
         name: 'agora',
         label: 'Página Agora',
         path: 'src/content/agora',

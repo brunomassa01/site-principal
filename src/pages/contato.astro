@@ -2,6 +2,9 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
+import { getEntry } from 'astro:content';
+const identidade = await getEntry('identidade', 'index');
+const id = identidade!.data;
 ---
 <BaseLayout title="Contato" descricao="Entre em contato com Bruno Massa.">
   <Header />
@@ -32,29 +35,33 @@ import Footer from '../components/Footer.astro';
     <section class="py-12">
       <div class="max-w-3xl mx-auto px-6">
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <a
-            href="mailto:brunobrm@gmail.com"
-            class="group bg-apple-surface rounded-2xl shadow-card p-6 transition-all duration-300 hover:shadow-card-hover hover:-translate-y-0.5"
-          >
-            <p class="text-[12px] font-semibold uppercase tracking-[0.08em] text-apple-tertiary mb-3">E-mail</p>
-            <p class="text-[20px] font-semibold text-apple-label tracking-tight mb-2 group-hover:text-apple-accent transition-colors">
-              brunobrm@gmail.com
-            </p>
-            <p class="text-[14px] text-apple-secondary">Respondo em até 24h em dias úteis.</p>
-          </a>
+          {id.email && (
+            <a
+              href={`mailto:${id.email}`}
+              class="group bg-apple-surface rounded-2xl shadow-card p-6 transition-all duration-300 hover:shadow-card-hover hover:-translate-y-0.5"
+            >
+              <p class="text-[12px] font-semibold uppercase tracking-[0.08em] text-apple-tertiary mb-3">E-mail</p>
+              <p class="text-[20px] font-semibold text-apple-label tracking-tight mb-2 group-hover:text-apple-accent transition-colors">
+                {id.email}
+              </p>
+              <p class="text-[14px] text-apple-secondary">Respondo em até 24h em dias úteis.</p>
+            </a>
+          )}
 
-          <a
-            href="https://linkedin.com/in/brunormassa"
-            target="_blank"
-            rel="noopener"
-            class="group bg-apple-surface rounded-2xl shadow-card p-6 transition-all duration-300 hover:shadow-card-hover hover:-translate-y-0.5"
-          >
-            <p class="text-[12px] font-semibold uppercase tracking-[0.08em] text-apple-tertiary mb-3">LinkedIn</p>
-            <p class="text-[20px] font-semibold text-apple-label tracking-tight mb-2 group-hover:text-apple-accent transition-colors">
-              /in/brunormassa ↗
-            </p>
-            <p class="text-[14px] text-apple-secondary">Conecte-se ou envie uma mensagem direta.</p>
-          </a>
+          {id.linkedin_url && (
+            <a
+              href={id.linkedin_url}
+              target="_blank"
+              rel="noopener"
+              class="group bg-apple-surface rounded-2xl shadow-card p-6 transition-all duration-300 hover:shadow-card-hover hover:-translate-y-0.5"
+            >
+              <p class="text-[12px] font-semibold uppercase tracking-[0.08em] text-apple-tertiary mb-3">LinkedIn</p>
+              <p class="text-[20px] font-semibold text-apple-label tracking-tight mb-2 group-hover:text-apple-accent transition-colors">
+                {id.linkedin_url.replace('https://', '').replace('http://', '')} ↗
+              </p>
+              <p class="text-[14px] text-apple-secondary">Conecte-se ou envie uma mensagem direta.</p>
+            </a>
+          )}
         </div>
 
         <div class="mt-8 bg-apple-fill rounded-2xl p-6">

@@ -1,4 +1,8 @@
 ---
+import { getEntry } from 'astro:content';
+const identidade = await getEntry('identidade', 'index');
+const nome = identidade?.data.nome ?? 'Bruno Massa';
+
 const links = [
   { href: '/', label: 'Início' },
   { href: '/timeline', label: 'Trajetória' },
@@ -16,7 +20,7 @@ const ehAtual = (href: string) => href === '/' ? pathname === '/' : pathname.sta
   <div class="max-w-5xl mx-auto px-6 h-11 flex items-center justify-between">
     <a href="/" class="flex items-center gap-2 hover:opacity-80 transition-opacity duration-200">
       <img src="/favicon.png" alt="" class="w-7 h-7 rounded-md" aria-hidden="true" />
-      <span class="text-[15px] font-semibold text-apple-label">Bruno Massa</span>
+      <span class="text-[15px] font-semibold text-apple-label">{nome}</span>
     </a>
     <nav aria-label="Menu principal">
       <ul class="flex items-center overflow-x-auto scrollbar-hide" style="scrollbar-width:none;-webkit-overflow-scrolling:touch;">

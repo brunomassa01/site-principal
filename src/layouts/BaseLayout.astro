@@ -1,13 +1,18 @@
 ---
 import '../styles/global.css';
+import { getEntry } from 'astro:content';
 
 interface Props {
   title: string;
   descricao?: string;
 }
 
-const { title, descricao = 'Currículo vivo do Bruno Massa — trajetória profissional em tempo real.' } = Astro.props;
-const tituloCompleto = title === 'Bruno Massa' ? title : `${title} — Bruno Massa`;
+const identidade = await getEntry('identidade', 'index');
+const id = identidade?.data;
+const { title, descricao = id?.descricao_meta ?? 'Currículo vivo do Bruno Massa — trajetória profissional em tempo real.' } = Astro.props;
+const tituloCompleto = title === (id?.nome ?? 'Bruno Massa') ? title : `${title} — ${id?.nome ?? 'Bruno Massa'}`;
+const rawOgImage = id?.og_image ?? '/images/bruno.jpg';
+const ogImage = rawOgImage.startsWith('http') ? rawOgImage : `https://brunomassa.online${rawOgImage}`;
 ---
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -24,7 +29,7 @@ const tituloCompleto = title === 'Bruno Massa' ? title : `${title} — Bruno Mas
     <meta property="og:description" content={descricao} />
     <meta property="og:type" content="website" />
     <meta property="og:url" content={Astro.url.href} />
-    <meta property="og:image" content="https://brunomassa.online/images/bruno.jpg" />
+    <meta property="og:image" content={ogImage} />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />

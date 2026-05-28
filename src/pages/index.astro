@@ -2,7 +2,10 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
-import { getCollection } from 'astro:content';
+import { getCollection, getEntry } from 'astro:content';
+
+const identidade = await getEntry('identidade', 'index');
+const id = identidade!.data;
 
 const timeline = (await getCollection('timeline'))
   .sort((a, b) => b.data.inicio.valueOf() - a.data.inicio.valueOf());
@@ -25,7 +28,7 @@ const statusLabel: Record<string, string> = {
 
 const fmtMesAno = (d: Date) => d.toLocaleDateString('pt-BR', { month: 'short', year: 'numeric' });
 ---
-<BaseLayout title="Bruno Massa" descricao="Bruno Massa — profissional de marketing, produto e negócios. Currículo vivo em movimento.">
+<BaseLayout title={id.nome} descricao={id.descricao_meta}>
   <Header />
   <main>
     <!-- Hero: scroll-driven video -->
@@ -68,17 +71,21 @@ const fmtMesAno = (d: Date) => d.toLocaleDateString('pt-BR', { month: 'short', y
                 </p>
               )}
               <h1 class="text-5xl md:text-6xl font-semibold text-white tracking-tight leading-none mb-5">
-                Bruno Massa
+                {id.nome}
               </h1>
               <p class="text-xl md:text-2xl font-normal text-white/80 tracking-tight leading-snug mb-4">
-                Marketing · Produto · Negócios
+                {id.tagline}
               </p>
-              <p class="text-[19px] md:text-[21px] font-medium text-white leading-snug max-w-md mb-3">
-                "Se não vira receita, não é marketing, é decoração."
-              </p>
-              <p class="text-[14px] text-white/45 leading-relaxed max-w-md mb-8">
-                Currículo vivo — em movimento, não em PDF.
-              </p>
+              {id.slogan && (
+                <p class="text-[19px] md:text-[21px] font-medium text-white leading-snug max-w-md mb-3">
+                  "{id.slogan}"
+                </p>
+              )}
+              {id.bio_curta && (
+                <p class="text-[14px] text-white/45 leading-relaxed max-w-md mb-8">
+                  {id.bio_curta}
+                </p>
+              )}
               <div class="flex flex-wrap gap-3">
                 <a
                   href="/timeline"

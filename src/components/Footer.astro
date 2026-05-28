@@ -1,12 +1,15 @@
 ---
+import { getEntry } from 'astro:content';
+const identidade = await getEntry('identidade', 'index');
+const id = identidade!.data;
 const ano = new Date().getFullYear();
 ---
 <footer class="bg-apple-fill border-t border-apple-separator-light mt-20">
   <div class="max-w-5xl mx-auto px-6 py-12">
     <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
       <div>
-        <p class="text-[15px] font-semibold text-apple-label">Bruno Massa</p>
-        <p class="text-[13px] text-apple-tertiary mt-0.5">Marketing · Produto · Negócios</p>
+        <p class="text-[15px] font-semibold text-apple-label">{id.nome}</p>
+        <p class="text-[13px] text-apple-tertiary mt-0.5">{id.tagline}</p>
       </div>
       <nav aria-label="Links do rodapé">
         <ul class="flex flex-wrap gap-x-6 gap-y-2">
@@ -19,15 +22,17 @@ const ano = new Date().getFullYear();
       </nav>
     </div>
     <div class="mt-8 pt-6 border-t border-apple-separator-light flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
-      <p class="text-[12px] text-apple-tertiary">© {ano} Bruno Massa. Currículo vivo, sempre em construção.</p>
-      <a
-        href="https://linkedin.com/in/brunormassa"
-        target="_blank"
-        rel="noopener"
-        class="text-[12px] text-apple-secondary hover:text-apple-accent transition-colors"
-      >
-        LinkedIn ↗
-      </a>
+      <p class="text-[12px] text-apple-tertiary">© {ano} {id.nome}. Currículo vivo, sempre em construção.</p>
+      {id.linkedin_url && (
+        <a
+          href={id.linkedin_url}
+          target="_blank"
+          rel="noopener"
+          class="text-[12px] text-apple-secondary hover:text-apple-accent transition-colors"
+        >
+          LinkedIn ↗
+        </a>
+      )}
     </div>
   </div>
 </footer>
