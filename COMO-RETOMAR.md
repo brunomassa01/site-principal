@@ -29,8 +29,9 @@
    - `DATABASE_URL` (Neon, string **pooled** — host com `-pooler`)
    - `DATABASE_URL_UNPOOLED` (Neon, string **direta**)
    - `SESSION_SECRET` (string longa aleatória)
+   - `BLOB_READ_WRITE_TOKEN` (só p/ testar upload de imagem local — copie da aba `.env.local` do store no Vercel)
 
-   > Os valores estão no **Vercel → Settings → Environment Variables**, ou no painel da **Neon**.
+   > Os valores estão no **Vercel → Settings → Environment Variables**, ou nos painéis da **Neon** / **Blob**.
 5. Rodar local: `npm run dev`.
 
 ## Comandos úteis
@@ -55,6 +56,8 @@
   `Stop-Process -Name node -Force; Remove-Item -Recurse -Force node_modules\.vite,.astro` e rode `npx astro dev` de novo.
 - Cuidado com **servidores zumbis**: se a porta 4321 estiver ocupada, o dev sobe em outra porta (4322+). Mate os `node` antes.
 - **NUNCA** criar uma pasta `api/` na raiz: a Vercel a trata como funções nativas e quebra as rotas `/api/painel/*` do Astro.
+- **Vercel Blob:** ao conectar o store, a Vercel NÃO cria `BLOB_READ_WRITE_TOKEN` sozinha (só `BLOB_STORE_ID` + webhook). Adicione manual em Settings → Environment Variables (copie da aba `.env.local` do store).
+- **2 projetos Vercel** ligados ao repo: `site-principal` é quem tem o domínio brunomassa.online; `site-principal-omp4` é duplicado órfão — limpar quando der.
 
 ## Roadmap (8 fases) — conteúdo primeiro
 
@@ -70,7 +73,7 @@
 
 ## Status atual (2026-06-10)
 
-- **Fase 0 COMPLETA:** banco Neon (São Paulo); 9 tabelas; variáveis no Vercel.
-- **Fase 1 COMPLETA e no ar:** login em `/painel`, módulo **Blog** (criar/editar/publicar/arquivar/excluir), troca de senha, e `/posts` + `/agora` lendo do banco. Verificado em produção (login, CRUD, proteção de rota).
-- Admin antigo (Tina) ainda funciona em `/admin` (será removido na Fase 4).
-- **Próximo passo:** Fase 2 — Trajetória, Projetos, Skills, Agora e Identidade no Painel.
+- **Fases 0 e 1 COMPLETAS e no ar.** Login em `/painel`; Blog com **editor visual** (barra de formatação, sem markdown), **upload de imagem** (capa + dentro do texto, otimizada → Vercel Blob), capa exibida na listagem e no topo do post, ordenação por mais recente. `/posts` e `/agora` leem do banco (SSR). Tudo verificado em produção.
+- **Pendente no Blog:** filtro/busca na lista (palavras, data, com vídeo/imagem, mais visitados).
+- Admin antigo (Tina) ainda em `/admin` (será removido na Fase 4).
+- **Próximo:** Fase 2 — Trajetória, Projetos, Skills, Agora e Identidade no Painel.
