@@ -2,9 +2,9 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
-import { getEntry } from 'astro:content';
-const identidade = await getEntry('identidade', 'index');
-const id = identidade!.data;
+import { getIdentidade } from '../lib/content/collections';
+export const prerender = false;
+const id = (await getIdentidade()).data;
 ---
 <BaseLayout title="Contato" descricao="Entre em contato com Bruno Massa.">
   <Header />

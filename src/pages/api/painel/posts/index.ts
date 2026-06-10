@@ -8,10 +8,20 @@ import { json } from '../../../../lib/http';
 
 export const prerender = false;
 
-// Lista TODOS os posts (inclui rascunho/arquivado) — visão do Painel.
+// Lista TODOS os posts (inclui rascunho/arquivado) — visão do Painel, com flags de mídia e views.
 export const GET: APIRoute = async () => {
   const rows = await db.select().from(posts).orderBy(desc(posts.data), desc(posts.createdAt));
-  return json(rows);
+  return json(
+    rows.map((r) => {
+      const html = r.bodyHtml ?? '';
+      return {
+        id: r.id, slug: r.slug, titulo: r.titulo, situacao: r.situacao,
+        data: r.data, idioma: r.idioma, capaUrl: r.capaUrl, views: r.views, tags: r.tags,
+        temVideo: /<video-embed|<video[\s>]/i.test(html),
+        temImagem: Boolean(r.capaUrl) || /<img[\s>]/i.test(html),
+      };
+    }),
+  );
 };
 
 export const POST: APIRoute = async ({ request }) => {

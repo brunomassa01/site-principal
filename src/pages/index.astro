@@ -2,15 +2,16 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
-import { getCollection, getEntry } from 'astro:content';
+import { getIdentidade, getTimeline, getProjetos } from '../lib/content/collections';
 
-const identidade = await getEntry('identidade', 'index');
-const id = identidade!.data;
+export const prerender = false;
 
-const timeline = (await getCollection('timeline'))
+const id = (await getIdentidade()).data;
+
+const timeline = (await getTimeline())
   .sort((a, b) => b.data.inicio.valueOf() - a.data.inicio.valueOf());
 
-const projetos = (await getCollection('projetos'))
+const projetos = (await getProjetos())
   .sort((a, b) => b.data.inicio.valueOf() - a.data.inicio.valueOf());
 
 const cargoAtual = timeline.find((t) => !t.data.fim);

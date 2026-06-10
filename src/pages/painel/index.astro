@@ -6,9 +6,11 @@ const primeiroNome = user?.nome?.split(' ')[0] ?? '';
 
 const modulos = [
   { href: '/painel/posts', titulo: 'Blog', desc: 'Criar, editar e publicar matérias.', ativo: true },
-  { titulo: 'Trajetória', desc: 'Experiências e cargos.', ativo: false },
-  { titulo: 'Projetos', desc: 'Cases e portfólio.', ativo: false },
-  { titulo: 'Skills', desc: 'Habilidades e formação.', ativo: false },
+  { href: '/painel/timeline', titulo: 'Trajetória', desc: 'Experiências e cargos.', ativo: true },
+  { href: '/painel/projetos', titulo: 'Projetos', desc: 'Cases e portfólio.', ativo: true },
+  { href: '/painel/skills', titulo: 'Skills', desc: 'Habilidades, certificações e formação.', ativo: true },
+  { href: '/painel/agora', titulo: 'Agora', desc: 'O que você está fazendo agora.', ativo: true },
+  { href: '/painel/identidade', titulo: 'Identidade', desc: 'Nome, bio, contato e SEO.', ativo: true },
   { titulo: 'Mídia', desc: 'Imagens, vídeos e arquivos.', ativo: false },
   { titulo: 'Páginas & Menus', desc: 'Estrutura do site.', ativo: false },
   { titulo: 'Design', desc: 'Logo, cores e fontes.', ativo: false },

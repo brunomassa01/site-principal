@@ -1,0 +1,14 @@
+---
+import PainelLayout from '../../../layouts/PainelLayout.astro';
+import GenericForm from '../../../components/painel/GenericForm.tsx';
+import { getCollection } from '../../../lib/painel/config';
+export const prerender = false;
+const { colecao } = Astro.params;
+const cfg = colecao ? getCollection(colecao) : undefined;
+if (!cfg || cfg.singleton) return Astro.redirect(`/painel/${colecao ?? ''}`);
+---
+<PainelLayout titulo={`Novo ${cfg.singular}`}>
+  <a href={`/painel/${cfg.name}`} class="text-[13px] text-apple-secondary hover:text-apple-label">← {cfg.label}</a>
+  <h1 class="text-[24px] font-bold text-apple-label tracking-tight mt-2 mb-6">Novo · {cfg.singular}</h1>
+  <GenericForm client:load colecao={cfg.name} cfg={cfg} />
+</PainelLayout>

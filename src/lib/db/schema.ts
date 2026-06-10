@@ -131,6 +131,7 @@ export const posts = pgTable('posts', {
   fonteExternaUrl: text('fonte_externa_url'),
   fonteExternaNome: text('fonte_externa_nome'),
   idioma: text('idioma').notNull().default('pt'), // pt | en
+  views: integer('views').notNull().default(0),
   bodyHtml: text('body_html'),
   bodyJson: jsonb('body_json'),
   situacao: text('situacao').notNull().default('publicado'), // rascunho = não aparece no site

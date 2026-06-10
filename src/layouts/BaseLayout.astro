@@ -1,14 +1,13 @@
 ---
 import '../styles/global.css';
-import { getEntry } from 'astro:content';
+import { getIdentidade } from '../lib/content/collections';
 
 interface Props {
   title: string;
   descricao?: string;
 }
 
-const identidade = await getEntry('identidade', 'index');
-const id = identidade?.data;
+const id = (await getIdentidade()).data;
 const { title, descricao = id?.descricao_meta ?? 'Currículo vivo do Bruno Massa — trajetória profissional em tempo real.' } = Astro.props;
 const tituloCompleto = title === (id?.nome ?? 'Bruno Massa') ? title : `${title} — ${id?.nome ?? 'Bruno Massa'}`;
 const rawOgImage = id?.og_image ?? '/images/bruno.jpg';

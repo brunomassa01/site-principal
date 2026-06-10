@@ -1,7 +1,6 @@
 ---
-import { getEntry } from 'astro:content';
-const identidade = await getEntry('identidade', 'index');
-const id = identidade!.data;
+import { getIdentidade } from '../lib/content/collections';
+const id = (await getIdentidade()).data;
 const ano = new Date().getFullYear();
 ---
 <footer class="bg-apple-fill border-t border-apple-separator-light mt-20">

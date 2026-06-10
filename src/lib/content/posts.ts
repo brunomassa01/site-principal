@@ -1,4 +1,4 @@
-import { and, desc, eq, isNull, lte, or } from 'drizzle-orm';
+import { and, desc, eq, isNull, lte, or, sql } from 'drizzle-orm';
 import { db } from '../db';
 import { posts, type Post } from '../db/schema';
 
@@ -53,4 +53,13 @@ export async function getPostBySlug(slug: string): Promise<PostView | null> {
   if (!r || r.situacao !== 'publicado') return null;
   if (r.publicarEm && r.publicarEm.getTime() > Date.now()) return null;
   return toView(r);
+}
+
+/** Conta uma visita à página do post (para "mais visitados"). Não bloqueia a página. */
+export async function incrementViews(slug: string): Promise<void> {
+  try {
+    await db.update(posts).set({ views: sql`${posts.views} + 1` }).where(eq(posts.slug, slug));
+  } catch {
+    /* silencioso */
+  }
 }

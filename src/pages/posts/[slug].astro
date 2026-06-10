@@ -2,7 +2,7 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Header from '../../components/Header.astro';
 import Footer from '../../components/Footer.astro';
-import { getPostBySlug } from '../../lib/content/posts';
+import { getPostBySlug, incrementViews } from '../../lib/content/posts';
 import { renderBody } from '../../lib/content/render';
 
 export const prerender = false;
@@ -10,6 +10,7 @@ export const prerender = false;
 const { slug } = Astro.params;
 const post = slug ? await getPostBySlug(slug) : null;
 if (!post) return Astro.redirect('/posts');
+await incrementViews(slug!);
 
 const fmtData = (d: Date) => d.toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' });
 ---

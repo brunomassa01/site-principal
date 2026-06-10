@@ -1,7 +1,6 @@
 ---
-import { getEntry } from 'astro:content';
-const identidade = await getEntry('identidade', 'index');
-const nome = identidade?.data.nome ?? 'Bruno Massa';
+import { getIdentidade } from '../lib/content/collections';
+const nome = (await getIdentidade()).data.nome;
 
 const links = [
   { href: '/', label: 'Início' },

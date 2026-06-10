@@ -2,22 +2,14 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Header from '../../components/Header.astro';
 import Footer from '../../components/Footer.astro';
-import { getCollection, type CollectionEntry } from 'astro:content';
+import { getProjetoBySlug } from '../../lib/content/collections';
+import { renderBody } from '../../lib/content/render';
 
-export async function getStaticPaths() {
-  const projetos = await getCollection('projetos');
-  return projetos.map((p) => ({
-    params: { slug: p.slug },
-    props: { projeto: p },
-  }));
-}
+export const prerender = false;
 
-interface Props {
-  projeto: CollectionEntry<'projetos'>;
-}
-
-const { projeto } = Astro.props;
-const { Content } = await projeto.render();
+const { slug } = Astro.params;
+const projeto = slug ? await getProjetoBySlug(slug) : null;
+if (!projeto) return Astro.redirect('/projetos');
 const d = projeto.data;
 
 const statusLabel: Record<string, string> = {
@@ -123,10 +115,10 @@ const fmt = (date: Date) => date.toLocaleDateString('pt-BR', { month: 'short', y
           </div>
         )}
 
-        <!-- Corpo (Keystatic content) -->
-        <div class="prose-content mb-8">
-          <Content />
-        </div>
+        <!-- Corpo (texto rico do Painel) -->
+        {projeto.bodyHtml && (
+          <div class="prose-content mb-8" set:html={renderBody(projeto.bodyHtml)} />
+        )}
 
         <!-- Links -->
         {(d.link || d.repo) && (

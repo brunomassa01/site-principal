@@ -1,0 +1,27 @@
+---
+import PainelLayout from '../../../layouts/PainelLayout.astro';
+import GenericList from '../../../components/painel/GenericList.tsx';
+import GenericForm from '../../../components/painel/GenericForm.tsx';
+import { getCollection } from '../../../lib/painel/config';
+export const prerender = false;
+const { colecao } = Astro.params;
+const cfg = colecao ? getCollection(colecao) : undefined;
+if (!cfg) return Astro.redirect('/painel');
+---
+<PainelLayout titulo={cfg.label}>
+  {cfg.singleton ? (
+    <Fragment>
+      <h1 class="text-[24px] font-bold text-apple-label tracking-tight mb-1">{cfg.label}</h1>
+      <p class="text-[14px] text-apple-secondary mb-6">Registro único — editado direto aqui.</p>
+      <GenericForm client:load colecao={cfg.name} cfg={cfg} />
+    </Fragment>
+  ) : (
+    <Fragment>
+      <div class="flex items-center justify-between mb-6">
+        <h1 class="text-[24px] font-bold text-apple-label tracking-tight">{cfg.label}</h1>
+        <a href={`/painel/${cfg.name}/novo`} class="px-4 py-2 rounded-full bg-apple-label text-white text-[14px] font-medium hover:bg-black transition-colors">+ Novo</a>
+      </div>
+      <GenericList client:load colecao={cfg.name} cfg={cfg} />
+    </Fragment>
+  )}
+</PainelLayout>

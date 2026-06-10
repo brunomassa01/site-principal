@@ -2,9 +2,11 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
-import { getCollection } from 'astro:content';
+import { getSkills } from '../lib/content/collections';
 
-const todas = (await getCollection('skills'))
+export const prerender = false;
+
+const todas = (await getSkills())
   .sort((a, b) => (b.data.ano ?? 0) - (a.data.ano ?? 0));
 
 type Cat = 'habilidade' | 'certificacao' | 'formacao' | 'idioma';
@@ -31,8 +33,6 @@ const nivelLabel: Record<string, string> = {
 const nivelWidth: Record<string, string> = {
   basico: 'w-1/4', intermediario: 'w-2/4', avancado: 'w-3/4', especialista: 'w-full',
 };
-
-const ordem: Cat[] = ['habilidade', 'certificacao', 'formacao', 'idioma'];
 ---
 <BaseLayout title="Skills, certificações e formação" descricao="Habilidades, certificações, formação e idiomas de Bruno Massa.">
   <Header />
