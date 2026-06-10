@@ -41,6 +41,9 @@ const fmtData = (d: Date) => d.toLocaleDateString('pt-BR', { day: 'numeric', mon
                 href={`/posts/${p.slug}`}
                 class="group block bg-apple-surface rounded-2xl shadow-card p-6 transition-all duration-300 hover:shadow-card-hover hover:-translate-y-0.5"
               >
+                {p.data.capa_url && (
+                  <img src={p.data.capa_url} alt="" class="w-full h-48 object-cover rounded-xl mb-4" />
+                )}
                 <div class="flex flex-wrap items-center gap-3 mb-2">
                   <time class="text-[12px] font-medium text-apple-tertiary uppercase tracking-wide">
                     {fmtData(p.data.data)}
