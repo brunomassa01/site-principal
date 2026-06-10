@@ -44,10 +44,22 @@
 | Build de produção | `npm run build` |
 | Salvar no GitHub | `git add -A && git commit -m "..." && git push` |
 
+## Acesso ao Painel
+
+- URL: **brunomassa.online/painel** · login inicial: `brunobrm@gmail.com` (troque a senha em **Conta**).
+- Edições aparecem no site na hora (Blog, /posts, /agora leem do banco; SSR).
+
+## Dev local (Windows) — armadilhas conhecidas
+
+- Se o `npm run dev` der **`MiddlewareCantBeLoaded` / "sequence is not a function"**: é cache corrompido do Vite. Pare tudo e limpe:
+  `Stop-Process -Name node -Force; Remove-Item -Recurse -Force node_modules\.vite,.astro` e rode `npx astro dev` de novo.
+- Cuidado com **servidores zumbis**: se a porta 4321 estiver ocupada, o dev sobe em outra porta (4322+). Mate os `node` antes.
+- **NUNCA** criar uma pasta `api/` na raiz: a Vercel a trata como funções nativas e quebra as rotas `/api/painel/*` do Astro.
+
 ## Roadmap (8 fases) — conteúdo primeiro
 
 0. **Infra** — banco Neon + schema. ✅ COMPLETA
-1. **Acesso + Blog** — login no `/painel` e publicar posts.
+1. **Acesso + Blog** — login no `/painel` e publicar posts. ✅ COMPLETA
 2. **Demais conteúdos** — Trajetória, Projetos, Skills, Agora, Identidade.
 3. **Mídia + editor rico** — biblioteca de arquivos + Tiptap.
 4. **Páginas + Menus + remover Tina.**
@@ -58,6 +70,7 @@
 
 ## Status atual (2026-06-10)
 
-- **Fase 0 COMPLETA:** banco Neon criado (região São Paulo); **9 tabelas** criadas (users, sessions, timeline, projetos, skills, posts, atualizacoes, identidade, agora); variáveis no Vercel; build local OK.
+- **Fase 0 COMPLETA:** banco Neon (São Paulo); 9 tabelas; variáveis no Vercel.
+- **Fase 1 COMPLETA e no ar:** login em `/painel`, módulo **Blog** (criar/editar/publicar/arquivar/excluir), troca de senha, e `/posts` + `/agora` lendo do banco. Verificado em produção (login, CRUD, proteção de rota).
 - Admin antigo (Tina) ainda funciona em `/admin` (será removido na Fase 4).
-- **Próximo passo:** Fase 1 — Acesso (login no `/painel`) + Blog.
+- **Próximo passo:** Fase 2 — Trajetória, Projetos, Skills, Agora e Identidade no Painel.
