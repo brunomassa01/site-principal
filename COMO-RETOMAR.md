@@ -73,7 +73,8 @@
 
 ## Status atual (2026-06-10)
 
-- **Fases 0 e 1 COMPLETAS e no ar.** Login em `/painel`; Blog com **editor visual** (barra de formatação, sem markdown), **upload de imagem** (capa + dentro do texto, otimizada → Vercel Blob), capa exibida na listagem e no topo do post, ordenação por mais recente. `/posts` e `/agora` leem do banco (SSR). Tudo verificado em produção.
-- **Pendente no Blog:** filtro/busca na lista (palavras, data, com vídeo/imagem, mais visitados).
+- **Fases 0, 1 e 2 COMPLETAS e no ar.** Login em `/painel`; Blog com **editor visual** (barra de formatação, sem markdown), **upload de imagem** (capa + dentro do texto, otimizada → Vercel Blob), capa exibida na listagem e no topo do post, ordenação por mais recente. `/posts` e `/agora` leem do banco (SSR). Tudo verificado em produção.
+- **Filtro do Blog FEITO:** busca por palavra/tag + filtros de situação, mídia (com imagem/vídeo) e idioma + ordenação (recentes / antigos / mais visitados). Contador de views incrementa a cada visita.
+- **Fase 2 FEITA (CMS config-driven):** Trajetória, Projetos, Skills, Agora e Identidade editáveis no Painel a partir de **uma config declarativa** (`src/lib/painel/config.ts`) — CRUD e telas são gerados automaticamente. O site público inteiro lê do banco (SSR) via `src/lib/content/collections.ts`. Conteúdo antigo migrado p/ o banco com `scripts/migrate-fase2.ts`.
 - Admin antigo (Tina) ainda em `/admin` (será removido na Fase 4).
-- **Próximo:** Fase 2 — Trajetória, Projetos, Skills, Agora e Identidade no Painel.
+- **Próximo:** Fase 3 — Mídia (biblioteca de img/pdf/vídeo) + editor rico completo.
