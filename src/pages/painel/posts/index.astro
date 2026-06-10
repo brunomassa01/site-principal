@@ -1,0 +1,14 @@
+---
+import PainelLayout from '../../../layouts/PainelLayout.astro';
+import PostsList from '../../../components/painel/PostsList.tsx';
+export const prerender = false;
+---
+<PainelLayout titulo="Blog">
+  <div class="flex items-center justify-between mb-6">
+    <h1 class="text-[24px] font-bold text-apple-label tracking-tight">Blog</h1>
+    <a href="/painel/posts/novo" class="px-4 py-2 rounded-full bg-apple-label text-white text-[14px] font-medium hover:bg-black transition-colors">
+      + Novo post
+    </a>
+  </div>
+  <PostsList client:load />
+</PainelLayout>

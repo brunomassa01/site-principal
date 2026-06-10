@@ -174,3 +174,10 @@ export const agora = pgTable('agora', {
   bodyJson: jsonb('body_json'),
   updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' }).defaultNow().notNull(),
 });
+
+// ───────────────────────── Tipos inferidos ─────────────────────────
+
+export type User = typeof users.$inferSelect;
+export type NewUser = typeof users.$inferInsert;
+export type Post = typeof posts.$inferSelect;
+export type NewPost = typeof posts.$inferInsert;

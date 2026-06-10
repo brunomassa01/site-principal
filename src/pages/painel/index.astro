@@ -1,0 +1,43 @@
+---
+import PainelLayout from '../../layouts/PainelLayout.astro';
+export const prerender = false;
+const user = Astro.locals.user;
+const primeiroNome = user?.nome?.split(' ')[0] ?? '';
+
+const modulos = [
+  { href: '/painel/posts', titulo: 'Blog', desc: 'Criar, editar e publicar matérias.', ativo: true },
+  { titulo: 'Trajetória', desc: 'Experiências e cargos.', ativo: false },
+  { titulo: 'Projetos', desc: 'Cases e portfólio.', ativo: false },
+  { titulo: 'Skills', desc: 'Habilidades e formação.', ativo: false },
+  { titulo: 'Mídia', desc: 'Imagens, vídeos e arquivos.', ativo: false },
+  { titulo: 'Páginas & Menus', desc: 'Estrutura do site.', ativo: false },
+  { titulo: 'Design', desc: 'Logo, cores e fontes.', ativo: false },
+  { titulo: 'Redes Sociais', desc: 'Gerar conteúdo com IA.', ativo: false },
+];
+---
+<PainelLayout titulo="Início">
+  <h1 class="text-[26px] font-bold text-apple-label tracking-tight mb-1">
+    Olá, {primeiroNome} 👋
+  </h1>
+  <p class="text-[15px] text-apple-secondary mb-8">O que você quer gerenciar hoje?</p>
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+    {modulos.map((m) => (
+      m.ativo ? (
+        <a href={m.href} class="group bg-white rounded-2xl shadow-card p-6 transition-all duration-300 hover:shadow-card-hover hover:-translate-y-0.5">
+          <h2 class="text-[17px] font-semibold text-apple-label group-hover:text-apple-accent transition-colors">{m.titulo}</h2>
+          <p class="text-[14px] text-apple-secondary mt-1">{m.desc}</p>
+          <p class="text-[13px] text-apple-accent mt-4 group-hover:underline">Abrir →</p>
+        </a>
+      ) : (
+        <div class="bg-white/60 rounded-2xl border border-dashed border-apple-separator p-6 opacity-70">
+          <div class="flex items-center gap-2">
+            <h2 class="text-[17px] font-semibold text-apple-tertiary">{m.titulo}</h2>
+            <span class="text-[10px] font-semibold uppercase tracking-wide bg-apple-fill text-apple-tertiary px-1.5 py-0.5 rounded">em breve</span>
+          </div>
+          <p class="text-[14px] text-apple-tertiary mt-1">{m.desc}</p>
+        </div>
+      )
+    ))}
+  </div>
+</PainelLayout>

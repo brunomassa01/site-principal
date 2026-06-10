@@ -2,12 +2,11 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Header from '../../components/Header.astro';
 import Footer from '../../components/Footer.astro';
-import { getCollection } from 'astro:content';
+import { getPostsPublicados } from '../../lib/content/posts';
 
-const agora_dt = new Date();
-const posts = (await getCollection('posts', ({ data }) =>
-  !data.rascunho && (!data.publicar_em || data.publicar_em <= agora_dt)
-)).sort((a, b) => b.data.data.valueOf() - a.data.data.valueOf());
+export const prerender = false;
+
+const posts = await getPostsPublicados();
 
 const fmtData = (d: Date) => d.toLocaleDateString('pt-BR', { day: 'numeric', month: 'short', year: 'numeric' });
 ---

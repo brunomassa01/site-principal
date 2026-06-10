@@ -1,0 +1,11 @@
+---
+import PainelLayout from '../../../layouts/PainelLayout.astro';
+import PostEditor from '../../../components/painel/PostEditor.tsx';
+export const prerender = false;
+const { id } = Astro.params;
+---
+<PainelLayout titulo="Editar post">
+  <a href="/painel/posts" class="text-[13px] text-apple-secondary hover:text-apple-label">← Blog</a>
+  <h1 class="text-[24px] font-bold text-apple-label tracking-tight mt-2 mb-6">Editar post</h1>
+  <PostEditor client:load id={id} />
+</PainelLayout>

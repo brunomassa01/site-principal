@@ -2,23 +2,14 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Header from '../../components/Header.astro';
 import Footer from '../../components/Footer.astro';
-import { getCollection, type CollectionEntry } from 'astro:content';
-import VideoEmbed from '../../components/VideoEmbed.astro';
+import { getPostBySlug } from '../../lib/content/posts';
+import { renderBody } from '../../lib/content/render';
 
-export async function getStaticPaths() {
-  const posts = await getCollection('posts', ({ data }) => !data.rascunho);
-  return posts.map((p) => ({
-    params: { slug: p.slug },
-    props: { post: p },
-  }));
-}
+export const prerender = false;
 
-interface Props {
-  post: CollectionEntry<'posts'>;
-}
-
-const { post } = Astro.props;
-const { Content } = await post.render();
+const { slug } = Astro.params;
+const post = slug ? await getPostBySlug(slug) : null;
+if (!post) return Astro.redirect('/posts');
 
 const fmtData = (d: Date) => d.toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' });
 ---
@@ -78,9 +69,7 @@ const fmtData = (d: Date) => d.toLocaleDateString('pt-BR', { day: 'numeric', mon
     <section class="py-12">
       <div class="max-w-3xl mx-auto px-6">
         <article class="bg-apple-surface rounded-2xl shadow-card p-8 md:p-10">
-          <div class="prose-content">
-            <Content components={{ VideoEmbed }} />
-          </div>
+          <div class="prose-content" set:html={renderBody(post.bodyHtml)} />
         </article>
 
         <div class="mt-8 pt-8 border-t border-apple-separator-light">

@@ -1,0 +1,11 @@
+---
+import PainelLayout from '../../layouts/PainelLayout.astro';
+import ContaForm from '../../components/painel/ContaForm.tsx';
+export const prerender = false;
+const user = Astro.locals.user;
+---
+<PainelLayout titulo="Minha conta">
+  <h1 class="text-[24px] font-bold text-apple-label tracking-tight mb-1">Minha conta</h1>
+  <p class="text-[14px] text-apple-secondary mb-6">{user?.email}</p>
+  <ContaForm client:load />
+</PainelLayout>
