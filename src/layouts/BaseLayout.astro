@@ -5,12 +5,14 @@ import { getIdentidade } from '../lib/content/collections';
 interface Props {
   title: string;
   descricao?: string;
+  imagem?: string;
+  tipo?: string;
 }
 
 const id = (await getIdentidade()).data;
-const { title, descricao = id?.descricao_meta ?? 'Currículo vivo do Bruno Massa — trajetória profissional em tempo real.' } = Astro.props;
+const { title, descricao = id?.descricao_meta ?? 'Currículo vivo do Bruno Massa — trajetória profissional em tempo real.', imagem, tipo = 'website' } = Astro.props;
 const tituloCompleto = title === (id?.nome ?? 'Bruno Massa') ? title : `${title} — ${id?.nome ?? 'Bruno Massa'}`;
-const rawOgImage = id?.og_image ?? '/images/bruno.jpg';
+const rawOgImage = imagem ?? id?.og_image ?? '/images/bruno.jpg';
 const ogImage = rawOgImage.startsWith('http') ? rawOgImage : `https://brunomassa.online${rawOgImage}`;
 ---
 <!DOCTYPE html>
@@ -26,9 +28,14 @@ const ogImage = rawOgImage.startsWith('http') ? rawOgImage : `https://brunomassa
     <link rel="apple-touch-icon" href="/favicon.png" />
     <meta property="og:title" content={tituloCompleto} />
     <meta property="og:description" content={descricao} />
-    <meta property="og:type" content="website" />
+    <meta property="og:type" content={tipo} />
     <meta property="og:url" content={Astro.url.href} />
     <meta property="og:image" content={ogImage} />
+    <meta property="og:image:alt" content={tituloCompleto} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={tituloCompleto} />
+    <meta name="twitter:description" content={descricao} />
+    <meta name="twitter:image" content={ogImage} />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />

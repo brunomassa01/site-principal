@@ -255,6 +255,35 @@ export default function PostEditor({ id }: Props) {
           </div>
         </div>
 
+        {editando && f.slug && (
+          <div className="bg-white rounded-2xl shadow-card p-5">
+            <label className={labelCls}>Compartilhar</label>
+            {f.situacao === 'publicado' ? (
+              <a
+                href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent('https://brunomassa.online/posts/' + f.slug)}`}
+                target="_blank"
+                rel="noopener"
+                className="mt-1 flex items-center justify-center gap-2 py-2.5 rounded-full bg-[#0A66C2] text-white text-[14px] font-medium hover:bg-[#004182] transition-colors"
+              >
+                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M20.45 20.45h-3.56v-5.57c0-1.33-.03-3.04-1.85-3.04-1.86 0-2.14 1.45-2.14 2.94v5.67H9.34V9h3.42v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.07 2.07 0 1 1 0-4.13 2.07 2.07 0 0 1 0 4.13zm1.78 13.02H3.56V9h3.56v11.45zM22.22 0H1.77C.79 0 0 .77 0 1.73v20.54C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.73V1.73C24 .77 23.2 0 22.22 0z"/>
+                </svg>
+                Compartilhar no LinkedIn
+              </a>
+            ) : (
+              <>
+                <div className="mt-1 flex items-center justify-center gap-2 py-2.5 rounded-full bg-apple-fill text-apple-tertiary text-[14px] font-medium cursor-not-allowed select-none">
+                  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                    <path d="M20.45 20.45h-3.56v-5.57c0-1.33-.03-3.04-1.85-3.04-1.86 0-2.14 1.45-2.14 2.94v5.67H9.34V9h3.42v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.07 2.07 0 1 1 0-4.13 2.07 2.07 0 0 1 0 4.13zm1.78 13.02H3.56V9h3.56v11.45zM22.22 0H1.77C.79 0 0 .77 0 1.73v20.54C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.73V1.73C24 .77 23.2 0 22.22 0z"/>
+                  </svg>
+                  Compartilhar no LinkedIn
+                </div>
+                <p className="text-[12px] text-apple-tertiary mt-2">Publique o post para liberar o compartilhamento.</p>
+              </>
+            )}
+          </div>
+        )}
+
         <div className="bg-white rounded-2xl shadow-card p-5">
           <button onClick={() => setAvancado((v) => !v)} className="w-full flex items-center justify-between text-[14px] font-medium text-apple-label">
             <span>Opções avançadas</span>
