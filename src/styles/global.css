@@ -183,6 +183,18 @@ body {
   font-style: italic;
 }
 
+.prose-content u {
+  text-decoration: underline;
+}
+
+.prose-content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 12px;
+  margin: 1.75rem 0;
+  display: block;
+}
+
 .prose-content hr {
   border: none;
   border-top: 1px solid #d2d2d7;

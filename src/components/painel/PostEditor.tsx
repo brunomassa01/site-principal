@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import RichTextEditor from './RichTextEditor';
 
 type Props = { id?: string };
 
@@ -6,30 +7,24 @@ type Form = {
   titulo: string;
   slug: string;
   resumo: string;
-  data: string; // yyyy-mm-dd
-  publicar_em: string; // datetime-local ou ''
+  data: string;
+  publicar_em: string;
   capa_url: string;
-  tags: string; // separadas por vírgula
+  tags: string;
   idioma: string;
   fonte_externa_url: string;
   fonte_externa_nome: string;
   situacao: string;
-  body_markdown: string;
+  bodyHtml: string;
+  bodyJson: unknown;
 };
 
 const vazio: Form = {
-  titulo: '',
-  slug: '',
-  resumo: '',
+  titulo: '', slug: '', resumo: '',
   data: new Date().toISOString().slice(0, 10),
-  publicar_em: '',
-  capa_url: '',
-  tags: '',
-  idioma: 'pt',
-  fonte_externa_url: '',
-  fonte_externa_nome: '',
-  situacao: 'rascunho',
-  body_markdown: '',
+  publicar_em: '', capa_url: '', tags: '', idioma: 'pt',
+  fonte_externa_url: '', fonte_externa_nome: '', situacao: 'rascunho',
+  bodyHtml: '', bodyJson: null,
 };
 
 function paraInputDate(v: string | null): string {
@@ -38,9 +33,47 @@ function paraInputDate(v: string | null): string {
 function paraInputDateTime(v: string | null): string {
   if (!v) return '';
   const d = new Date(v);
-  // yyyy-mm-ddThh:mm no horário local
-  const off = d.getTimezoneOffset() * 60000;
-  return new Date(d.getTime() - off).toISOString().slice(0, 16);
+  return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+}
+
+// Otimiza a imagem no navegador (reduz dimensão e converte p/ webp) antes de enviar.
+async function otimizar(file: File): Promise<File> {
+  if (file.type === 'image/svg+xml' || file.type === 'image/gif') return file;
+  try {
+    const bmp = await createImageBitmap(file, { imageOrientation: 'from-image' });
+    const maxW = 1600;
+    const scale = Math.min(1, maxW / bmp.width);
+    const w = Math.round(bmp.width * scale);
+    const h = Math.round(bmp.height * scale);
+    const canvas = document.createElement('canvas');
+    canvas.width = w;
+    canvas.height = h;
+    canvas.getContext('2d')!.drawImage(bmp, 0, 0, w, h);
+    const blob = await new Promise<Blob | null>((res) => canvas.toBlob(res, 'image/webp', 0.82));
+    if (!blob) return file;
+    const nome = file.name.replace(/\.\w+$/, '') + '.webp';
+    return new File([blob], nome, { type: 'image/webp' });
+  } catch {
+    return file;
+  }
+}
+
+async function enviarImagem(file: File): Promise<string | null> {
+  try {
+    const otimizada = await otimizar(file);
+    const fd = new FormData();
+    fd.append('file', otimizada);
+    const r = await fetch('/api/painel/upload', { method: 'POST', body: fd });
+    const d = await r.json();
+    if (!r.ok) {
+      alert(d.error || 'Falha ao enviar a imagem.');
+      return null;
+    }
+    return d.url as string;
+  } catch (e) {
+    alert('Falha ao enviar a imagem: ' + (e as Error).message);
+    return null;
+  }
 }
 
 export default function PostEditor({ id }: Props) {
@@ -49,6 +82,8 @@ export default function PostEditor({ id }: Props) {
   const [carregando, setCarregando] = useState(editando);
   const [salvando, setSalvando] = useState(false);
   const [erro, setErro] = useState('');
+  const [enviandoCapa, setEnviandoCapa] = useState(false);
+  const [avancado, setAvancado] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -72,28 +107,48 @@ export default function PostEditor({ id }: Props) {
         fonte_externa_url: p.fonteExternaUrl ?? '',
         fonte_externa_nome: p.fonteExternaNome ?? '',
         situacao: p.situacao ?? 'rascunho',
-        body_markdown: p.bodyJson?.markdown ?? '',
+        bodyHtml: p.bodyHtml ?? '',
+        bodyJson: p.bodyJson ?? null,
       });
       setCarregando(false);
     })();
   }, [id]);
 
   function upd(campo: keyof Form, valor: string) {
-    setF((prev) => ({ ...prev, [campo]: valor }));
+    setF((p) => ({ ...p, [campo]: valor }));
+  }
+
+  async function trocarCapa(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+    setEnviandoCapa(true);
+    const url = await enviarImagem(file);
+    setEnviandoCapa(false);
+    if (url) setF((p) => ({ ...p, capa_url: url }));
   }
 
   async function salvar(situacao?: string) {
     setErro('');
     setSalvando(true);
     const payload = {
-      ...f,
-      situacao: situacao ?? f.situacao,
+      titulo: f.titulo,
+      slug: f.slug,
+      resumo: f.resumo,
+      data: f.data,
+      publicar_em: f.publicar_em,
+      capa_url: f.capa_url,
       tags: f.tags.split(',').map((t) => t.trim()).filter(Boolean),
+      idioma: f.idioma,
+      fonte_externa_url: f.fonte_externa_url,
+      fonte_externa_nome: f.fonte_externa_nome,
+      situacao: situacao ?? f.situacao,
+      body_html: f.bodyHtml,
+      body_json: f.bodyJson,
     };
     const url = editando ? `/api/painel/posts/${id}` : '/api/painel/posts';
-    const method = editando ? 'PUT' : 'POST';
     const r = await fetch(url, {
-      method,
+      method: editando ? 'PUT' : 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify(payload),
     });
@@ -108,8 +163,7 @@ export default function PostEditor({ id }: Props) {
 
   if (carregando) return <p className="text-apple-secondary text-[14px]">Carregando…</p>;
 
-  const inputCls =
-    'w-full px-3 py-2 rounded-lg border border-apple-separator text-[14px] focus:outline-none focus:ring-2 focus:ring-apple-accent/40';
+  const inputCls = 'w-full px-3 py-2 rounded-lg border border-apple-separator text-[14px] focus:outline-none focus:ring-2 focus:ring-apple-accent/40';
   const labelCls = 'block text-[13px] font-medium text-apple-label mb-1';
 
   return (
@@ -125,20 +179,16 @@ export default function PostEditor({ id }: Props) {
 
         <div>
           <label className={labelCls}>Resumo *</label>
-          <textarea className={`${inputCls} min-h-[70px]`} value={f.resumo} onChange={(e) => upd('resumo', e.target.value)} />
+          <textarea className={`${inputCls} min-h-[64px]`} value={f.resumo} onChange={(e) => upd('resumo', e.target.value)} placeholder="1-2 frases — aparece no card e no Google." />
         </div>
 
         <div>
-          <label className={labelCls}>Conteúdo (Markdown)</label>
-          <textarea
-            className={`${inputCls} min-h-[420px] font-mono text-[13px] leading-relaxed`}
-            value={f.body_markdown}
-            onChange={(e) => upd('body_markdown', e.target.value)}
-            placeholder={'Escreva em Markdown.\n\n## Subtítulo\n\nParágrafo com **negrito** e [link](https://...).'}
+          <label className={labelCls}>Conteúdo</label>
+          <RichTextEditor
+            value={f.bodyHtml}
+            onChange={(html, json) => setF((p) => ({ ...p, bodyHtml: html, bodyJson: json }))}
+            onImageUpload={enviarImagem}
           />
-          <p className="text-[12px] text-apple-tertiary mt-1">
-            Markdown: <code>## título</code>, <code>**negrito**</code>, <code>[link](url)</code>, listas com <code>-</code>. Vídeo: <code>&lt;VideoEmbed src="/videos/x.mp4" legenda="..." /&gt;</code>
-          </p>
         </div>
       </div>
 
@@ -162,18 +212,10 @@ export default function PostEditor({ id }: Props) {
             <input type="datetime-local" className={inputCls} value={f.publicar_em} onChange={(e) => upd('publicar_em', e.target.value)} />
           </div>
           <div className="flex gap-2 pt-1">
-            <button
-              onClick={() => salvar('publicado')}
-              disabled={salvando}
-              className="flex-1 py-2.5 rounded-full bg-apple-label text-white text-[14px] font-medium hover:bg-black disabled:opacity-60"
-            >
+            <button onClick={() => salvar('publicado')} disabled={salvando} className="flex-1 py-2.5 rounded-full bg-apple-label text-white text-[14px] font-medium hover:bg-black disabled:opacity-60">
               {salvando ? 'Salvando…' : 'Publicar'}
             </button>
-            <button
-              onClick={() => salvar('rascunho')}
-              disabled={salvando}
-              className="px-4 py-2.5 rounded-full border border-apple-separator text-[14px] text-apple-secondary hover:bg-apple-fill disabled:opacity-60"
-            >
+            <button onClick={() => salvar('rascunho')} disabled={salvando} className="px-4 py-2.5 rounded-full border border-apple-separator text-[14px] text-apple-secondary hover:bg-apple-fill disabled:opacity-60">
               Rascunho
             </button>
           </div>
@@ -181,16 +223,28 @@ export default function PostEditor({ id }: Props) {
 
         <div className="bg-white rounded-2xl shadow-card p-5 space-y-4">
           <div>
-            <label className={labelCls}>Slug (URL)</label>
-            <input className={inputCls} value={f.slug} onChange={(e) => upd('slug', e.target.value)} placeholder="gerado do título" />
+            <label className={labelCls}>Imagem de capa</label>
+            {f.capa_url ? (
+              <div>
+                <img src={f.capa_url} alt="capa" className="w-full h-36 object-cover rounded-lg border border-apple-separator" />
+                <div className="flex gap-3 mt-2 text-[13px]">
+                  <label className="text-apple-accent cursor-pointer hover:underline">
+                    Trocar
+                    <input type="file" accept="image/*" hidden onChange={trocarCapa} />
+                  </label>
+                  <button onClick={() => setF((p) => ({ ...p, capa_url: '' }))} className="text-red-600 hover:underline">Remover</button>
+                </div>
+              </div>
+            ) : (
+              <label className="flex items-center justify-center h-24 rounded-lg border-2 border-dashed border-apple-separator text-[13px] text-apple-secondary cursor-pointer hover:bg-apple-fill">
+                {enviandoCapa ? 'Enviando…' : '+ Enviar imagem do computador'}
+                <input type="file" accept="image/*" hidden onChange={trocarCapa} />
+              </label>
+            )}
           </div>
           <div>
             <label className={labelCls}>Tags (separadas por vírgula)</label>
             <input className={inputCls} value={f.tags} onChange={(e) => upd('tags', e.target.value)} />
-          </div>
-          <div>
-            <label className={labelCls}>Imagem de capa (URL)</label>
-            <input className={inputCls} value={f.capa_url} onChange={(e) => upd('capa_url', e.target.value)} placeholder="/images/posts/..." />
           </div>
           <div>
             <label className={labelCls}>Idioma</label>
@@ -199,14 +253,28 @@ export default function PostEditor({ id }: Props) {
               <option value="en">English</option>
             </select>
           </div>
-          <div>
-            <label className={labelCls}>Fonte externa — URL (opcional)</label>
-            <input className={inputCls} value={f.fonte_externa_url} onChange={(e) => upd('fonte_externa_url', e.target.value)} />
-          </div>
-          <div>
-            <label className={labelCls}>Fonte externa — nome</label>
-            <input className={inputCls} value={f.fonte_externa_nome} onChange={(e) => upd('fonte_externa_nome', e.target.value)} placeholder="LinkedIn, Medium…" />
-          </div>
+        </div>
+
+        <div className="bg-white rounded-2xl shadow-card p-5">
+          <button onClick={() => setAvancado((v) => !v)} className="w-full flex items-center justify-between text-[14px] font-medium text-apple-label">
+            <span>Opções avançadas</span>
+            <span className="text-apple-tertiary">{avancado ? '▲' : '▼'}</span>
+          </button>
+          {avancado && (
+            <div className="space-y-4 mt-4">
+              <div>
+                <label className={labelCls}>Endereço (URL) no site</label>
+                <input className={inputCls} value={f.slug} onChange={(e) => upd('slug', e.target.value)} placeholder="gerado do título" />
+              </div>
+              <div className="pt-2 border-t border-apple-separator/50">
+                <p className="text-[12px] text-apple-tertiary mb-2">Republicação: se este texto saiu primeiro em outro lugar (LinkedIn, Medium…), o site mostra o crédito "Originalmente publicado em…".</p>
+                <label className={labelCls}>Fonte original — onde saiu (nome)</label>
+                <input className={inputCls} value={f.fonte_externa_nome} onChange={(e) => upd('fonte_externa_nome', e.target.value)} placeholder="LinkedIn, Medium…" />
+                <label className={`${labelCls} mt-3`}>Fonte original — link</label>
+                <input className={inputCls} value={f.fonte_externa_url} onChange={(e) => upd('fonte_externa_url', e.target.value)} placeholder="https://…" />
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
