@@ -3,6 +3,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import { getIdentidade, getTimeline, getProjetos } from '../lib/content/collections';
+import { getPostsPublicados } from '../lib/content/posts';
 
 export const prerender = false;
 
@@ -28,6 +29,11 @@ const statusLabel: Record<string, string> = {
 };
 
 const fmtMesAno = (d: Date) => d.toLocaleDateString('pt-BR', { month: 'short', year: 'numeric' });
+
+const postsPublicados = await getPostsPublicados();
+const postDestaque = postsPublicados[0];
+const postsSecundarios = postsPublicados.slice(1, 4);
+const fmtPostData = (d: Date) => d.toLocaleDateString('pt-BR', { day: 'numeric', month: 'short', year: 'numeric' });
 ---
 <BaseLayout title={id.nome} descricao={id.descricao_meta}>
   <Header />
@@ -288,6 +294,91 @@ const fmtMesAno = (d: Date) => d.toLocaleDateString('pt-BR', { month: 'short', y
           </div>
           <div class="mt-6 sm:hidden">
             <a href="/projetos" class="text-[15px] text-apple-accent hover:underline">Ver todos os projetos →</a>
+          </div>
+        </div>
+      </section>
+    )}
+
+    <!-- Blog em destaque -->
+    {postDestaque && (
+      <section class="py-20">
+        <div class="max-w-5xl mx-auto px-6">
+          <div class="flex items-end justify-between mb-10">
+            <div>
+              <p class="text-[12px] font-semibold uppercase tracking-[0.08em] text-apple-accent mb-2">Conteúdo</p>
+              <h2 class="text-3xl md:text-4xl font-bold text-apple-label tracking-tight">Escrevo por aqui</h2>
+            </div>
+            <a href="/posts" class="text-[15px] text-apple-accent hover:underline hidden sm:block">
+              Ver tudo →
+            </a>
+          </div>
+
+          <!-- Post em destaque -->
+          <a
+            href={`/posts/${postDestaque.slug}`}
+            class="group block rounded-2xl overflow-hidden bg-apple-surface shadow-card transition-all duration-300 hover:shadow-card-hover mb-4"
+          >
+            <div class="grid md:grid-cols-2">
+              <div class="relative aspect-[16/10] md:aspect-auto md:min-h-[280px] overflow-hidden bg-gradient-to-br from-apple-label to-[#2d2d2f]">
+                {postDestaque.data.capa_url ? (
+                  <img
+                    src={postDestaque.data.capa_url}
+                    alt=""
+                    class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.04]"
+                  />
+                ) : (
+                  <span class="absolute inset-0 flex items-center justify-center text-white/15 text-[110px] font-serif leading-none select-none">“</span>
+                )}
+              </div>
+              <div class="p-8 md:p-10 flex flex-col justify-center">
+                <div class="flex items-center gap-2 mb-3">
+                  <span class="text-[11px] font-semibold uppercase tracking-[0.08em] text-apple-accent">Mais recente</span>
+                  <span class="text-apple-separator">·</span>
+                  <time class="text-[12px] text-apple-tertiary">{fmtPostData(postDestaque.data.data)}</time>
+                </div>
+                <h3 class="text-[24px] md:text-[28px] font-bold text-apple-label tracking-tight leading-snug mb-3 text-balance group-hover:text-apple-accent transition-colors">
+                  {postDestaque.data.titulo}
+                </h3>
+                <p class="text-[15px] text-apple-secondary leading-relaxed line-clamp-3 mb-5">
+                  {postDestaque.data.resumo}
+                </p>
+                <span class="text-[15px] font-medium text-apple-accent">Ler artigo →</span>
+              </div>
+            </div>
+          </a>
+
+          <!-- Próximos posts -->
+          {postsSecundarios.length > 0 && (
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {postsSecundarios.map((p) => (
+                <a
+                  href={`/posts/${p.slug}`}
+                  class="group block bg-apple-surface rounded-2xl overflow-hidden shadow-card transition-all duration-300 hover:shadow-card-hover hover:-translate-y-0.5"
+                >
+                  <div class="relative aspect-[16/9] overflow-hidden bg-gradient-to-br from-apple-label to-[#2d2d2f]">
+                    {p.data.capa_url ? (
+                      <img
+                        src={p.data.capa_url}
+                        alt=""
+                        class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.04]"
+                      />
+                    ) : (
+                      <span class="absolute inset-0 flex items-center justify-center text-white/15 text-[64px] font-serif leading-none select-none">“</span>
+                    )}
+                  </div>
+                  <div class="p-5">
+                    <time class="text-[12px] text-apple-tertiary">{fmtPostData(p.data.data)}</time>
+                    <h4 class="text-[15px] font-semibold text-apple-label tracking-tight leading-snug mt-1.5 line-clamp-2 group-hover:text-apple-accent transition-colors">
+                      {p.data.titulo}
+                    </h4>
+                  </div>
+                </a>
+              ))}
+            </div>
+          )}
+
+          <div class="mt-6 sm:hidden">
+            <a href="/posts" class="text-[15px] text-apple-accent hover:underline">Ver todo o conteúdo →</a>
           </div>
         </div>
       </section>
