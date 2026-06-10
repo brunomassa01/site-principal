@@ -10,7 +10,7 @@ export const prerender = false;
 
 // Lista TODOS os posts (inclui rascunho/arquivado) — visão do Painel.
 export const GET: APIRoute = async () => {
-  const rows = await db.select().from(posts).orderBy(desc(posts.data));
+  const rows = await db.select().from(posts).orderBy(desc(posts.data), desc(posts.createdAt));
   return json(rows);
 };
 

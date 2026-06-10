@@ -44,7 +44,7 @@ export async function getPostsPublicados(): Promise<PostView[]> {
     .select()
     .from(posts)
     .where(and(eq(posts.situacao, 'publicado'), or(isNull(posts.publicarEm), lte(posts.publicarEm, now))))
-    .orderBy(desc(posts.data));
+    .orderBy(desc(posts.data), desc(posts.createdAt));
   return rows.map(toView);
 }
 
