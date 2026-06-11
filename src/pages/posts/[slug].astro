@@ -14,7 +14,7 @@ await incrementViews(slug!);
 
 const fmtData = (d: Date) => d.toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' });
 
-const postUrl = new URL(Astro.url.pathname, Astro.site).href;
+const postUrl = new URL(Astro.url.pathname, 'https://www.brunomassa.online').href;
 const linkedinShare = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(postUrl)}`;
 ---
 <BaseLayout title={post.data.titulo} descricao={post.data.resumo} imagem={post.data.capa_url ?? undefined} tipo="article">

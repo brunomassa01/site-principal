@@ -4,6 +4,7 @@ import { db } from '../../../../../lib/db';
 import { socialPecas, socialSemanas } from '../../../../../lib/db/schema';
 import { json } from '../../../../../lib/http';
 import { gerarConteudo } from '../../../../../lib/social/ia';
+import { logUso } from '../../../../../lib/social/uso';
 
 export const prerender = false;
 
@@ -17,7 +18,8 @@ export const POST: APIRoute = async ({ params }) => {
   const [semana] = await db.select().from(socialSemanas).where(eq(socialSemanas.id, peca.semanaId));
 
   try {
-    const { conteudo, legenda } = await gerarConteudo(peca as never, (semana ?? { cluster: null, ponteIa: false }) as never);
+    const { conteudo, legenda, usage } = await gerarConteudo(peca as never, (semana ?? { cluster: null, ponteIa: false }) as never);
+    await logUso('claude-sonnet-4-6', `gerar-${peca.formato}`, usage);
     const novoConteudo = { ...((peca.conteudo as Record<string, unknown>) ?? {}), ...conteudo };
     const set: Record<string, unknown> = { conteudo: novoConteudo, status: 'escrito', updatedAt: new Date() };
     if (legenda !== undefined) set.legenda = legenda;

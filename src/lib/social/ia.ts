@@ -95,7 +95,7 @@ const TOOLS: Record<string, Anthropic.Tool> = {
   },
 };
 
-export async function gerarConteudo(peca: Peca, semana: Semana): Promise<{ conteudo: Record<string, unknown>; legenda?: string }> {
+export async function gerarConteudo(peca: Peca, semana: Semana): Promise<{ conteudo: Record<string, unknown>; legenda?: string; usage?: { input_tokens: number; output_tokens: number } }> {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) throw new Error('ANTHROPIC_API_KEY não configurada.');
   const client = new Anthropic({ apiKey });
@@ -127,16 +127,16 @@ Escreva o ${peca.formato === 'linkedin' ? 'post de LinkedIn' : peca.formato} no 
   if (!block) throw new Error('A IA não retornou conteúdo estruturado.');
   const out = block.input as Record<string, unknown>;
 
+  let conteudo: Record<string, unknown>;
+  let legenda: string | undefined;
   if (peca.formato === 'linkedin') {
-    return { conteudo: { texto: out.texto } };
+    conteudo = { texto: out.texto };
+  } else if (peca.formato === 'carrossel') {
+    conteudo = { formato: '9 slides · 1080x1350', slides: (out.slides as unknown[]) ?? [] };
+    legenda = out.legenda as string;
+  } else {
+    conteudo = { capa: out.capa, duracao: '~60s · 8 cenas', roteiro: out.roteiro, cenas: out.cenas };
+    legenda = out.legenda as string;
   }
-  if (peca.formato === 'carrossel') {
-    const slides = (out.slides as unknown[]) ?? [];
-    return { conteudo: { formato: '9 slides · 1080x1350', slides }, legenda: out.legenda as string };
-  }
-  // reel
-  return {
-    conteudo: { capa: out.capa, duracao: '~60s · 8 cenas', roteiro: out.roteiro, cenas: out.cenas },
-    legenda: out.legenda as string,
-  };
+  return { conteudo, legenda, usage: resp.usage };
 }

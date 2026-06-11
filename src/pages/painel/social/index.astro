@@ -2,12 +2,14 @@
 import PainelLayout from '../../../layouts/PainelLayout.astro';
 import SocialCalendario from '../../../components/painel/SocialCalendario.tsx';
 import { getSemanas, numeroSemanaDestaque, progresso } from '../../../lib/content/social';
+import { getUsoResumo } from '../../../lib/social/uso';
 
 export const prerender = false;
 
 const semanas = await getSemanas();
 const destaque = numeroSemanaDestaque(semanas);
 const atual = semanas.find((s) => s.numero === destaque);
+const uso = await getUsoResumo();
 const prog = progresso(semanas);
 
 const FMT_LABEL: Record<string, string> = { linkedin: 'LinkedIn', carrossel: 'Carrossel', reel: 'Reel' };
@@ -48,7 +50,14 @@ const semanasJson = semanas.map((s) => ({
       <span>🚀 {prog.publicado} publicados</span>
       <span>de {prog.total}</span>
     </div>
+    <span class="text-[12px] text-apple-tertiary border-l border-apple-separator/60 pl-3" title="Custo estimado pelos tokens usados">
+      🤖 IA: <strong>${uso.mesUsd.toFixed(2)}</strong> no mês · ${uso.totalUsd.toFixed(2)} total ({uso.geracoes})
+    </span>
   </div>
+  <p class="text-[11px] text-apple-tertiary -mt-4 mb-6">
+    Custo de IA estimado pelos tokens. O saldo real (quanto resta) fica no
+    <a href="https://console.anthropic.com/settings/billing" target="_blank" rel="noopener" class="text-apple-accent hover:underline">Console da Anthropic → Billing ↗</a>.
+  </p>
 
   <!-- Semana em destaque -->
   {atual && (

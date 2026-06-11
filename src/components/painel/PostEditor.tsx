@@ -83,21 +83,7 @@ export default function PostEditor({ id }: Props) {
   const [salvando, setSalvando] = useState(false);
   const [erro, setErro] = useState('');
   const [enviandoCapa, setEnviandoCapa] = useState(false);
-  const [gerandoCapa, setGerandoCapa] = useState(false);
   const [avancado, setAvancado] = useState(false);
-
-  async function gerarCapa() {
-    if (!f.titulo.trim()) { alert('Preencha o título do post primeiro.'); return; }
-    setGerandoCapa(true);
-    const r = await fetch('/api/painel/posts/gerar-capa', {
-      method: 'POST', headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ titulo: f.titulo, kicker: f.tags.split(',')[0]?.trim() || 'BLOG' }),
-    });
-    const j = await r.json().catch(() => ({}));
-    setGerandoCapa(false);
-    if (r.ok && j.url) setF((p) => ({ ...p, capa_url: j.url }));
-    else alert(j.error || 'Não foi possível gerar a capa.');
-  }
 
   useEffect(() => {
     if (!id) return;
@@ -255,9 +241,6 @@ export default function PostEditor({ id }: Props) {
                 <input type="file" accept="image/*" hidden onChange={trocarCapa} />
               </label>
             )}
-            <button onClick={gerarCapa} disabled={gerandoCapa} className="mt-2 w-full py-2 rounded-lg border border-violet-300 text-violet-700 text-[13px] font-medium hover:bg-violet-50 disabled:opacity-60">
-              {gerandoCapa ? 'Gerando capa…' : '✨ Gerar capa na marca'}
-            </button>
           </div>
           <div>
             <label className={labelCls}>Tags (separadas por vírgula)</label>
@@ -277,7 +260,7 @@ export default function PostEditor({ id }: Props) {
             <label className={labelCls}>Compartilhar</label>
             {f.situacao === 'publicado' ? (
               <a
-                href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent('https://brunomassa.online/posts/' + f.slug)}`}
+                href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent('https://www.brunomassa.online/posts/' + f.slug)}`}
                 target="_blank"
                 rel="noopener"
                 className="mt-1 flex items-center justify-center gap-2 py-2.5 rounded-full bg-[#0A66C2] text-white text-[14px] font-medium hover:bg-[#004182] transition-colors"
