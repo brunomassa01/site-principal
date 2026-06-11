@@ -17,7 +17,7 @@ const norm = (s: string) =>
 // ignorando acento (impede a IA de trocar palavras).
 export const POST: APIRoute = async ({ request }) => {
   if (!process.env.ANTHROPIC_API_KEY) return json({ error: 'IA não configurada.' }, 500);
-  const LIM = 40;
+  const LIM = 25;
 
   const pecas = await db.select().from(socialPecas);
   const semanas = await db.select().from(socialSemanas);
@@ -45,7 +45,7 @@ export const POST: APIRoute = async ({ request }) => {
       tool_choice: { type: 'tool', name: 'acentuar' },
       messages: [{
         role: 'user',
-        content: `Cada frase abaixo está em português brasileiro mas foi escrita SEM ACENTOS. Reescreva cada uma com a acentuação e a cedilha CORRETAS. Exemplos: "ninguem sabe" vira "ninguém sabe"; "relatorio de marketing" vira "relatório de marketing"; "1 milhao de views" vira "1 milhão de views"; "a lingua do negocio" vira "a língua do negócio". Mantenha exatamente as mesmas palavras, ordem, pontuação, números e caixa — só conserte os acentos que faltam. Devolva a lista corrigida, mesma ordem e mesma quantidade.\n\n${JSON.stringify(lote.map((x) => x.texto))}`,
+        content: `Tarefa: CORRIGIR a acentuação. As ${lote.length} frases abaixo foram digitadas SEM acentos e estão ERRADAS. Reescreva cada uma com os acentos e a cedilha corretos do português brasileiro. ATENÇÃO: quase todas VÃO MUDAR ao ganhar acento — não devolva uma frase idêntica se ela precisa de acento. Exemplos do que corrigir: "funcoes"→"funções", "nao"→"não", "lingua"→"língua", "negocio"→"negócio", "relatorio"→"relatório", "midia"→"mídia", "metricas"→"métricas", "estrategia"→"estratégia", "ninguem"→"ninguém", "voce"→"você", "ja"→"já", "ate"→"até", "organograma"→"organograma" (sem acento), "e"→"é" quando for o verbo ser. Mantenha as MESMAS palavras, ordem, pontuação, números e caixa. Frases:\n${JSON.stringify(lote.map((x) => x.texto))}`,
       }],
     });
     const block = resp.content.find((b) => b.type === 'tool_use') as Anthropic.ToolUseBlock | undefined;
