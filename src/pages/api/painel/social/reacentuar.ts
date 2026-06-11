@@ -9,7 +9,8 @@ import { logUso } from '../../../../lib/social/uso';
 export const prerender = false;
 
 const ACC = /[áàâãéêíóôõúüçÁÀÂÃÉÊÍÓÔÕÚÜÇ]/;
-const norm = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+const norm = (s: string) =>
+  Array.from(s.normalize('NFD')).filter((c) => { const n = c.charCodeAt(0); return n < 0x300 || n > 0x36f; }).join('').toLowerCase();
 
 // Re-acentua o texto importado do calendário (que veio sem acento da planilha).
 // Usa a Claude só para adicionar diacríticos; trava: só aplica se as palavras forem idênticas
