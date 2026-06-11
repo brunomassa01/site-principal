@@ -3,8 +3,10 @@ import { eq } from 'drizzle-orm';
 import { put } from '@vercel/blob';
 import { db } from '../../../../../lib/db';
 import { socialPecas } from '../../../../../lib/db/schema';
+import { neon } from '@neondatabase/serverless';
 import { json } from '../../../../../lib/http';
 import { carrosselElements, reelCoverElement, loadFontes, renderPng } from '../../../../../lib/marca/render';
+import { gerarImagemEstilo, promptDoEstilo } from '../../../../../lib/social/imagem';
 
 export const prerender = false;
 
@@ -16,13 +18,24 @@ export const POST: APIRoute = async ({ params, request }) => {
   const [peca] = await db.select().from(socialPecas).where(eq(socialPecas.id, id));
   if (!peca) return json({ error: 'Peça não encontrada.' }, 404);
 
-  const conteudo = (peca.conteudo ?? {}) as { slides?: unknown[]; capa?: string };
+  const conteudo = (peca.conteudo ?? {}) as { slides?: { titulo?: string }[]; capa?: string; bg?: string; estilo?: string };
   if (peca.formato === 'linkedin') return json({ error: 'LinkedIn é texto puro — não tem arte de imagem.' }, 400);
   if (peca.formato === 'carrossel' && !conteudo.slides?.length) return json({ error: 'Monte os slides antes de gerar as artes.' }, 400);
   if (peca.formato === 'reel' && !conteudo.capa) return json({ error: 'Defina a capa do reel antes de gerar a arte.' }, 400);
 
   const base = new URL(request.url).origin;
   try {
+    // Se a peça tem um ESTILO escolhido (id de fundo), a IA gera uma imagem de capa NOVA nesse estilo.
+    if (conteudo.estilo && conteudo.estilo !== 'upload') {
+      const sql = neon(process.env.DATABASE_URL!);
+      const linhas = (await sql`SELECT rotulo FROM social_fundos WHERE id = ${conteudo.estilo}`) as { rotulo: string }[];
+      const tema = (peca.gancho ?? conteudo.slides?.[0]?.titulo ?? '').toString();
+      const img = await gerarImagemEstilo(promptDoEstilo(linhas[0]?.rotulo ?? ''), tema);
+      if ('error' in img) return json({ error: img.error }, 502);
+      conteudo.bg = img.url;
+      await db.update(socialPecas).set({ conteudo: conteudo as never, updatedAt: new Date() }).where(eq(socialPecas.id, id));
+    }
+
     const fontes = await loadFontes(base);
     const els = peca.formato === 'carrossel'
       ? carrosselElements(conteudo as never, peca.manychat ?? undefined)

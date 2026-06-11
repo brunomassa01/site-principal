@@ -14,6 +14,7 @@ type Conteudo = {
   roteiro?: string;
   notas?: string;
   bg?: string;
+  estilo?: string;
 };
 
 // monta um roteiro corrido (pra ler e gravar) a partir das cenas estruturadas
@@ -241,12 +242,16 @@ function PecaCard({ peca, fundos, onPatch, onPatchConteudo }: {
       await new Promise((r) => setTimeout(r, 500));
     }
   }
-  // escolhe o fundo da capa (foto da biblioteca, upload, ou tinta) e persiste na hora
-  async function escolherFundo(url: string) {
-    onPatchConteudo(peca.id, { bg: url });
-    const novoConteudo = { ...(peca.conteudo ?? {}), bg: url };
+  // aplica um patch no conteúdo da capa e persiste na hora
+  async function persistirConteudo(patch: Partial<Conteudo>) {
+    onPatchConteudo(peca.id, patch);
+    const novoConteudo = { ...(peca.conteudo ?? {}), ...patch };
     await fetch(`/api/painel/social/pecas/${peca.id}`, { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ conteudo: novoConteudo }) });
   }
+  const escolherTinta = () => persistirConteudo({ estilo: '', bg: '' });
+  // estilo = referência visual; a IA gera uma imagem NOVA nesse estilo ao "Gerar artes"
+  const escolherEstilo = (id: string) => persistirConteudo({ estilo: id, bg: '' });
+  const escolherFotoFixa = (url: string) => persistirConteudo({ estilo: 'upload', bg: url });
   async function subirFundo(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     e.target.value = '';
@@ -257,7 +262,7 @@ function PecaCard({ peca, fundos, onPatch, onPatchConteudo }: {
     const r = await fetch('/api/painel/upload', { method: 'POST', body: fd });
     const j = await r.json().catch(() => ({}));
     setSubindo(false);
-    if (j.url) { setExtras((x) => (x.includes(j.url) ? x : [...x, j.url])); escolherFundo(j.url); }
+    if (j.url) { setExtras((x) => (x.includes(j.url) ? x : [...x, j.url])); escolherFotoFixa(j.url); }
     else alert(j.error || 'Falha ao subir a foto.');
   }
   async function gerarIA() {
@@ -345,21 +350,23 @@ function PecaCard({ peca, fundos, onPatch, onPatchConteudo }: {
         {/* seletor de modelo visual (capa) — só carrossel/reel */}
         {(peca.formato === 'carrossel' || peca.formato === 'reel') && (
           <div>
-            <label className="block text-[12px] font-medium text-apple-tertiary mb-2">Modelo visual da capa — escolha antes de gerar as artes</label>
+            <label className="block text-[12px] font-medium text-apple-tertiary mb-1">Estilo visual da capa</label>
+            <p className="text-[11px] text-apple-tertiary mb-2">Escolha um <strong>estilo</strong> — a IA cria uma imagem nova nesse estilo ao "Gerar artes". Ou use Tinta / sua própria foto.</p>
             <div className="flex flex-wrap gap-2">
-              <button onClick={() => escolherFundo('')} title="Tinta (fundo preto, sem foto)"
-                className={`w-16 h-20 rounded-lg overflow-hidden border-2 flex items-center justify-center bg-apple-label ${!c.bg ? 'border-apple-accent' : 'border-transparent'}`}>
+              <button onClick={escolherTinta} title="Tinta (fundo preto, sem foto)"
+                className={`w-16 h-20 rounded-lg overflow-hidden border-2 flex items-center justify-center bg-apple-label ${!c.estilo && !c.bg ? 'border-apple-accent' : 'border-transparent'}`}>
                 <span className="text-[9px] text-white/70">Tinta</span>
               </button>
               {fundos.map((f) => (
-                <button key={f.id} onClick={() => escolherFundo(f.url)} title={f.rotulo}
-                  className={`w-16 h-20 rounded-lg overflow-hidden border-2 ${c.bg === f.url ? 'border-apple-accent' : 'border-transparent'}`}>
+                <button key={f.id} onClick={() => escolherEstilo(f.id)} title={`Estilo: ${f.rotulo} (IA gera nova)`}
+                  className={`relative w-16 h-20 rounded-lg overflow-hidden border-2 ${c.estilo === f.id ? 'border-apple-accent' : 'border-transparent'}`}>
                   <img src={f.url} alt={f.rotulo} className="w-full h-full object-cover" />
+                  <span className="absolute top-0.5 right-0.5 text-[9px] bg-black/60 text-white rounded px-1 leading-tight">✨</span>
                 </button>
               ))}
               {extras.filter((u) => u && !fundos.some((f) => f.url === u)).map((url) => (
-                <button key={url} onClick={() => escolherFundo(url)} title="Foto que você enviou"
-                  className={`w-16 h-20 rounded-lg overflow-hidden border-2 ${c.bg === url ? 'border-apple-accent' : 'border-transparent'}`}>
+                <button key={url} onClick={() => escolherFotoFixa(url)} title="Sua foto (usada como está)"
+                  className={`w-16 h-20 rounded-lg overflow-hidden border-2 ${c.estilo === 'upload' && c.bg === url ? 'border-apple-accent' : 'border-transparent'}`}>
                   <img src={url} alt="foto enviada" className="w-full h-full object-cover" />
                 </button>
               ))}
