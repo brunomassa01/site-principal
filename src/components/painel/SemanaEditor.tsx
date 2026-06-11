@@ -76,6 +76,7 @@ const inputCls = 'w-full px-3 py-2 rounded-lg border border-apple-separator text
 export default function SemanaEditor({ semana }: { semana: Semana }) {
   const [pecas, setPecas] = useState<Peca[]>(semana.pecas);
   const [statusSem, setStatusSem] = useState(semana.status);
+  const [gerandoTodos, setGerandoTodos] = useState(false);
 
   function patchPeca(id: string, patch: Partial<Peca>) {
     setPecas((ps) => ps.map((p) => (p.id === id ? { ...p, ...patch } : p)));
@@ -89,6 +90,18 @@ export default function SemanaEditor({ semana }: { semana: Semana }) {
     await fetch(`/api/painel/social/semanas/${semana.numero}`, {
       method: 'PATCH', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ status: s }),
     });
+  }
+  async function gerarTodos() {
+    if (!confirm('Gerar (ou regerar) os 3 formatos desta semana com IA? Isso substitui o conteúdo atual das peças.')) return;
+    setGerandoTodos(true);
+    for (const p of pecas) {
+      try {
+        const r = await fetch(`/api/painel/social/gerar/${p.id}`, { method: 'POST' });
+        const j = await r.json();
+        if (r.ok && j.conteudo) patchPeca(p.id, { conteudo: j.conteudo, legenda: j.legenda ?? p.legenda, status: j.status ?? 'escrito' });
+      } catch { /* segue */ }
+    }
+    setGerandoTodos(false);
   }
 
   return (
@@ -104,7 +117,10 @@ export default function SemanaEditor({ semana }: { semana: Semana }) {
         {semana.coringa && <span className="text-[11px] px-2 py-0.5 rounded-full bg-orange-50 text-orange-700 border border-orange-200 font-medium">Coringa</span>}
         {semana.slotReativo && <span className="text-[11px] px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200 font-medium">Reativo</span>}
         <div className="ml-auto flex items-center gap-2">
-          <span className="text-[12px] text-apple-tertiary">Status da semana</span>
+          <button onClick={gerarTodos} disabled={gerandoTodos} className="px-4 py-2 rounded-full bg-violet-600 text-white text-[13px] font-medium hover:bg-violet-700 disabled:opacity-60">
+            {gerandoTodos ? 'Gerando os 3…' : '✨ Gerar os 3 com IA'}
+          </button>
+          <span className="text-[12px] text-apple-tertiary">Status</span>
           <select className={`${inputCls} w-auto py-1.5`} value={statusSem} onChange={(e) => setStatusSemana(e.target.value)}>
             <option value="planejado">Planejado</option>
             <option value="em-producao">Em produção</option>
@@ -135,6 +151,7 @@ function PecaCard({ peca, onPatch, onPatchConteudo }: {
   const [copiado, setCopiado] = useState(false);
   const [enviando, setEnviando] = useState(false);
   const [gerando, setGerando] = useState(false);
+  const [gerandoIA, setGerandoIA] = useState(false);
   const [artes, setArtes] = useState<string[]>(peca.midiaUrls ?? []);
   const meta = FMT[peca.formato] ?? { label: peca.formato, icon: '•' };
 
@@ -172,6 +189,19 @@ function PecaCard({ peca, onPatch, onPatchConteudo }: {
     setGerando(false);
     if (r.ok && Array.isArray(j.urls)) setArtes(j.urls);
     else alert(j.error || 'Não foi possível gerar as artes.');
+  }
+  async function gerarIA() {
+    const temConteudo = peca.conteudo && Object.keys(peca.conteudo).length > 0;
+    if (temConteudo && !confirm('Isso substitui o conteúdo atual desta peça pela versão gerada pela IA. Continuar?')) return;
+    setGerandoIA(true);
+    const r = await fetch(`/api/painel/social/gerar/${peca.id}`, { method: 'POST' });
+    const j = await r.json().catch(() => ({}));
+    setGerandoIA(false);
+    if (r.ok && j.conteudo) {
+      onPatch(peca.id, { conteudo: j.conteudo, legenda: j.legenda ?? peca.legenda, status: j.status ?? 'escrito' });
+    } else {
+      alert(j.error || (j.detail ? `Erro: ${j.detail}` : 'Não foi possível gerar com IA.'));
+    }
   }
 
   const c = peca.conteudo ?? {};
@@ -244,6 +274,9 @@ function PecaCard({ peca, onPatch, onPatchConteudo }: {
 
         {/* ações */}
         <div className="flex flex-wrap items-center gap-2 pt-1">
+          <button onClick={gerarIA} disabled={gerandoIA} className="px-4 py-2 rounded-full bg-violet-600 text-white text-[13px] font-medium hover:bg-violet-700 disabled:opacity-60">
+            {gerandoIA ? 'Gerando…' : '✨ Gerar com IA'}
+          </button>
           <button onClick={salvar} disabled={salvando} className="px-4 py-2 rounded-full bg-apple-label text-white text-[13px] font-medium hover:bg-black disabled:opacity-60">
             {salvando ? 'Salvando…' : salvo ? 'Salvo ✓' : 'Salvar'}
           </button>
