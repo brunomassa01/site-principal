@@ -11,8 +11,22 @@ type Conteudo = {
   capa?: string;
   duracao?: string;
   cenas?: Cena[];
+  roteiro?: string;
   notas?: string;
 };
+
+// monta um roteiro corrido (pra ler e gravar) a partir das cenas estruturadas
+function montarRoteiro(c: Conteudo): string {
+  const linhas: string[] = [];
+  if (c.capa) linhas.push(`CAPA: ${c.capa}`, '');
+  (c.cenas ?? []).forEach((s) => {
+    linhas.push((s.titulo ?? `Cena ${s.n ?? ''}`).toUpperCase());
+    if (s.fala) linhas.push(s.fala);
+    if (s.legenda) linhas.push(`   [legenda na tela: ${s.legenda}]`);
+    linhas.push('');
+  });
+  return linhas.join('\n').trim();
+}
 type Peca = {
   id: string; formato: string; gancho: string | null; lente: string | null;
   conteudo: Conteudo | null; legenda: string | null; manychat: string | null;
@@ -51,8 +65,8 @@ function textoParaCopiar(p: Peca): string {
     return [slides, p.legenda ? `\n\nLegenda:\n${p.legenda}` : ''].join('');
   }
   if (p.formato === 'reel') {
-    const cenas = (c.cenas ?? []).map((s) => `[${s.titulo ?? `Cena ${s.n}`}]\nFala: ${s.fala ?? ''}\nLegenda: ${s.legenda ?? ''}`).join('\n\n');
-    return [c.capa ? `Capa: ${c.capa}\n` : '', cenas, p.legenda ? `\n\nLegenda:\n${p.legenda}` : ''].join('');
+    const base = c.roteiro && c.roteiro.trim() ? c.roteiro.trim() : montarRoteiro(c);
+    return base + (p.legenda ? `\n\nLegenda:\n${p.legenda}` : '');
   }
   return '';
 }
@@ -185,9 +199,25 @@ function PecaCard({ peca, onPatch, onPatchConteudo }: {
         )}
 
         {peca.formato === 'reel' && (
-          <Cenas capa={c.capa ?? ''} onCapa={(v) => onPatchConteudo(peca.id, { capa: v })}
-            cenas={c.cenas ?? []} onChange={(cenas) => onPatchConteudo(peca.id, { cenas })}
-            legenda={peca.legenda} onLegenda={(v) => onPatch(peca.id, { legenda: v })} />
+          <div className="space-y-3">
+            <div>
+              <div className="flex items-center justify-between mb-1">
+                <label className="block text-[12px] font-medium text-apple-tertiary">Roteiro — texto corrido pra ler e gravar</label>
+                {(c.cenas?.length ?? 0) > 0 && (
+                  <button onClick={() => onPatchConteudo(peca.id, { roteiro: montarRoteiro(c) })} className="text-[12px] text-apple-accent hover:underline">↻ Montar a partir das cenas</button>
+                )}
+              </div>
+              <textarea className={`${inputCls} min-h-[260px] leading-relaxed`} placeholder="Escreva o roteiro corrido, do jeito que você vai falar…" value={c.roteiro ?? ''} onChange={(e) => onPatchConteudo(peca.id, { roteiro: e.target.value })} />
+            </div>
+            <details className="rounded-lg border border-apple-separator/60 px-3 py-2">
+              <summary className="text-[12px] font-medium text-apple-tertiary cursor-pointer select-none">Cenas, capa e legenda (estrutura — opcional, pra edição/artes)</summary>
+              <div className="mt-3">
+                <Cenas capa={c.capa ?? ''} onCapa={(v) => onPatchConteudo(peca.id, { capa: v })}
+                  cenas={c.cenas ?? []} onChange={(cenas) => onPatchConteudo(peca.id, { cenas })}
+                  legenda={peca.legenda} onLegenda={(v) => onPatch(peca.id, { legenda: v })} />
+              </div>
+            </details>
+          </div>
         )}
 
         {/* ações */}
