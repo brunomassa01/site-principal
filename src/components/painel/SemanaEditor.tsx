@@ -13,6 +13,7 @@ type Conteudo = {
   cenas?: Cena[];
   roteiro?: string;
   notas?: string;
+  bg?: string;
 };
 
 // monta um roteiro corrido (pra ler e gravar) a partir das cenas estruturadas
@@ -72,6 +73,43 @@ function textoParaCopiar(p: Peca): string {
 }
 
 const inputCls = 'w-full px-3 py-2 rounded-lg border border-apple-separator text-[14px] focus:outline-none focus:ring-2 focus:ring-apple-accent/40';
+
+// Otimiza a imagem no navegador (reduz dimensão e converte p/ webp) antes de enviar — espelha o otimizador do blog.
+async function otimizarImagem(file: File): Promise<File> {
+  if (file.type === 'image/svg+xml' || file.type === 'image/gif') return file;
+  try {
+    const bmp = await createImageBitmap(file, { imageOrientation: 'from-image' });
+    const scale = Math.min(1, 1600 / bmp.width);
+    const w = Math.round(bmp.width * scale);
+    const h = Math.round(bmp.height * scale);
+    const canvas = document.createElement('canvas');
+    canvas.width = w; canvas.height = h;
+    canvas.getContext('2d')!.drawImage(bmp, 0, 0, w, h);
+    const blob = await new Promise<Blob | null>((res) => canvas.toBlob(res, 'image/webp', 0.82));
+    if (!blob) return file;
+    return new File([blob], file.name.replace(/\.\w+$/, '') + '.webp', { type: 'image/webp' });
+  } catch {
+    return file;
+  }
+}
+
+// Baixa uma imagem do Blob (CORS liberado) forçando o download, com a extensão certa.
+async function baixarImagem(url: string, nomeBase: string) {
+  try {
+    const blob = await (await fetch(url)).blob();
+    const ext = blob.type.includes('png') ? 'png' : blob.type.includes('webp') ? 'webp'
+      : blob.type.includes('jpeg') ? 'jpg' : (url.split('?')[0].split('.').pop() || 'png');
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `${nomeBase}.${ext}`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  } catch {
+    window.open(url, '_blank');
+  }
+}
 
 export default function SemanaEditor({ semana }: { semana: Semana }) {
   const [pecas, setPecas] = useState<Peca[]>(semana.pecas);
@@ -158,6 +196,8 @@ function PecaCard({ peca, fundos, onPatch, onPatchConteudo }: {
   const [gerando, setGerando] = useState(false);
   const [gerandoIA, setGerandoIA] = useState(false);
   const [artes, setArtes] = useState<string[]>(peca.midiaUrls ?? []);
+  const [subindo, setSubindo] = useState(false);
+  const [extras, setExtras] = useState<string[]>(() => (peca.conteudo?.bg ? [peca.conteudo.bg] : []));
   const meta = FMT[peca.formato] ?? { label: peca.formato, icon: '•' };
 
   async function salvar() {
@@ -195,6 +235,12 @@ function PecaCard({ peca, fundos, onPatch, onPatchConteudo }: {
     if (r.ok && Array.isArray(j.urls)) setArtes(j.urls);
     else alert(j.error || 'Não foi possível gerar as artes.');
   }
+  async function baixarTodas() {
+    for (let i = 0; i < artes.length; i++) {
+      await baixarImagem(artes[i], `arte-${peca.formato}-${String(i + 1).padStart(2, '0')}`);
+      await new Promise((r) => setTimeout(r, 500));
+    }
+  }
   // escolhe o fundo da capa (foto da biblioteca, upload, ou tinta) e persiste na hora
   async function escolherFundo(url: string) {
     onPatchConteudo(peca.id, { bg: url });
@@ -205,11 +251,13 @@ function PecaCard({ peca, fundos, onPatch, onPatchConteudo }: {
     const file = e.target.files?.[0];
     e.target.value = '';
     if (!file) return;
+    setSubindo(true);
     const fd = new FormData();
-    fd.append('file', file);
+    fd.append('file', await otimizarImagem(file));
     const r = await fetch('/api/painel/upload', { method: 'POST', body: fd });
     const j = await r.json().catch(() => ({}));
-    if (j.url) escolherFundo(j.url);
+    setSubindo(false);
+    if (j.url) { setExtras((x) => (x.includes(j.url) ? x : [...x, j.url])); escolherFundo(j.url); }
     else alert(j.error || 'Falha ao subir a foto.');
   }
   async function gerarIA() {
@@ -309,9 +357,15 @@ function PecaCard({ peca, fundos, onPatch, onPatchConteudo }: {
                   <img src={f.url} alt={f.rotulo} className="w-full h-full object-cover" />
                 </button>
               ))}
-              <label className="w-16 h-20 rounded-lg border-2 border-dashed border-apple-separator flex items-center justify-center text-[10px] text-apple-secondary cursor-pointer hover:bg-apple-fill text-center px-1">
-                + Subir foto
-                <input type="file" accept="image/*" hidden onChange={subirFundo} />
+              {extras.filter((u) => u && !fundos.some((f) => f.url === u)).map((url) => (
+                <button key={url} onClick={() => escolherFundo(url)} title="Foto que você enviou"
+                  className={`w-16 h-20 rounded-lg overflow-hidden border-2 ${c.bg === url ? 'border-apple-accent' : 'border-transparent'}`}>
+                  <img src={url} alt="foto enviada" className="w-full h-full object-cover" />
+                </button>
+              ))}
+              <label className={`w-16 h-20 rounded-lg border-2 border-dashed border-apple-separator flex items-center justify-center text-[10px] text-center px-1 ${subindo ? 'opacity-60' : 'text-apple-secondary cursor-pointer hover:bg-apple-fill'}`}>
+                {subindo ? 'Subindo…' : '+ Subir foto'}
+                <input type="file" accept="image/*" hidden disabled={subindo} onChange={subirFundo} />
               </label>
             </div>
           </div>
@@ -340,12 +394,21 @@ function PecaCard({ peca, fundos, onPatch, onPatchConteudo }: {
 
         {artes.length > 0 && (
           <div className="pt-2">
-            <p className="text-[12px] font-medium text-apple-tertiary mb-2">Artes geradas ({artes.length})</p>
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-[12px] font-medium text-apple-tertiary">Artes geradas ({artes.length})</p>
+              <button onClick={baixarTodas} className="text-[12px] font-medium text-apple-accent hover:underline">⬇ Baixar todas</button>
+            </div>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
               {artes.map((url, i) => (
-                <a key={i} href={url} target="_blank" rel="noopener" className="block rounded-lg overflow-hidden border border-apple-separator/60 hover:shadow-card-hover transition-shadow">
+                <div key={i} className="group relative rounded-lg overflow-hidden border border-apple-separator/60">
                   <img src={url} alt={`arte ${i + 1}`} className="w-full aspect-[4/5] object-cover" />
-                </a>
+                  <div className="absolute inset-x-0 bottom-0 flex gap-1 p-1.5 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button onClick={() => baixarImagem(url, `arte-${peca.formato}-${String(i + 1).padStart(2, '0')}`)}
+                      className="flex-1 text-[11px] text-white bg-black/50 hover:bg-black/70 rounded px-2 py-1 backdrop-blur-sm">⬇ Baixar</button>
+                    <a href={url} target="_blank" rel="noopener" title="Abrir em nova aba"
+                      className="text-[11px] text-white bg-black/50 hover:bg-black/70 rounded px-2 py-1 backdrop-blur-sm">↗</a>
+                  </div>
+                </div>
               ))}
             </div>
           </div>
