@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 // ---- tipos (peças vêm serializadas da página Astro) ----
 type Slide = { n?: number; tipo?: string; tag?: string; titulo?: string; subtitulo?: string; texto?: string; assinatura?: string };
@@ -77,6 +77,10 @@ export default function SemanaEditor({ semana }: { semana: Semana }) {
   const [pecas, setPecas] = useState<Peca[]>(semana.pecas);
   const [statusSem, setStatusSem] = useState(semana.status);
   const [gerandoTodos, setGerandoTodos] = useState(false);
+  const [fundos, setFundos] = useState<{ id: string; url: string; rotulo: string }[]>([]);
+  useEffect(() => {
+    fetch('/api/painel/social/fundos').then((r) => r.json()).then((d) => Array.isArray(d) && setFundos(d)).catch(() => {});
+  }, []);
 
   function patchPeca(id: string, patch: Partial<Peca>) {
     setPecas((ps) => ps.map((p) => (p.id === id ? { ...p, ...patch } : p)));
@@ -135,14 +139,15 @@ export default function SemanaEditor({ semana }: { semana: Semana }) {
 
       {/* As 3 peças */}
       {pecas.map((p) => (
-        <PecaCard key={p.id} peca={p} onPatch={patchPeca} onPatchConteudo={patchConteudo} />
+        <PecaCard key={p.id} peca={p} fundos={fundos} onPatch={patchPeca} onPatchConteudo={patchConteudo} />
       ))}
     </div>
   );
 }
 
-function PecaCard({ peca, onPatch, onPatchConteudo }: {
+function PecaCard({ peca, fundos, onPatch, onPatchConteudo }: {
   peca: Peca;
+  fundos: { id: string; url: string; rotulo: string }[];
   onPatch: (id: string, patch: Partial<Peca>) => void;
   onPatchConteudo: (id: string, patch: Partial<Conteudo>) => void;
 }) {
@@ -189,6 +194,23 @@ function PecaCard({ peca, onPatch, onPatchConteudo }: {
     setGerando(false);
     if (r.ok && Array.isArray(j.urls)) setArtes(j.urls);
     else alert(j.error || 'Não foi possível gerar as artes.');
+  }
+  // escolhe o fundo da capa (foto da biblioteca, upload, ou tinta) e persiste na hora
+  async function escolherFundo(url: string) {
+    onPatchConteudo(peca.id, { bg: url });
+    const novoConteudo = { ...(peca.conteudo ?? {}), bg: url };
+    await fetch(`/api/painel/social/pecas/${peca.id}`, { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ conteudo: novoConteudo }) });
+  }
+  async function subirFundo(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+    const fd = new FormData();
+    fd.append('file', file);
+    const r = await fetch('/api/painel/upload', { method: 'POST', body: fd });
+    const j = await r.json().catch(() => ({}));
+    if (j.url) escolherFundo(j.url);
+    else alert(j.error || 'Falha ao subir a foto.');
   }
   async function gerarIA() {
     const temConteudo = peca.conteudo && Object.keys(peca.conteudo).length > 0;
@@ -269,6 +291,29 @@ function PecaCard({ peca, onPatch, onPatchConteudo }: {
                   legenda={peca.legenda} onLegenda={(v) => onPatch(peca.id, { legenda: v })} />
               </div>
             </details>
+          </div>
+        )}
+
+        {/* seletor de modelo visual (capa) — só carrossel/reel */}
+        {(peca.formato === 'carrossel' || peca.formato === 'reel') && (
+          <div>
+            <label className="block text-[12px] font-medium text-apple-tertiary mb-2">Modelo visual da capa — escolha antes de gerar as artes</label>
+            <div className="flex flex-wrap gap-2">
+              <button onClick={() => escolherFundo('')} title="Tinta (fundo preto, sem foto)"
+                className={`w-16 h-20 rounded-lg overflow-hidden border-2 flex items-center justify-center bg-apple-label ${!c.bg ? 'border-apple-accent' : 'border-transparent'}`}>
+                <span className="text-[9px] text-white/70">Tinta</span>
+              </button>
+              {fundos.map((f) => (
+                <button key={f.id} onClick={() => escolherFundo(f.url)} title={f.rotulo}
+                  className={`w-16 h-20 rounded-lg overflow-hidden border-2 ${c.bg === f.url ? 'border-apple-accent' : 'border-transparent'}`}>
+                  <img src={f.url} alt={f.rotulo} className="w-full h-full object-cover" />
+                </button>
+              ))}
+              <label className="w-16 h-20 rounded-lg border-2 border-dashed border-apple-separator flex items-center justify-center text-[10px] text-apple-secondary cursor-pointer hover:bg-apple-fill text-center px-1">
+                + Subir foto
+                <input type="file" accept="image/*" hidden onChange={subirFundo} />
+              </label>
+            </div>
           </div>
         )}
 

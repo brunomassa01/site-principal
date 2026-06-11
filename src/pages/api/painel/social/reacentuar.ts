@@ -45,7 +45,7 @@ export const POST: APIRoute = async ({ request }) => {
       tool_choice: { type: 'tool', name: 'acentuar' },
       messages: [{
         role: 'user',
-        content: `As frases abaixo (português brasileiro) estão SEM acentuação. Devolva a MESMA lista, na MESMA ordem e mesma quantidade, com acentos e cedilha corretos. NÃO altere nenhuma palavra, ordem, pontuação, número ou caixa — apenas adicione os acentos/ç que faltam.\n\n${JSON.stringify(lote.map((x) => x.texto))}`,
+        content: `Cada frase abaixo está em português brasileiro mas foi escrita SEM ACENTOS. Reescreva cada uma com a acentuação e a cedilha CORRETAS. Exemplos: "ninguem sabe" vira "ninguém sabe"; "relatorio de marketing" vira "relatório de marketing"; "1 milhao de views" vira "1 milhão de views"; "a lingua do negocio" vira "a língua do negócio". Mantenha exatamente as mesmas palavras, ordem, pontuação, números e caixa — só conserte os acentos que faltam. Devolva a lista corrigida, mesma ordem e mesma quantidade.\n\n${JSON.stringify(lote.map((x) => x.texto))}`,
       }],
     });
     const block = resp.content.find((b) => b.type === 'tool_use') as Anthropic.ToolUseBlock | undefined;
@@ -68,5 +68,5 @@ export const POST: APIRoute = async ({ request }) => {
     }
     processados++;
   }
-  return json({ ok: true, processados, restantes: restantesAntes - processados });
+  return json({ ok: true, processados, restantes: restantesAntes - processados, amostra: lote.slice(0, 3).map((x, i) => ({ orig: x.texto, novo: frases[i] ?? null })) });
 };
