@@ -129,7 +129,20 @@ export async function loadFontes(base: string) {
   return _fontes;
 }
 
-export async function renderPng(element: El, fontes: { name: string; data: ArrayBuffer; weight: number; style: 'normal' }[]): Promise<Buffer> {
-  const svg = await satori(element as never, { width: W, height: H, fonts: fontes as never });
-  return new Resvg(svg, { fitTo: { mode: 'width', value: W } }).render().asPng();
+export async function renderPng(element: El, fontes: { name: string; data: ArrayBuffer; weight: number; style: 'normal' }[], w = W, h = H): Promise<Buffer> {
+  const svg = await satori(element as never, { width: w, height: h, fonts: fontes as never });
+  return new Resvg(svg, { fitTo: { mode: 'width', value: w } }).render().asPng();
+}
+
+// capa de post de blog (16:9, 1280x720): fundo tinta + barra lime + título grande
+export function capaPostElement(titulo: string, kicker = 'BLOG'): El {
+  const CW = 1280, CH = 720;
+  return div({ width: CW, height: CH, display: 'flex', flexDirection: 'column', position: 'relative', fontFamily: 'Hanken', backgroundColor: INK, color: WHITE, padding: 72, justifyContent: 'space-between' }, [
+    topo(kicker, SITE),
+    div({ display: 'flex', flexDirection: 'column', maxWidth: 1040 }, [
+      div({ display: 'flex', width: 80, height: 12, backgroundColor: LIME, marginBottom: 30 }, []),
+      div({ display: 'flex', fontWeight: 900, fontSize: titulo.length > 70 ? 56 : 68, lineHeight: 1.03, letterSpacing: -2, color: WHITE }, [titulo]),
+    ]),
+    rodape(),
+  ]);
 }
