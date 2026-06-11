@@ -1,0 +1,27 @@
+---
+import PainelLayout from '../../../layouts/PainelLayout.astro';
+import SemanaEditor from '../../../components/painel/SemanaEditor.tsx';
+import { getSemana } from '../../../lib/content/social';
+
+export const prerender = false;
+
+const numero = parseInt(Astro.params.numero ?? '', 10);
+const semana = Number.isFinite(numero) ? await getSemana(numero) : null;
+if (!semana) return Astro.redirect('/painel/social');
+
+const semanaJson = {
+  numero: semana.numero,
+  inicio: semana.inicio ? new Date(semana.inicio).toISOString() : null,
+  cluster: semana.cluster,
+  ponteIa: semana.ponteIa, coringa: semana.coringa, slotReativo: semana.slotReativo,
+  observacoes: semana.observacoes, status: semana.status,
+  pecas: semana.pecas.map((p) => ({
+    id: p.id, formato: p.formato, gancho: p.gancho, lente: p.lente,
+    conteudo: p.conteudo, legenda: p.legenda, manychat: p.manychat,
+    diaPublicacao: p.diaPublicacao, status: p.status,
+  })),
+};
+---
+<PainelLayout titulo={`Semana ${semana.numero}`}>
+  <SemanaEditor client:load semana={semanaJson} />
+</PainelLayout>

@@ -176,9 +176,65 @@ export const agora = pgTable('agora', {
   updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' }).defaultNow().notNull(),
 });
 
+// ───────────────────────── Redes Sociais (Publicador) ─────────────────────────
+// Máquina editorial: calendário de 52 semanas, cada semana = 1 ideia → 3 formatos
+// (LinkedIn, carrossel IG, reel). Status: planejado → escrito → aprovado → publicado.
+
+export const socialClusters = pgTable('social_clusters', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  ordem: integer('ordem').notNull().default(0),
+  nome: text('nome').notNull(), // "Cap. 1 — O currículo do marketing"
+  capitulo: text('capitulo'),   // "Capítulo 1" | "Coringa" | "Epílogo"
+  semanaInicio: integer('semana_inicio'),
+  semanaFim: integer('semana_fim'),
+  palavrasChave: jsonb('palavras_chave').$type<string[]>().default([]),
+  leadMagnetUrl: text('lead_magnet_url'),
+  descricao: text('descricao'),
+  createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' }).defaultNow().notNull(),
+});
+
+export const socialSemanas = pgTable('social_semanas', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  numero: integer('numero').notNull().unique(), // 1..52
+  inicio: date('inicio', { mode: 'date' }),      // segunda-feira da semana
+  cluster: text('cluster'),                       // rótulo denormalizado (ex.: "Cap 1")
+  clusterId: uuid('cluster_id').references(() => socialClusters.id),
+  tema: text('tema'),
+  ponteIa: boolean('ponte_ia').notNull().default(false),
+  slotReativo: boolean('slot_reativo').notNull().default(false),
+  coringa: boolean('coringa').notNull().default(false),
+  observacoes: text('observacoes'),
+  status: text('status').notNull().default('planejado'), // planejado | em-producao | concluido
+  createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' }).defaultNow().notNull(),
+});
+
+export const socialPecas = pgTable('social_pecas', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  semanaId: uuid('semana_id').notNull().references(() => socialSemanas.id, { onDelete: 'cascade' }),
+  formato: text('formato').notNull(),  // linkedin | carrossel | reel
+  gancho: text('gancho'),               // ideia/gancho da pauta
+  lente: text('lente'),                 // conceito do livro usado como lente
+  conteudo: jsonb('conteudo'),          // estrutura por formato: {texto} | {slides[]} | {cenas[]}
+  legenda: text('legenda'),
+  manychat: text('manychat'),           // palavra-chave do Manychat
+  diaPublicacao: text('dia_publicacao'),// terca | quarta | quinta | sexta
+  status: text('status').notNull().default('planejado'), // planejado | escrito | aprovado | publicado
+  publicadoEm: timestamp('publicado_em', { withTimezone: true, mode: 'date' }),
+  urlPublicada: text('url_publicada'),  // link do post no ar (p/ casar métricas)
+  midiaUrls: jsonb('midia_urls').$type<string[]>().default([]),
+  metricas: jsonb('metricas'),          // {impressoes,curtidas,comentarios,compartilhamentos,cliques,salvos,atualizadoEm}
+  createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' }).defaultNow().notNull(),
+});
+
 // ───────────────────────── Tipos inferidos ─────────────────────────
 
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
 export type Post = typeof posts.$inferSelect;
 export type NewPost = typeof posts.$inferInsert;
+export type SocialCluster = typeof socialClusters.$inferSelect;
+export type SocialSemana = typeof socialSemanas.$inferSelect;
+export type SocialPeca = typeof socialPecas.$inferSelect;

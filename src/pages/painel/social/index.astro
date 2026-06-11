@@ -1,0 +1,82 @@
+---
+import PainelLayout from '../../../layouts/PainelLayout.astro';
+import SocialCalendario from '../../../components/painel/SocialCalendario.tsx';
+import { getSemanas, numeroSemanaDestaque, progresso } from '../../../lib/content/social';
+
+export const prerender = false;
+
+const semanas = await getSemanas();
+const destaque = numeroSemanaDestaque(semanas);
+const atual = semanas.find((s) => s.numero === destaque);
+const prog = progresso(semanas);
+
+const FMT_LABEL: Record<string, string> = { linkedin: 'LinkedIn', carrossel: 'Carrossel', reel: 'Reel' };
+const STATUS_LABEL: Record<string, string> = { planejado: 'Planejado', escrito: 'Escrito', aprovado: 'Aprovado', publicado: 'Publicado' };
+const STATUS_CLS: Record<string, string> = {
+  planejado: 'bg-gray-100 text-gray-500 border-gray-200',
+  escrito: 'bg-amber-50 text-amber-700 border-amber-200',
+  aprovado: 'bg-blue-50 text-blue-700 border-blue-200',
+  publicado: 'bg-green-50 text-green-700 border-green-200',
+};
+const fmtData = (d: Date | null) => (d ? new Date(d).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }) : '');
+
+// serializa p/ os componentes (datas viram ISO)
+const semanasJson = semanas.map((s) => ({
+  numero: s.numero, inicio: s.inicio ? new Date(s.inicio).toISOString() : null, cluster: s.cluster,
+  ponteIa: s.ponteIa, coringa: s.coringa, slotReativo: s.slotReativo, status: s.status,
+  pecas: s.pecas.map((p) => ({ formato: p.formato, status: p.status, gancho: p.gancho })),
+}));
+---
+<PainelLayout titulo="Redes Sociais">
+  <div class="flex items-center justify-between mb-1">
+    <h1 class="text-[24px] font-bold text-apple-label tracking-tight">Redes Sociais</h1>
+    <span class="text-[13px] text-apple-tertiary">Calendário editorial · 52 semanas</span>
+  </div>
+  <p class="text-[14px] text-apple-secondary mb-6">Uma ideia por semana, três formatos. Da pauta ao texto pronto pra publicar.</p>
+
+  <!-- Progresso -->
+  <div class="bg-white rounded-2xl shadow-card p-4 mb-6 flex flex-wrap items-center gap-4">
+    <span class="text-[13px] font-medium text-apple-label">Produção</span>
+    <div class="flex-1 flex h-2.5 rounded-full overflow-hidden bg-apple-fill min-w-[200px]">
+      <div class="bg-green-500" style={`width:${(prog.publicado / prog.total) * 100}%`}></div>
+      <div class="bg-blue-500" style={`width:${(prog.aprovado / prog.total) * 100}%`}></div>
+      <div class="bg-amber-400" style={`width:${(prog.escrito / prog.total) * 100}%`}></div>
+    </div>
+    <div class="flex items-center gap-3 text-[12px] text-apple-tertiary">
+      <span>✍ {prog.escrito} escritos</span>
+      <span>✓ {prog.aprovado} aprovados</span>
+      <span>🚀 {prog.publicado} publicados</span>
+      <span>de {prog.total}</span>
+    </div>
+  </div>
+
+  <!-- Semana em destaque -->
+  {atual && (
+    <div class="bg-white rounded-2xl shadow-card overflow-hidden mb-8 border border-apple-accent/20">
+      <div class="px-5 py-4 bg-apple-accent/5 flex flex-wrap items-center gap-3 border-b border-apple-separator/40">
+        <span class="text-[11px] font-bold uppercase tracking-wide text-apple-accent">Semana atual</span>
+        <h2 class="text-[18px] font-bold text-apple-label">Semana {atual.numero}</h2>
+        <span class="text-[13px] text-apple-tertiary">{fmtData(atual.inicio)}</span>
+        {atual.cluster && <span class="text-[12px] px-2 py-0.5 rounded-full bg-white text-apple-secondary border border-apple-separator/50">{atual.cluster}</span>}
+        {atual.ponteIa && <span class="text-[11px] px-2 py-0.5 rounded-full bg-violet-50 text-violet-700 border border-violet-200 font-medium">PONTE IA</span>}
+        <a href={`/painel/social/${atual.numero}`} class="ml-auto px-4 py-2 rounded-full bg-apple-label text-white text-[13px] font-medium hover:bg-black transition-colors">Abrir a semana →</a>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-apple-separator/40">
+        {atual.pecas.map((p) => (
+          <a href={`/painel/social/${atual.numero}`} class="block p-5 hover:bg-apple-fill transition-colors">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-[13px] font-semibold text-apple-label">{FMT_LABEL[p.formato] ?? p.formato}</span>
+              <span class={`text-[11px] px-2 py-0.5 rounded-full border font-medium ${STATUS_CLS[p.status] ?? ''}`}>{STATUS_LABEL[p.status] ?? p.status}</span>
+            </div>
+            <p class="text-[13px] text-apple-secondary leading-relaxed line-clamp-3">{p.gancho ?? 'Sem pauta'}</p>
+            {p.manychat && <p class="text-[11px] text-apple-tertiary mt-2">Manychat: {p.manychat}</p>}
+          </a>
+        ))}
+      </div>
+    </div>
+  )}
+
+  <!-- Calendário completo -->
+  <h2 class="text-[16px] font-semibold text-apple-label mb-3">Calendário completo</h2>
+  <SocialCalendario client:load semanas={semanasJson} destaque={destaque} />
+</PainelLayout>
