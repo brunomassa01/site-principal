@@ -18,7 +18,7 @@ const semanaJson = {
   pecas: semana.pecas.map((p) => ({
     id: p.id, formato: p.formato, gancho: p.gancho, lente: p.lente,
     conteudo: p.conteudo, legenda: p.legenda, manychat: p.manychat,
-    diaPublicacao: p.diaPublicacao, status: p.status,
+    diaPublicacao: p.diaPublicacao, status: p.status, midiaUrls: p.midiaUrls ?? [],
   })),
 };
 ---

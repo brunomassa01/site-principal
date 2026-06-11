@@ -30,7 +30,7 @@ function montarRoteiro(c: Conteudo): string {
 type Peca = {
   id: string; formato: string; gancho: string | null; lente: string | null;
   conteudo: Conteudo | null; legenda: string | null; manychat: string | null;
-  diaPublicacao: string | null; status: string;
+  diaPublicacao: string | null; status: string; midiaUrls: string[] | null;
 };
 type Semana = {
   numero: number; inicio: string | null; cluster: string | null;
@@ -133,6 +133,9 @@ function PecaCard({ peca, onPatch, onPatchConteudo }: {
   const [salvando, setSalvando] = useState(false);
   const [salvo, setSalvo] = useState(false);
   const [copiado, setCopiado] = useState(false);
+  const [enviando, setEnviando] = useState(false);
+  const [gerando, setGerando] = useState(false);
+  const [artes, setArtes] = useState<string[]>(peca.midiaUrls ?? []);
   const meta = FMT[peca.formato] ?? { label: peca.formato, icon: '•' };
 
   async function salvar() {
@@ -150,6 +153,25 @@ function PecaCard({ peca, onPatch, onPatchConteudo }: {
   async function copiar() {
     await navigator.clipboard.writeText(textoParaCopiar(peca));
     setCopiado(true); setTimeout(() => setCopiado(false), 1500);
+  }
+  async function enviarBlog() {
+    setEnviando(true);
+    const r = await fetch(`/api/painel/social/para-blog/${peca.id}`, { method: 'POST' });
+    const j = await r.json().catch(() => ({}));
+    setEnviando(false);
+    if (r.ok && j.id) {
+      if (confirm('Rascunho criado no blog. Abrir para revisar e publicar?')) window.location.href = `/painel/posts/${j.id}`;
+    } else {
+      alert(j.error || 'Não foi possível enviar para o blog.');
+    }
+  }
+  async function gerarArtes() {
+    setGerando(true);
+    const r = await fetch(`/api/painel/social/artes/${peca.id}`, { method: 'POST' });
+    const j = await r.json().catch(() => ({}));
+    setGerando(false);
+    if (r.ok && Array.isArray(j.urls)) setArtes(j.urls);
+    else alert(j.error || 'Não foi possível gerar as artes.');
   }
 
   const c = peca.conteudo ?? {};
@@ -221,15 +243,35 @@ function PecaCard({ peca, onPatch, onPatchConteudo }: {
         )}
 
         {/* ações */}
-        <div className="flex items-center gap-2 pt-1">
+        <div className="flex flex-wrap items-center gap-2 pt-1">
           <button onClick={salvar} disabled={salvando} className="px-4 py-2 rounded-full bg-apple-label text-white text-[13px] font-medium hover:bg-black disabled:opacity-60">
             {salvando ? 'Salvando…' : salvo ? 'Salvo ✓' : 'Salvar'}
           </button>
           <button onClick={copiar} className="px-4 py-2 rounded-full border border-apple-separator text-[13px] text-apple-secondary hover:bg-apple-fill">
             {copiado ? 'Copiado ✓' : 'Copiar texto'}
           </button>
-          <span className="text-[12px] text-apple-tertiary ml-auto">Gerar com IA e artes — em breve</span>
+          <button onClick={enviarBlog} disabled={enviando} className="px-4 py-2 rounded-full border border-apple-separator text-[13px] text-apple-secondary hover:bg-apple-fill disabled:opacity-60">
+            {enviando ? 'Enviando…' : '↗ Enviar para o blog'}
+          </button>
+          {(peca.formato === 'carrossel' || peca.formato === 'reel') && (
+            <button onClick={gerarArtes} disabled={gerando} className="px-4 py-2 rounded-full border border-apple-separator text-[13px] text-apple-secondary hover:bg-apple-fill disabled:opacity-60">
+              {gerando ? 'Gerando artes…' : '🎨 Gerar artes'}
+            </button>
+          )}
         </div>
+
+        {artes.length > 0 && (
+          <div className="pt-2">
+            <p className="text-[12px] font-medium text-apple-tertiary mb-2">Artes geradas ({artes.length})</p>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              {artes.map((url, i) => (
+                <a key={i} href={url} target="_blank" rel="noopener" className="block rounded-lg overflow-hidden border border-apple-separator/60 hover:shadow-card-hover transition-shadow">
+                  <img src={url} alt={`arte ${i + 1}`} className="w-full aspect-[4/5] object-cover" />
+                </a>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
