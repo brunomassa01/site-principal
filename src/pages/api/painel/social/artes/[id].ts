@@ -6,7 +6,7 @@ import { socialPecas } from '../../../../../lib/db/schema';
 import { neon } from '@neondatabase/serverless';
 import { json } from '../../../../../lib/http';
 import { carrosselElements, reelCoverElement, loadFontes, renderPng } from '../../../../../lib/marca/render';
-import { gerarImagemEstilo, promptDoEstilo } from '../../../../../lib/social/imagem';
+import { gerarImagemEstilo } from '../../../../../lib/social/imagem';
 
 export const prerender = false;
 
@@ -28,9 +28,9 @@ export const POST: APIRoute = async ({ params, request }) => {
     // Se a peça tem um ESTILO escolhido (id de fundo), a IA gera uma imagem de capa NOVA nesse estilo.
     if (conteudo.estilo && conteudo.estilo !== 'upload') {
       const sql = neon(process.env.DATABASE_URL!);
-      const linhas = (await sql`SELECT rotulo FROM social_fundos WHERE id = ${conteudo.estilo}`) as { rotulo: string }[];
+      const linhas = (await sql`SELECT url, rotulo FROM social_fundos WHERE id = ${conteudo.estilo}`) as { url: string; rotulo: string }[];
       const tema = (peca.gancho ?? conteudo.slides?.[0]?.titulo ?? '').toString();
-      const img = await gerarImagemEstilo(promptDoEstilo(linhas[0]?.rotulo ?? ''), tema);
+      const img = await gerarImagemEstilo(linhas[0]?.url ?? '', tema, linhas[0]?.rotulo ?? '');
       if ('error' in img) return json({ error: img.error }, 502);
       conteudo.bg = img.url;
       await db.update(socialPecas).set({ conteudo: conteudo as never, updatedAt: new Date() }).where(eq(socialPecas.id, id));

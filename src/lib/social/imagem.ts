@@ -26,18 +26,46 @@ export function promptDoEstilo(rotulo: string): string {
   return `${BASE_ESTILO} Scene: ${cena}.`;
 }
 
-export async function gerarImagemEstilo(promptEstilo: string, tema: string): Promise<Resultado> {
+// Baixa a imagem de referência e devolve base64 + mime (pra mandar pro Gemini como referência VISUAL).
+async function carregarRef(url: string): Promise<{ data: string; mime: string } | null> {
+  try {
+    const r = await fetch(url);
+    if (!r.ok) return null;
+    const mime = r.headers.get('content-type') || 'image/jpeg';
+    const buf = Buffer.from(await r.arrayBuffer());
+    return { data: buf.toString('base64'), mime };
+  } catch {
+    return null;
+  }
+}
+
+// refUrl = a foto de referência (o estilo escolhido). A IA OLHA essa foto e gera uma imagem NOVA no mesmo estilo.
+// Se a referência não carregar, cai no prompt de texto (promptDoEstilo(rotulo)).
+export async function gerarImagemEstilo(refUrl: string, tema: string, rotulo = ''): Promise<Resultado> {
   const key = process.env.GEMINI_API_KEY;
   if (!key) return { error: 'Gerador de imagem não configurado (falta GEMINI_API_KEY no Vercel).' };
 
-  // Prompt em inglês (modelos de imagem respondem melhor) — estilo manda, tema entra de forma sutil.
-  const prompt = [
-    promptEstilo,
-    'Vertical 4:5 full-bleed social media cover background.',
-    'Leave generous negative space and dark areas so white text can be overlaid on top.',
-    'No text, no letters, no words, no logos, no watermark.',
-    tema ? `Subtly evoke this theme without being literal: "${tema}".` : '',
-  ].filter(Boolean).join(' ');
+  const ref = refUrl ? await carregarRef(refUrl) : null;
+
+  const prompt = ref
+    ? [
+        'Use the provided image ONLY as a STYLE reference: match its mood, lighting, black-and-white editorial treatment, film grain, contrast and overall composition feel.',
+        'Generate a COMPLETELY NEW and DIFFERENT image in that same visual style — a new but related scene. Do NOT reproduce, copy or just recolor the reference.',
+        'Vertical 4:5 full-bleed social media cover background. Generous dark negative space so white text can be overlaid on top.',
+        'No text, no letters, no words, no logos, no watermark.',
+        tema ? `Subtly evoke this theme without being literal: "${tema}".` : '',
+      ].filter(Boolean).join(' ')
+    : [
+        promptDoEstilo(rotulo),
+        'Vertical 4:5 full-bleed social media cover background.',
+        'Leave generous negative space and dark areas so white text can be overlaid on top.',
+        'No text, no letters, no words, no logos, no watermark.',
+        tema ? `Subtly evoke this theme without being literal: "${tema}".` : '',
+      ].filter(Boolean).join(' ');
+
+  const parts: any[] = [];
+  if (ref) parts.push({ inlineData: { mimeType: ref.mime, data: ref.data } });
+  parts.push({ text: prompt });
 
   let resp: Response;
   try {
@@ -45,7 +73,7 @@ export async function gerarImagemEstilo(promptEstilo: string, tema: string): Pro
       method: 'POST',
       headers: { 'x-goog-api-key': key, 'content-type': 'application/json' },
       body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
+        contents: [{ parts }],
         generationConfig: { responseModalities: ['IMAGE'] },
       }),
     });
@@ -61,8 +89,8 @@ export async function gerarImagemEstilo(promptEstilo: string, tema: string): Pro
   let data: any;
   try { data = await resp.json(); } catch { return { error: 'Resposta inválida do Gemini.' }; }
 
-  const parts = data?.candidates?.[0]?.content?.parts ?? [];
-  const img = parts
+  const outParts = data?.candidates?.[0]?.content?.parts ?? [];
+  const img = outParts
     .map((p: any) => p?.inlineData ?? p?.inline_data)
     .find((d: any) => d?.data);
   if (!img?.data) {

@@ -5,6 +5,29 @@ import Anthropic from '@anthropic-ai/sdk';
 
 const MODELO = 'claude-sonnet-4-6';
 
+// Pós-processador determinístico do humanizer: mata travessão (muleta de IA nº1) e limpa pontuação.
+function humanizar(t: string): string {
+  if (!t) return t;
+  return t
+    .replace(/^[ \t]*[—–][ \t]*/gm, '• ') // travessão de bullet no começo da linha → vira bullet
+    .replace(/\s*[—–]\s*/g, ', ') // travessão no meio da frase → vírgula
+    .replace(/,\s*,/g, ',')
+    .replace(/\s+([.,;:!?])/g, '$1')
+    .replace(/[ \t]{2,}/g, ' ')
+    .trim();
+}
+// Aplica o humanizar em todas as strings de um objeto/array gerado.
+function humanizarTudo<T>(v: T): T {
+  if (typeof v === 'string') return humanizar(v) as unknown as T;
+  if (Array.isArray(v)) return v.map((x) => humanizarTudo(x)) as unknown as T;
+  if (v && typeof v === 'object') {
+    const o: Record<string, unknown> = {};
+    for (const k of Object.keys(v as Record<string, unknown>)) o[k] = humanizarTudo((v as Record<string, unknown>)[k]);
+    return o as unknown as T;
+  }
+  return v;
+}
+
 const PERSONA = `Você é o ghostwriter do Bruno Massa e escreve EXATAMENTE na voz dele. O texto precisa passar como escrito de próprio punho — se soar como IA, falhou.
 
 QUEM É O BRUNO
@@ -23,8 +46,10 @@ FILTRO HUMANIZER — a regra mais importante, NUNCA viole:
 - Sem trio de adjetivos.
 - Sem gerúndio de profundidade falsa ("desbloqueando", "potencializando", "alavancando").
 - Sem conclusão genérica e animadora ("e é assim que você vence").
-- Sem excesso de travessão (—). Prefira ponto, vírgula ou reescreva.
-- Não repita a fórmula "Não é X. É Y." em todo fechamento.
+- ZERO travessão (— ou –). É proibido. Use ponto ou vírgula, ou reescreva a frase.
+- Não use a fórmula "Não é X. É Y." nem variações dela.
+- PROIBIDAS estas muletas de IA e clichês de copy: "a verdade é que", "vamos ser honestos", "no fim do dia", "mais do que nunca", "em um mundo cada vez mais", "o segredo é", "a chave para", "isso muda tudo", "spoiler:", "plot twist", "a real é que", "bora?", "aqui vai um", "pode parecer clichê, mas". Se uma frase soa como legenda motivacional genérica, troque pela experiência concreta do Bruno.
+- ANTES de devolver, releia e corte qualquer frase que você não diria em voz alta numa conversa real.
 
 DISCRIÇÃO (regra de ouro): NUNCA cite número, resultado ou caso identificável do empregador atual (Grupo Quali). Pode usar: histórias anonimizadas, casos públicos, os livros, os SaaS próprios e a experiência antiga.
 
@@ -138,7 +163,7 @@ Escreva o ${peca.formato === 'linkedin' ? 'post de LinkedIn' : peca.formato} no 
     conteudo = { capa: out.capa, duracao: '~60s · 8 cenas', roteiro: out.roteiro, cenas: out.cenas };
     legenda = out.legenda as string;
   }
-  return { conteudo, legenda, usage: resp.usage };
+  return { conteudo: humanizarTudo(conteudo), legenda: legenda === undefined ? undefined : humanizar(legenda), usage: resp.usage };
 }
 
 // Gera a RESPOSTA AUTOMÁTICA do Manychat (DM disparado quando o seguidor comenta a palavra-chave).
@@ -195,5 +220,5 @@ Escreva as duas partes do DM (pedido de automação + entrega). Use a ferramenta
   const block = resp.content.find((b) => b.type === 'tool_use') as Anthropic.ToolUseBlock | undefined;
   if (!block) throw new Error('A IA não retornou a resposta.');
   const out = block.input as { pedido?: string; entrega?: string };
-  return { pedido: out.pedido ?? '', entrega: out.entrega ?? '', usage: resp.usage };
+  return { pedido: humanizar(out.pedido ?? ''), entrega: humanizar(out.entrega ?? ''), usage: resp.usage };
 }
