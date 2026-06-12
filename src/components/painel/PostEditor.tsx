@@ -83,6 +83,7 @@ export default function PostEditor({ id }: Props) {
   const [salvando, setSalvando] = useState(false);
   const [erro, setErro] = useState('');
   const [enviandoCapa, setEnviandoCapa] = useState(false);
+  const [gerandoCapaIA, setGerandoCapaIA] = useState(false);
   const [avancado, setAvancado] = useState(false);
 
   useEffect(() => {
@@ -126,6 +127,15 @@ export default function PostEditor({ id }: Props) {
     const url = await enviarImagem(file);
     setEnviandoCapa(false);
     if (url) setF((p) => ({ ...p, capa_url: url }));
+  }
+  async function gerarCapaIA() {
+    if (!f.titulo.trim()) { alert('Escreva o título primeiro — a IA usa ele como tema da capa.'); return; }
+    setGerandoCapaIA(true);
+    const r = await fetch('/api/painel/posts/gerar-capa', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ titulo: f.titulo }) });
+    const j = await r.json().catch(() => ({}));
+    setGerandoCapaIA(false);
+    if (j.url) setF((p) => ({ ...p, capa_url: j.url }));
+    else alert(j.error || 'Não foi possível gerar a capa.');
   }
 
   async function salvar(situacao?: string) {
@@ -227,19 +237,25 @@ export default function PostEditor({ id }: Props) {
             {f.capa_url ? (
               <div>
                 <img src={f.capa_url} alt="capa" className="w-full h-36 object-cover rounded-lg border border-apple-separator" />
-                <div className="flex gap-3 mt-2 text-[13px]">
+                <div className="flex gap-3 mt-2 text-[13px] flex-wrap">
                   <label className="text-apple-accent cursor-pointer hover:underline">
                     Trocar
                     <input type="file" accept="image/*" hidden onChange={trocarCapa} />
                   </label>
+                  <button onClick={gerarCapaIA} disabled={gerandoCapaIA} className="text-violet-600 hover:underline disabled:opacity-60">{gerandoCapaIA ? 'Gerando…' : '✨ Gerar outra com IA'}</button>
                   <button onClick={() => setF((p) => ({ ...p, capa_url: '' }))} className="text-red-600 hover:underline">Remover</button>
                 </div>
               </div>
             ) : (
-              <label className="flex items-center justify-center h-24 rounded-lg border-2 border-dashed border-apple-separator text-[13px] text-apple-secondary cursor-pointer hover:bg-apple-fill">
-                {enviandoCapa ? 'Enviando…' : '+ Enviar imagem do computador'}
-                <input type="file" accept="image/*" hidden onChange={trocarCapa} />
-              </label>
+              <div className="space-y-2">
+                <button onClick={gerarCapaIA} disabled={gerandoCapaIA} className="w-full flex items-center justify-center h-24 rounded-lg border-2 border-dashed border-violet-300 text-[13px] font-medium text-violet-700 hover:bg-violet-50 disabled:opacity-60">
+                  {gerandoCapaIA ? 'Gerando capa com IA…' : '✨ Gerar capa com IA (usa o título)'}
+                </button>
+                <label className="flex items-center justify-center h-12 rounded-lg border-2 border-dashed border-apple-separator text-[13px] text-apple-secondary cursor-pointer hover:bg-apple-fill">
+                  {enviandoCapa ? 'Enviando…' : '+ ou enviar imagem do computador'}
+                  <input type="file" accept="image/*" hidden onChange={trocarCapa} />
+                </label>
+              </div>
             )}
           </div>
           <div>

@@ -115,3 +115,47 @@ export async function gerarImagemEstilo(refUrl: string, tema: string, rotulo = '
     return { error: 'Imagem gerada, mas falhou ao salvar no Blob: ' + String((e as Error)?.message ?? e) };
   }
 }
+
+// Gera uma capa editorial 16:9 pro blog (P&B, na cara da marca), tematizada pelo título do post.
+export async function gerarCapaBlog(titulo: string): Promise<Resultado> {
+  const key = process.env.GEMINI_API_KEY;
+  if (!key) return { error: 'Gerador de imagem não configurado (falta GEMINI_API_KEY no Vercel).' };
+  const prompt = [
+    'Black and white editorial cover photograph, cinematic and minimal, premium magazine aesthetic, soft directional light, subtle 35mm film grain, monochrome, no people.',
+    'Wide 16:9 landscape that FILLS the entire frame with clear visible detail and texture; balanced exposure, not mostly black or empty.',
+    'It is a real photographic image, never a chart, diagram, graphic, illustration or text.',
+    'No text, no letters, no words, no logos, no watermark.',
+    titulo ? `Abstractly and loosely evoke the theme of an article titled: "${titulo}".` : '',
+  ].filter(Boolean).join(' ');
+
+  let resp: Response;
+  try {
+    resp = await fetch(ENDPOINT, {
+      method: 'POST',
+      headers: { 'x-goog-api-key': key, 'content-type': 'application/json' },
+      body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig: { responseModalities: ['IMAGE'] } }),
+    });
+  } catch (e) {
+    return { error: 'Falha de rede ao chamar o Gemini: ' + String((e as Error)?.message ?? e) };
+  }
+  if (!resp.ok) {
+    const corpo = await resp.text().catch(() => '');
+    return { error: `Gemini ${resp.status}: ${corpo.slice(0, 300)}` };
+  }
+  let data: any;
+  try { data = await resp.json(); } catch { return { error: 'Resposta inválida do Gemini.' }; }
+  const outParts = data?.candidates?.[0]?.content?.parts ?? [];
+  const img = outParts.map((p: any) => p?.inlineData ?? p?.inline_data).find((d: any) => d?.data);
+  if (!img?.data) {
+    const motivo = data?.promptFeedback?.blockReason || data?.candidates?.[0]?.finishReason || 'sem imagem na resposta';
+    return { error: `Gemini não devolveu imagem (${motivo}).` };
+  }
+  try {
+    const blob = await put('posts/capa-ia.png', Buffer.from(img.data, 'base64'), {
+      access: 'public', addRandomSuffix: true, contentType: img.mimeType ?? img.mime_type ?? 'image/png',
+    });
+    return { url: blob.url };
+  } catch (e) {
+    return { error: 'Capa gerada, mas falhou ao salvar no Blob: ' + String((e as Error)?.message ?? e) };
+  }
+}
