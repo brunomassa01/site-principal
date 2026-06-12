@@ -13,6 +13,9 @@ type Conteudo = {
   cenas?: Cena[];
   roteiro?: string;
   notas?: string;
+  tag?: string;
+  titulo?: string;
+  subtitulo?: string;
   bg?: string;
   estilo?: string;
   refUpload?: string;
@@ -48,6 +51,7 @@ const FMT: Record<string, { label: string; icon: string }> = {
   linkedin: { label: 'LinkedIn', icon: 'in' },
   carrossel: { label: 'Carrossel Instagram', icon: '▦' },
   reel: { label: 'Reel', icon: '►' },
+  post: { label: 'Post único Instagram', icon: '◻' },
 };
 const STATUS = ['planejado', 'escrito', 'aprovado', 'publicado'];
 const STATUS_LABEL: Record<string, string> = { planejado: 'Planejado', escrito: 'Escrito', aprovado: 'Aprovado', publicado: 'Publicado' };
@@ -69,6 +73,10 @@ function textoParaCopiar(p: Peca): string {
       return [`— Slide ${s.n ?? ''} —`, cab, s.subtitulo, s.texto, s.assinatura].filter(Boolean).join('\n');
     }).join('\n\n');
     return [slides, p.legenda ? `\n\nLegenda:\n${p.legenda}` : ''].join('');
+  }
+  if (p.formato === 'post') {
+    const cab = [c.tag, c.titulo].filter(Boolean).join(' · ');
+    return [cab, c.subtitulo, p.legenda ? `\n\nLegenda:\n${p.legenda}` : ''].filter(Boolean).join('\n');
   }
   if (p.formato === 'reel') {
     const base = c.roteiro && c.roteiro.trim() ? c.roteiro.trim() : montarRoteiro(c);
@@ -150,6 +158,18 @@ export default function SemanaEditor({ semana }: { semana: Semana }) {
     }
     setGerandoTodos(false);
   }
+  async function adicionarPost() {
+    const r = await fetch('/api/painel/social/pecas', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ numero: semana.numero, formato: 'post' }) });
+    const j = await r.json().catch(() => ({}));
+    if (r.ok && j.id) {
+      setPecas((ps) => [...ps, { id: j.id, formato: 'post', gancho: j.gancho ?? null, lente: j.lente ?? null, conteudo: j.conteudo ?? null, legenda: j.legenda ?? null, manychat: j.manychat ?? null, diaPublicacao: j.diaPublicacao ?? null, status: j.status ?? 'planejado', midiaUrls: j.midiaUrls ?? [] }]);
+    } else alert(j.error || 'Não foi possível adicionar o post.');
+  }
+  async function removerPeca(id: string) {
+    if (!confirm('Remover esta peça? Esta ação não pode ser desfeita.')) return;
+    await fetch(`/api/painel/social/pecas/${id}`, { method: 'DELETE' });
+    setPecas((ps) => ps.filter((p) => p.id !== id));
+  }
 
   return (
     <div className="space-y-5">
@@ -180,10 +200,14 @@ export default function SemanaEditor({ semana }: { semana: Semana }) {
         <p className="text-[13px] text-apple-secondary bg-apple-fill rounded-lg px-3 py-2">📌 {semana.observacoes}</p>
       )}
 
-      {/* As 3 peças */}
+      {/* As peças da semana */}
       {pecas.map((p) => (
-        <PecaCard key={p.id} peca={p} fundos={fundos} onPatch={patchPeca} onPatchConteudo={patchConteudo} />
+        <PecaCard key={p.id} peca={p} fundos={fundos} onPatch={patchPeca} onPatchConteudo={patchConteudo} onRemove={removerPeca} />
       ))}
+
+      <button onClick={adicionarPost} className="w-full py-3 rounded-2xl border-2 border-dashed border-apple-separator text-[14px] text-apple-secondary hover:bg-apple-fill hover:text-apple-label transition-colors">
+        + Adicionar post único (Instagram)
+      </button>
 
       {/* Resposta do Manychat — card próprio da semana (a palavra-chave é a mesma p/ todos os posts) */}
       {pecas.some((p) => p.formato === 'carrossel') && (
@@ -237,11 +261,12 @@ function ManychatBloco({ peca, onPatchConteudo }: { peca: Peca; onPatchConteudo:
   );
 }
 
-function PecaCard({ peca, fundos, onPatch, onPatchConteudo }: {
+function PecaCard({ peca, fundos, onPatch, onPatchConteudo, onRemove }: {
   peca: Peca;
   fundos: { id: string; url: string; rotulo: string }[];
   onPatch: (id: string, patch: Partial<Peca>) => void;
   onPatchConteudo: (id: string, patch: Partial<Conteudo>) => void;
+  onRemove: (id: string) => void;
 }) {
   const [salvando, setSalvando] = useState(false);
   const [salvo, setSalvo] = useState(false);
@@ -385,6 +410,9 @@ function PecaCard({ peca, fundos, onPatch, onPatchConteudo }: {
             </button>
           ))}
         </div>
+        {peca.formato === 'post' && (
+          <button onClick={() => onRemove(peca.id)} title="Remover este post" className="text-[12px] text-red-600 hover:underline">✕ remover</button>
+        )}
       </div>
 
       <div className="p-4 sm:p-5 space-y-4">
@@ -435,8 +463,29 @@ function PecaCard({ peca, fundos, onPatch, onPatchConteudo }: {
           </div>
         )}
 
-        {/* seletor de modelo visual (capa) — só carrossel/reel */}
-        {(peca.formato === 'carrossel' || peca.formato === 'reel') && (
+        {peca.formato === 'post' && (
+          <div className="space-y-3">
+            <div>
+              <label className="block text-[12px] font-medium text-apple-tertiary mb-1">Tag (kicker, opcional)</label>
+              <input className={inputCls} placeholder="Ex.: GESTÃO DE MARKETING" value={c.tag ?? ''} onChange={(e) => onPatchConteudo(peca.id, { tag: e.target.value })} />
+            </div>
+            <div>
+              <label className="block text-[12px] font-medium text-apple-tertiary mb-1">Título da imagem (o gancho grande)</label>
+              <textarea className={`${inputCls} min-h-[70px] font-medium`} placeholder="A frase forte que vai grande na imagem…" value={c.titulo ?? ''} onChange={(e) => onPatchConteudo(peca.id, { titulo: e.target.value })} />
+            </div>
+            <div>
+              <label className="block text-[12px] font-medium text-apple-tertiary mb-1">Subtítulo (linha de apoio, opcional)</label>
+              <input className={inputCls} placeholder="Uma linha que explica o gancho" value={c.subtitulo ?? ''} onChange={(e) => onPatchConteudo(peca.id, { subtitulo: e.target.value })} />
+            </div>
+            <div>
+              <label className="block text-[12px] font-medium text-apple-tertiary mb-1">Legenda do post</label>
+              <textarea className={`${inputCls} min-h-[100px]`} placeholder="A legenda pro feed…" value={peca.legenda ?? ''} onChange={(e) => onPatch(peca.id, { legenda: e.target.value })} />
+            </div>
+          </div>
+        )}
+
+        {/* seletor de modelo visual (capa) — carrossel/reel/post */}
+        {(peca.formato === 'carrossel' || peca.formato === 'reel' || peca.formato === 'post') && (
           <div>
             <label className="block text-[12px] font-medium text-apple-tertiary mb-1">Estilo visual da capa</label>
             <p className="text-[11px] text-apple-tertiary mb-2">Escolha um <strong>estilo</strong> (✨): a IA cria uma imagem nova ao "Gerar artes". <strong>Sua própria foto também vira referência</strong> — ou use ela como está. Ou Tinta (preto).</p>
@@ -494,7 +543,7 @@ function PecaCard({ peca, fundos, onPatch, onPatchConteudo }: {
           <button onClick={enviarBlog} disabled={enviando} className="px-4 py-2 rounded-full border border-apple-separator text-[13px] text-apple-secondary hover:bg-apple-fill disabled:opacity-60">
             {enviando ? 'Enviando…' : '↗ Enviar para o blog'}
           </button>
-          {(peca.formato === 'carrossel' || peca.formato === 'reel') && (
+          {(peca.formato === 'carrossel' || peca.formato === 'reel' || peca.formato === 'post') && (
             <button onClick={gerarArtes} disabled={gerando} className="px-4 py-2 rounded-full border border-apple-separator text-[13px] text-apple-secondary hover:bg-apple-fill disabled:opacity-60">
               {gerando ? 'Gerando…' : artes.length ? '🎨 Gerar outra' : '🎨 Gerar artes'}
             </button>

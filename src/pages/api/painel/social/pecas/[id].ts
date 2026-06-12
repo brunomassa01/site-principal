@@ -29,3 +29,8 @@ const upd: APIRoute = async ({ params, request }) => {
 
 export const PUT = upd;
 export const PATCH = upd;
+
+export const DELETE: APIRoute = async ({ params }) => {
+  await db.delete(socialPecas).where(eq(socialPecas.id, params.id!));
+  return json({ ok: true });
+};

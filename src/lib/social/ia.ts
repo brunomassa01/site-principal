@@ -72,6 +72,7 @@ Já viu (ou ocupou) uma vaga dessas? Me conta como terminou.
 """`,
   carrossel: `EXEMPLO de carrossel dele (gabarito de estrutura): 9 slides. Slide 1 é a CAPA (tag curta em caixa-alta + título-gancho curto entre aspas + subtítulo explicando). Slides 2 a 7-8 são as ideias, cada um com um título curto e 1-2 frases de texto. O penúltimo amarra o conceito do livro. O último é a CTA com a pergunta + "Comenta {PALAVRA} que eu te mando...". Frases curtas, afiadas, uma ideia por slide.`,
   reel: `EXEMPLO de reel dele (gabarito): vídeo de ~60s, 8 cenas curtas. Capa com frase-gancho. Cada cena tem uma FALA (como ele diria, natural, falada) e uma LEGENDA destacada de 2-4 palavras em caixa-alta. Abre com gancho forte, desenvolve, fecha com a CTA "Comenta {PALAVRA}...". Também entregue um "roteiro" em texto corrido (as falas em sequência, pra ele ler e gravar).`,
+  post: `EXEMPLO de post único dele (gabarito): UMA imagem só, não é carrossel. Uma tag curta em caixa-alta, um título-gancho curto e afiado (a tese da imagem, no estilo dele), um subtítulo de uma linha que explica, e a legenda pro feed. É o formato mais direto: uma ideia, uma imagem, uma legenda.`,
 };
 
 type Peca = { formato: string; gancho: string | null; lente: string | null; manychat: string | null };
@@ -118,6 +119,20 @@ const TOOLS: Record<string, Anthropic.Tool> = {
       required: ['capa', 'roteiro', 'cenas', 'legenda'],
     },
   },
+  post: {
+    name: 'post_unico',
+    description: 'Entrega um post único do Instagram (uma imagem só + legenda).',
+    input_schema: {
+      type: 'object',
+      properties: {
+        tag: { type: 'string', description: 'kicker curto em caixa-alta (ex.: GESTÃO DE MARKETING)' },
+        titulo: { type: 'string', description: 'a frase-gancho forte e curta que vai grande na imagem, no estilo do Bruno' },
+        subtitulo: { type: 'string', description: 'uma linha curta de apoio que explica o gancho' },
+        legenda: { type: 'string', description: 'a legenda do post pro Instagram, na voz do Bruno' },
+      },
+      required: ['titulo', 'legenda'],
+    },
+  },
 };
 
 export async function gerarConteudo(peca: Peca, semana: Semana): Promise<{ conteudo: Record<string, unknown>; legenda?: string; usage?: { input_tokens: number; output_tokens: number } }> {
@@ -158,6 +173,9 @@ Escreva o ${peca.formato === 'linkedin' ? 'post de LinkedIn' : peca.formato} no 
     conteudo = { texto: out.texto };
   } else if (peca.formato === 'carrossel') {
     conteudo = { formato: '9 slides · 1080x1350', slides: (out.slides as unknown[]) ?? [] };
+    legenda = out.legenda as string;
+  } else if (peca.formato === 'post') {
+    conteudo = { tag: out.tag, titulo: out.titulo, subtitulo: out.subtitulo };
     legenda = out.legenda as string;
   } else {
     conteudo = { capa: out.capa, duracao: '~60s · 8 cenas', roteiro: out.roteiro, cenas: out.cenas };

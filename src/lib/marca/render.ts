@@ -19,7 +19,7 @@ const div = (style: Record<string, unknown>, children: unknown): El => ({ type: 
 const img = (src: string, style: Record<string, unknown>): El => ({ type: 'img', props: { src, style } });
 
 type Slide = { n?: number; tipo?: string; tag?: string; titulo?: string; subtitulo?: string; texto?: string; assinatura?: string };
-type Conteudo = { slides?: Slide[]; capa?: string; bg?: string; cenas?: { titulo?: string; legenda?: string }[] };
+type Conteudo = { slides?: Slide[]; capa?: string; bg?: string; tag?: string; titulo?: string; subtitulo?: string; cenas?: { titulo?: string; legenda?: string }[] };
 
 const HANDLE = '@brunormassa';
 const SITE = 'brunomassa.online';
@@ -103,6 +103,11 @@ export function carrosselElements(conteudo: Conteudo, manychat?: string): El[] {
 export function reelCoverElement(conteudo: Conteudo): El {
   // a capa do reel = headline selecionado sobre tinta/foto
   return capaEl({ tag: 'REEL', titulo: conteudo.capa || '', subtitulo: '' }, conteudo.bg);
+}
+
+export function postUnicoElement(conteudo: Conteudo): El {
+  // post único = uma imagem só, no estilo da capa (headline selecionado sobre tinta/foto)
+  return capaEl({ tag: conteudo.tag || '', titulo: conteudo.titulo || '', subtitulo: conteudo.subtitulo || '' }, conteudo.bg);
 }
 
 // ---- fontes (cacheadas) ----

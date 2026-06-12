@@ -10,9 +10,9 @@ export const prerender = false;
 
 type Slide = { titulo?: string; subtitulo?: string; texto?: string; tag?: string };
 type Cena = { fala?: string };
-type Conteudo = { texto?: string; slides?: Slide[]; capa?: string; roteiro?: string; cenas?: Cena[] };
+type Conteudo = { texto?: string; slides?: Slide[]; capa?: string; roteiro?: string; cenas?: Cena[]; tag?: string; titulo?: string; subtitulo?: string };
 
-function transformar(peca: { formato: string; gancho: string | null; manychat: string | null; conteudo: Conteudo | null }, cluster: string | null) {
+function transformar(peca: { formato: string; gancho: string | null; manychat: string | null; legenda: string | null; conteudo: Conteudo | null }, cluster: string | null) {
   const c = peca.conteudo ?? {};
   const tags = [cluster, peca.manychat, 'Redes sociais'].filter(Boolean) as string[];
   const limpa = (s: string) => s.replace(/\s*\[[^\]]*\]\s*/g, ' ').replace(/\s+/g, ' ').trim();
@@ -37,6 +37,10 @@ function transformar(peca: { formato: string; gancho: string | null; manychat: s
       })
       .filter(Boolean)
       .join('\n\n');
+  } else if (peca.formato === 'post') {
+    titulo = limpa((c.titulo || peca.gancho || 'Post').replace(/["]/g, '')).slice(0, 120);
+    resumo = (c.subtitulo || peca.gancho || '').slice(0, 240);
+    md = [c.titulo ? `## ${c.titulo}` : '', c.subtitulo ?? '', peca.legenda ?? ''].filter(Boolean).join('\n\n');
   } else {
     // reel
     titulo = limpa(c.capa || peca.gancho || 'Reel').slice(0, 120);

@@ -5,7 +5,7 @@ import { db } from '../../../../../lib/db';
 import { socialPecas } from '../../../../../lib/db/schema';
 import { neon } from '@neondatabase/serverless';
 import { json } from '../../../../../lib/http';
-import { carrosselElements, reelCoverElement, loadFontes, renderPng } from '../../../../../lib/marca/render';
+import { carrosselElements, reelCoverElement, postUnicoElement, loadFontes, renderPng } from '../../../../../lib/marca/render';
 import { gerarImagemEstilo } from '../../../../../lib/social/imagem';
 
 export const prerender = false;
@@ -18,17 +18,18 @@ export const POST: APIRoute = async ({ params, request }) => {
   const [peca] = await db.select().from(socialPecas).where(eq(socialPecas.id, id));
   if (!peca) return json({ error: 'Peça não encontrada.' }, 404);
 
-  const conteudo = (peca.conteudo ?? {}) as { slides?: { titulo?: string }[]; capa?: string; bg?: string; estilo?: string; refUpload?: string; refNota?: string };
+  const conteudo = (peca.conteudo ?? {}) as { slides?: { titulo?: string }[]; capa?: string; bg?: string; titulo?: string; estilo?: string; refUpload?: string; refNota?: string };
   if (peca.formato === 'linkedin') return json({ error: 'LinkedIn é texto puro — não tem arte de imagem.' }, 400);
   if (peca.formato === 'carrossel' && !conteudo.slides?.length) return json({ error: 'Monte os slides antes de gerar as artes.' }, 400);
   if (peca.formato === 'reel' && !conteudo.capa) return json({ error: 'Defina a capa do reel antes de gerar a arte.' }, 400);
+  if (peca.formato === 'post' && !conteudo.titulo) return json({ error: 'Escreva o título do post antes de gerar a arte.' }, 400);
 
   const base = new URL(request.url).origin;
   try {
     // Estilo escolhido: a IA gera uma capa NOVA a partir de uma referência visual.
     // 'ref' = foto que o Bruno subiu (conteudo.refUpload). Senão, é um id de fundo da biblioteca.
     if (conteudo.estilo && conteudo.estilo !== 'upload') {
-      const tema = (peca.gancho ?? conteudo.slides?.[0]?.titulo ?? '').toString();
+      const tema = (peca.gancho ?? conteudo.titulo ?? conteudo.slides?.[0]?.titulo ?? '').toString();
       let refUrl = '';
       let rotulo = '';
       if (conteudo.estilo === 'ref') {
@@ -48,6 +49,8 @@ export const POST: APIRoute = async ({ params, request }) => {
     const fontes = await loadFontes(base);
     const els = peca.formato === 'carrossel'
       ? carrosselElements(conteudo as never, peca.manychat ?? undefined)
+      : peca.formato === 'post'
+      ? [postUnicoElement(conteudo as never)]
       : [reelCoverElement(conteudo as never)];
 
     const urls: string[] = [];
