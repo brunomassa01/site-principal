@@ -1,8 +1,9 @@
 ---
 import { getIdentidade } from '../lib/content/collections';
+import { getMenu } from '../lib/content/menus';
 const nome = (await getIdentidade()).data.nome;
 
-const links = [
+const fallback = [
   { href: '/', label: 'Início' },
   { href: '/timeline', label: 'Trajetória' },
   { href: '/projetos', label: 'Projetos' },
@@ -11,6 +12,8 @@ const links = [
   { href: '/agora', label: 'Agora' },
   { href: '/contato', label: 'Contato' },
 ];
+const dbMenu = await getMenu('topo');
+const links = dbMenu.length ? dbMenu.map((i) => ({ href: i.url, label: i.label })) : fallback;
 
 const pathname = Astro.url.pathname;
 const ehAtual = (href: string) => href === '/' ? pathname === '/' : pathname.startsWith(href);

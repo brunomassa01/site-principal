@@ -1,0 +1,10 @@
+---
+import PainelLayout from '../../layouts/PainelLayout.astro';
+import MenusEditor from '../../components/painel/MenusEditor.tsx';
+export const prerender = false;
+---
+<PainelLayout titulo="Menu">
+  <h1 class="text-[24px] font-bold text-apple-label tracking-tight mb-1">Menu do topo</h1>
+  <p class="text-[14px] text-apple-secondary mb-6">Os itens do menu do site. Edite o nome e o link, reordene com ▲▼, adicione ou exclua. Aparece no site na hora.</p>
+  <MenusEditor client:load />
+</PainelLayout>
