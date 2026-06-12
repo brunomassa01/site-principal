@@ -73,16 +73,17 @@
 
 0. **Infra** — banco Neon + schema. ✅ COMPLETA
 1. **Acesso + Blog** — login no `/painel` e publicar posts. ✅ COMPLETA
-2. **Demais conteúdos** — Trajetória, Projetos, Skills, Agora, Identidade.
-3. **Mídia + editor rico** — biblioteca de arquivos + Tiptap.
-4. **Páginas + Menus + remover Tina.**
-5. **Home em blocos** (hero, slider, seções, vídeo, botões).
-6. **Design** (logo, cores, fontes).
-7. **Analytics + IA** (GA4 + sugestões).
-8. **Redes Sociais** — IA gera texto p/ copiar e imagem/vídeo p/ baixar.
+2. **Demais conteúdos** — Trajetória, Projetos, Skills, Agora, Identidade. ✅ COMPLETA
+3. **Mídia** — biblioteca (cataloga uploads + imagens IA), reusar, excluir. ✅ FEITO (12/06)
+4. **Páginas + Menus** — Menu do topo editável ✅ FEITO (12/06). Páginas avulsas + remover Tina: pendentes.
+5. **Home em blocos** (hero, slider, seções, vídeo, botões). Pendente.
+6. **Design** — logotipo (aplicar/redimensionar/excluir) ✅ FEITO (12/06). Cores/fontes: pendentes.
+7. **Analytics + IA** (GA4 + sugestões). Pendente.
+8. **Redes Sociais** — máquina completa (texto+imagem IA na marca + Manychat) ✅; + **post único** ✅ FEITO (12/06).
 
-## Status atual (2026-06-11)
+## Status atual (2026-06-12)
 
+- **MANHÃ 12/06 — 4 features novas (tudo no ar e saudável):** (1) **Post único** no publicador (formato `post`: 1 imagem + legenda + Manychat; botão "+ Adicionar post único" na semana → cria peça; editor com tag/título/subtítulo/legenda; IA, gerar arte, remover, enviar pro blog). (2) **Mídia** (`/painel/midia`): tabela `media`, `lib/media.ts` `catalogarMidia` cataloga todo upload + imagem gerada por IA, página com copiar-link/excluir, e **picker** (📁 Biblioteca) no editor do blog (`MediaPicker.tsx`). (3) **Menus** (`/painel/menus`): tabela `menu_items` (seed dos 7 links do topo), `lib/content/menus.ts` `getMenu`, **Header lê do banco** com fallback, CRUD com reordenar ▲▼. (4) **Design** (`/painel/design`): logo em `identidade.logo_url`+`logo_altura`, enviar/biblioteca, redimensionar (slider), excluir; Header usa o logo se houver, senão o nome. Tabelas novas criadas via node (CREATE/ALTER), schema atualizado.
 - **Fases 0, 1 e 2 COMPLETAS e no ar.** Login em `/painel`; Blog com editor visual Tiptap, upload de imagem otimizada (Vercel Blob), filtro/busca, contador de views. Trajetória/Projetos/Skills/Agora/Identidade editáveis via config declarativa (`src/lib/painel/config.ts`); site público lê do banco (SSR). Conteúdo reescrito na voz do Bruno a partir do CV/persona (regra de discrição: zero números da Quali no público).
 - **FASE 8 — PUBLICADOR (Redes Sociais) no ar** em `/painel/social`: calendário editorial de 52 semanas (semana atual em destaque), editor da semana com 3 formatos (LinkedIn, carrossel, reel). **A máquina:** ideia → **IA escreve na voz do Bruno** (`/api/painel/social/gerar/[id]`, Claude `claude-sonnet-4-6`) → **artes na marca** server-side (satori + @resvg/resvg-js, `src/lib/marca/render.ts`) → **enviar pro blog** (vira rascunho) / baixar. Medidor de custo de IA na tela. Tabelas `social_clusters/semanas/pecas/fundos`.
 - **FEITO 11–12/06 (tudo no ar):**
