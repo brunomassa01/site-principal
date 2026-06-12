@@ -26,7 +26,7 @@ const nav = [
 <html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="robots" content="noindex, nofollow" />
     <title>{titulo} · Painel</title>
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
@@ -37,15 +37,16 @@ const nav = [
     <meta name="theme-color" content="#ffffff" />
   </head>
   <body class="bg-apple-fill min-h-screen">
-    <header class="bg-white border-b border-apple-separator/40 sticky top-0 z-10">
-      <div class="max-w-5xl mx-auto px-6 h-14 flex items-center justify-between">
-        <div class="flex items-center gap-4">
-          <a href="/painel" class="text-[15px] font-semibold text-apple-label">Painel</a>
-          <nav class="flex items-center gap-1">
+    <header class="bg-white border-b border-apple-separator/40 sticky top-0 z-20">
+      <div class="max-w-5xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-2">
+        <div class="flex items-center gap-3 sm:gap-4 min-w-0">
+          <a href="/painel" class="text-[15px] font-semibold text-apple-label shrink-0">Painel</a>
+          <!-- nav desktop -->
+          <nav class="hidden md:flex items-center gap-0.5">
             {nav.map((l) => (
               <a
                 href={l.href}
-                class={`px-3 py-1.5 rounded-md text-[13px] transition-colors ${
+                class={`px-2.5 py-1.5 rounded-md text-[13px] whitespace-nowrap transition-colors ${
                   ativo(l.href) ? 'text-apple-accent font-medium' : 'text-apple-secondary hover:text-apple-label'
                 }`}
               >
@@ -54,22 +55,53 @@ const nav = [
             ))}
           </nav>
         </div>
-        <div class="flex items-center gap-3">
-          <a href="/" target="_blank" class="text-[13px] text-apple-secondary hover:text-apple-label">Ver site ↗</a>
-          {user && <span class="text-[13px] text-apple-tertiary hidden sm:inline">{user.nome.split(' ')[0]}</span>}
-          <button id="logout-btn" class="text-[13px] text-apple-secondary hover:text-red-600">Sair</button>
+        <div class="flex items-center gap-2 sm:gap-3 shrink-0">
+          <a href="/" target="_blank" class="hidden sm:inline text-[13px] text-apple-secondary hover:text-apple-label">Ver site ↗</a>
+          {user && <span class="hidden lg:inline text-[13px] text-apple-tertiary">{user.nome.split(' ')[0]}</span>}
+          <button id="logout-btn" class="hidden md:inline text-[13px] text-apple-secondary hover:text-red-600">Sair</button>
+          <!-- botao hamburguer (mobile) -->
+          <button id="menu-btn" class="md:hidden inline-flex items-center justify-center w-9 h-9 -mr-1 rounded-md text-apple-label hover:bg-apple-fill" aria-label="Abrir menu" aria-expanded="false">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>
+          </button>
         </div>
       </div>
+      <!-- menu mobile (dropdown) -->
+      <nav id="mobile-menu" class="md:hidden hidden border-t border-apple-separator/40 bg-white px-2 py-2">
+        {nav.map((l) => (
+          <a
+            href={l.href}
+            class={`block px-3 py-2.5 rounded-lg text-[15px] ${
+              ativo(l.href) ? 'text-apple-accent font-medium bg-apple-fill' : 'text-apple-secondary'
+            }`}
+          >
+            {l.label}
+          </a>
+        ))}
+        <div class="border-t border-apple-separator/40 mt-2 pt-3 flex items-center justify-between px-3 pb-1">
+          <a href="/" target="_blank" class="text-[14px] text-apple-secondary">Ver site ↗</a>
+          {user && <span class="text-[13px] text-apple-tertiary">{user.nome.split(' ')[0]}</span>}
+          <button id="logout-btn-m" class="text-[14px] text-red-600 font-medium">Sair</button>
+        </div>
+      </nav>
     </header>
 
-    <main class="max-w-5xl mx-auto px-6 py-8">
+    <main class="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
       <slot />
     </main>
 
     <script>
-      document.getElementById('logout-btn')?.addEventListener('click', async () => {
+      const logout = async () => {
         await fetch('/api/painel/auth/logout', { method: 'POST' });
         window.location.href = '/painel/login';
+      };
+      document.getElementById('logout-btn')?.addEventListener('click', logout);
+      document.getElementById('logout-btn-m')?.addEventListener('click', logout);
+
+      const menuBtn = document.getElementById('menu-btn');
+      const mobileMenu = document.getElementById('mobile-menu');
+      menuBtn?.addEventListener('click', () => {
+        const aberto = mobileMenu?.classList.toggle('hidden') === false;
+        menuBtn.setAttribute('aria-expanded', String(aberto));
       });
     </script>
   </body>
