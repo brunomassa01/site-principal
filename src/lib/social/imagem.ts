@@ -51,21 +51,19 @@ export async function gerarImagemEstilo(refUrl: string, tema: string, rotulo = '
   const VARIACOES = ['wide full-frame view', 'eye-level establishing shot', 'soft even light across the whole frame', 'window light filling the room', 'clear foreground and background depth', 'practical lights spread across the scene', 'centered symmetrical composition', 'three-quarter angle that fills the frame'];
   const variacao = VARIACOES[Math.floor(Math.random() * VARIACOES.length)];
 
-  const ENCHER = 'Vertical 4:5 portrait. The scene MUST FILL THE ENTIRE FRAME edge to edge with clearly visible detail and texture. Balanced exposure with readable midtones, NOT mostly black or empty. Keep it moody and cinematic but legible across the whole frame; only the lower third may be a bit darker so white text can sit there.';
+  const ENCHER = 'Vertical 4:5 portrait. The image must FILL THE ENTIRE FRAME edge to edge with clearly visible detail and texture, no empty bands. Reserve one calmer, less busy area (it can be a little darker or simpler) where white text can be overlaid.';
 
   const promptBase = ref
     ? [
-        'Use the provided image as the STYLE reference. Faithfully MATCH its COLOR PALETTE and color treatment (if it is warm, brown or colorful, keep it warm/brown/colorful; if it is black-and-white, keep it black-and-white), plus its mood, lighting, film grain, contrast and overall look.',
-        'Generate a COMPLETELY NEW and DIFFERENT scene in that SAME style and SAME colors. Do NOT reproduce or copy the reference, but its palette and look MUST be clearly recognizable in the result.',
+        'You are given a STYLE REFERENCE photo. Create a BRAND-NEW, DIFFERENT photograph that looks like it was shot in the SAME place and SAME style as the reference: the SAME color palette and color treatment (warm, brown, colorful or black-and-white — exactly like the reference, do NOT desaturate it), the SAME lighting and brightness, the same mood, depth and overall aesthetic.',
+        'Do NOT copy or reproduce the reference. Do NOT illustrate any concept, topic or text — it is a real photographic background, never a chart, diagram or graphic.',
         ENCHER,
-        'No text, no letters, no words, no logos, no watermark.',
-        tema ? `Subtly evoke this theme without being literal: "${tema}".` : '',
+        'No text, no letters, no words, no logos, no charts, no diagrams, no watermark.',
       ].filter(Boolean).join(' ')
     : [
         promptDoEstilo(rotulo),
         ENCHER,
-        'No text, no letters, no words, no logos, no watermark.',
-        tema ? `Subtly evoke this theme without being literal: "${tema}".` : '',
+        'No text, no letters, no words, no logos, no charts, no diagrams, no watermark.',
       ].filter(Boolean).join(' ');
 
   const prompt = `${promptBase} Composition variation: ${variacao}.`;
