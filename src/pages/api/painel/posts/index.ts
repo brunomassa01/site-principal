@@ -15,7 +15,7 @@ export const GET: APIRoute = async () => {
     rows.map((r) => {
       const html = r.bodyHtml ?? '';
       return {
-        id: r.id, slug: r.slug, titulo: r.titulo, situacao: r.situacao,
+        id: r.id, slug: r.slug, titulo: r.titulo, situacao: r.situacao, publicarEm: r.publicarEm,
         data: r.data, idioma: r.idioma, capaUrl: r.capaUrl, views: r.views, tags: r.tags,
         temVideo: /<video-embed|<video[\s>]/i.test(html),
         temImagem: Boolean(r.capaUrl) || /<img[\s>]/i.test(html),

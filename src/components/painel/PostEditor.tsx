@@ -138,7 +138,7 @@ export default function PostEditor({ id }: Props) {
     else alert(j.error || 'Não foi possível gerar a capa.');
   }
 
-  async function salvar(situacao?: string) {
+  async function salvar(situacao?: string, publicarEmOverride?: string) {
     setErro('');
     setSalvando(true);
     const payload = {
@@ -146,7 +146,7 @@ export default function PostEditor({ id }: Props) {
       slug: f.slug,
       resumo: f.resumo,
       data: f.data,
-      publicar_em: f.publicar_em,
+      publicar_em: publicarEmOverride !== undefined ? publicarEmOverride : f.publicar_em,
       capa_url: f.capa_url,
       tags: f.tags.split(',').map((t) => t.trim()).filter(Boolean),
       idioma: f.idioma,
@@ -169,6 +169,11 @@ export default function PostEditor({ id }: Props) {
       return;
     }
     window.location.href = '/painel/posts';
+  }
+  function agendar() {
+    if (!f.publicar_em) { setErro('Escolha a data e a hora em "Agendar publicação" antes de agendar.'); return; }
+    if (new Date(f.publicar_em).getTime() <= Date.now()) { setErro('A data de agendamento precisa ser no futuro.'); return; }
+    salvar('publicado', f.publicar_em);
   }
 
   if (carregando) return <p className="text-apple-secondary text-[14px]">Carregando…</p>;
@@ -220,13 +225,19 @@ export default function PostEditor({ id }: Props) {
           <div>
             <label className={labelCls}>Agendar publicação (opcional)</label>
             <input type="datetime-local" className={inputCls} value={f.publicar_em} onChange={(e) => upd('publicar_em', e.target.value)} />
+            <p className="text-[11px] text-apple-tertiary mt-1">Escolha a data/hora e clique em <strong>Agendar</strong>. O "Publicar agora" ignora isto e publica na hora.</p>
           </div>
-          <div className="flex gap-2 pt-1">
-            <button onClick={() => salvar('publicado')} disabled={salvando} className="flex-1 py-2.5 rounded-full bg-apple-label text-white text-[14px] font-medium hover:bg-black disabled:opacity-60">
-              {salvando ? 'Salvando…' : 'Publicar'}
-            </button>
-            <button onClick={() => salvar('rascunho')} disabled={salvando} className="px-4 py-2.5 rounded-full border border-apple-separator text-[14px] text-apple-secondary hover:bg-apple-fill disabled:opacity-60">
-              Rascunho
+          <div className="space-y-2 pt-1">
+            <div className="flex gap-2">
+              <button onClick={() => salvar('publicado', '')} disabled={salvando} className="flex-1 py-2.5 rounded-full bg-apple-label text-white text-[14px] font-medium hover:bg-black disabled:opacity-60">
+                {salvando ? 'Salvando…' : 'Publicar agora'}
+              </button>
+              <button onClick={() => salvar('rascunho')} disabled={salvando} className="px-4 py-2.5 rounded-full border border-apple-separator text-[14px] text-apple-secondary hover:bg-apple-fill disabled:opacity-60">
+                Rascunho
+              </button>
+            </div>
+            <button onClick={agendar} disabled={salvando || !f.publicar_em} className="w-full py-2.5 rounded-full bg-blue-600 text-white text-[14px] font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed" title={!f.publicar_em ? 'Escolha a data acima primeiro' : ''}>
+              {f.publicar_em ? '📅 Agendar para a data acima' : '📅 Agendar (escolha a data acima)'}
             </button>
           </div>
         </div>

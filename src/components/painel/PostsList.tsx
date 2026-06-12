@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 
 type Post = {
-  id: string; slug: string; titulo: string; situacao: string;
+  id: string; slug: string; titulo: string; situacao: string; publicarEm: string | null;
   data: string; idioma: string; views: number; tags: string[];
   temVideo: boolean; temImagem: boolean;
 };
@@ -12,6 +12,11 @@ const BADGE: Record<string, string> = {
   publicado: 'bg-green-50 text-green-700 border-green-200',
   arquivado: 'bg-gray-100 text-gray-500 border-gray-200',
 };
+
+// post publicado mas com data de publicação no futuro = agendado (ainda não aparece no site)
+function ehAgendado(p: Post): boolean {
+  return p.situacao === 'publicado' && !!p.publicarEm && new Date(p.publicarEm).getTime() > Date.now();
+}
 
 const selCls = 'px-3 py-2 rounded-lg border border-apple-separator text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-apple-accent/40';
 
@@ -109,7 +114,11 @@ export default function PostsList() {
               <div className="flex-1 min-w-0">
                 <p className="text-[15px] font-medium text-apple-label truncate">{p.titulo}</p>
                 <div className="flex items-center gap-2 mt-1 flex-wrap">
-                  <span className={`px-2 py-0.5 rounded-full text-[11px] font-medium border ${BADGE[p.situacao] ?? ''}`}>{LABEL[p.situacao] ?? p.situacao}</span>
+                  {ehAgendado(p) ? (
+                    <span className="px-2 py-0.5 rounded-full text-[11px] font-medium border bg-blue-50 text-blue-700 border-blue-200">📅 Agendado · {new Date(p.publicarEm!).toLocaleString('pt-BR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}</span>
+                  ) : (
+                    <span className={`px-2 py-0.5 rounded-full text-[11px] font-medium border ${BADGE[p.situacao] ?? ''}`}>{LABEL[p.situacao] ?? p.situacao}</span>
+                  )}
                   <span className="text-[12px] text-apple-tertiary">{new Date(p.data).toLocaleDateString('pt-BR')}</span>
                   <span className="text-[12px] text-apple-tertiary">👁 {p.views ?? 0}</span>
                   {p.temImagem && <span className="text-[12px]" title="Com imagem">🖼</span>}
