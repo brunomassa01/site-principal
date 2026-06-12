@@ -386,8 +386,8 @@ function PecaCard({ peca, fundos, onPatch, onPatchConteudo }: {
           </div>
         )}
 
-        {/* Resposta do Manychat (Instagram) — pedido de automacao + entrega */}
-        {(peca.formato === 'carrossel' || peca.formato === 'reel') && (
+        {/* Resposta do Manychat (Instagram) — uma vez por semana, no carrossel (a palavra-chave é a mesma da semana) */}
+        {peca.formato === 'carrossel' && (
           <div className="rounded-xl border border-apple-separator/60 bg-apple-surface/50 p-4">
             <div className="flex items-center justify-between flex-wrap gap-2 mb-1">
               <div>
