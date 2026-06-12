@@ -16,13 +16,15 @@ const pathname = Astro.url.pathname;
 const ehAtual = (href: string) => href === '/' ? pathname === '/' : pathname.startsWith(href);
 ---
 <header class="sticky top-0 z-50 nav-blur bg-white/80 border-b border-apple-separator/40 shadow-nav">
-  <div class="max-w-5xl mx-auto px-6 h-11 flex items-center justify-between">
-    <a href="/" class="flex items-center gap-2 hover:opacity-80 transition-opacity duration-200">
-      <img src="/favicon.png" alt="" class="w-7 h-7 rounded-md" aria-hidden="true" />
-      <span class="text-[15px] font-semibold text-apple-label">{nome}</span>
+  <div class="max-w-5xl mx-auto px-5 sm:px-6 h-11 flex items-center justify-between gap-3">
+    <a href="/" class="flex items-center gap-2 min-w-0 hover:opacity-80 transition-opacity duration-200">
+      <img src="/favicon.png" alt="" class="w-7 h-7 rounded-md flex-none" aria-hidden="true" />
+      <span class="text-[15px] font-semibold text-apple-label truncate">{nome}</span>
     </a>
-    <nav aria-label="Menu principal">
-      <ul class="flex items-center overflow-x-auto scrollbar-hide" style="scrollbar-width:none;-webkit-overflow-scrolling:touch;">
+
+    <!-- nav desktop -->
+    <nav aria-label="Menu principal" class="hidden md:block">
+      <ul class="flex items-center">
         {links.map((l) => (
           <li class="flex-none">
             <a
@@ -40,8 +42,41 @@ const ehAtual = (href: string) => href === '/' ? pathname === '/' : pathname.sta
         ))}
       </ul>
     </nav>
+
+    <!-- botao hamburguer (mobile) -->
+    <button id="site-menu-btn" class="md:hidden flex-none inline-flex items-center justify-center w-9 h-9 -mr-1 rounded-md text-apple-label hover:bg-apple-fill transition-colors" aria-label="Abrir menu" aria-expanded="false">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>
+    </button>
   </div>
+
+  <!-- menu mobile (dropdown) -->
+  <nav id="site-mobile-menu" aria-label="Menu" class="md:hidden hidden border-t border-apple-separator/40 bg-white/95 px-3 py-2">
+    <ul class="flex flex-col">
+      {links.map((l) => (
+        <li>
+          <a
+            href={l.href}
+            aria-current={ehAtual(l.href) ? 'page' : undefined}
+            class={`block px-3 py-2.5 rounded-lg text-[15px] ${
+              ehAtual(l.href) ? 'text-apple-accent font-medium bg-apple-fill' : 'text-apple-secondary'
+            }`}
+          >
+            {l.label}
+          </a>
+        </li>
+      ))}
+    </ul>
+  </nav>
 </header>
+
+<script>
+  const btn = document.getElementById('site-menu-btn');
+  const menu = document.getElementById('site-mobile-menu');
+  btn?.addEventListener('click', () => {
+    const aberto = menu?.classList.toggle('hidden') === false;
+    btn.setAttribute('aria-expanded', String(aberto));
+  });
+</script>
 
 <style>
   nav ul::-webkit-scrollbar {
