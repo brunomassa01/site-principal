@@ -11,7 +11,8 @@ export const POST: APIRoute = async ({ request }) => {
   const b = await request.json().catch(() => ({} as Record<string, unknown>));
   const numero = Number(b.numero);
   const formato = String(b.formato ?? '').trim();
-  if (!numero || !formato) return json({ error: 'numero e formato são obrigatórios.' }, 400);
+  // Number.isInteger (e não !numero): a área "Conteúdos avulsos" é a semana 0, e 0 é falsy em JS
+  if (!Number.isInteger(numero) || numero < 0 || !formato) return json({ error: 'numero e formato são obrigatórios.' }, 400);
 
   const [semana] = await db.select().from(socialSemanas).where(eq(socialSemanas.numero, numero));
   if (!semana) return json({ error: 'Semana não encontrada.' }, 404);
