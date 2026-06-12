@@ -39,7 +39,6 @@ function rodape(cor = WHITE): El {
 
 // capa: foto (se houver) + motivo "texto selecionado" do iOS
 function capaEl(s: Slide, bg?: string): El {
-  const menu = ['Recortar', 'Copiar', 'Pesquisar', 'Compartilhar'];
   const filhos: unknown[] = [];
   if (bg) {
     filhos.push(img(bg, { position: 'absolute', top: 0, left: 0, width: W, height: H, objectFit: 'cover' }));
@@ -49,9 +48,6 @@ function capaEl(s: Slide, bg?: string): El {
     div({ position: 'relative', width: W, height: H, display: 'flex', flexDirection: 'column', padding: 72, justifyContent: 'space-between' }, [
       topo(s.tag || '', SITE),
       div({ display: 'flex', flexDirection: 'column' }, [
-        // menu de contexto iOS
-        div({ display: 'flex', alignSelf: 'flex-start', backgroundColor: MENUBG, borderRadius: 14, padding: '8px 4px', marginBottom: 22, boxShadow: '0 12px 34px rgba(0,0,0,0.40)' },
-          menu.map((t, i) => div({ display: 'flex', color: WHITE, fontSize: 25, fontWeight: 500, padding: '6px 24px', borderRight: i < menu.length - 1 ? '1px solid rgba(255,255,255,0.16)' : '0px solid transparent' }, [t]))),
         // headline selecionado: barra lime + alças
         div({ display: 'flex', position: 'relative', alignSelf: 'flex-start' }, [
           div({ position: 'absolute', left: -9, top: -16, width: 20, height: 20, borderRadius: 10, backgroundColor: LIME, display: 'flex' }, []),

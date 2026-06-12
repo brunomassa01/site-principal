@@ -47,22 +47,23 @@ export async function gerarImagemEstilo(refUrl: string, tema: string, rotulo = '
 
   const ref = refUrl ? await carregarRef(refUrl) : null;
 
-  // varia a composição a cada chamada pra "Gerar outra" sair diferente
-  const VARIACOES = ['wider establishing shot', 'tighter intimate crop', 'low-key side lighting', 'high-contrast silhouette', 'soft diffused window light', 'deep-shadow foreground', 'reflective surfaces with bokeh', 'top-down overhead angle'];
+  // varia a composição a cada chamada pra "Gerar outra" sair diferente (sem deixar escuro/vazio)
+  const VARIACOES = ['wide full-frame view', 'eye-level establishing shot', 'soft even light across the whole frame', 'window light filling the room', 'clear foreground and background depth', 'practical lights spread across the scene', 'centered symmetrical composition', 'three-quarter angle that fills the frame'];
   const variacao = VARIACOES[Math.floor(Math.random() * VARIACOES.length)];
+
+  const ENCHER = 'Vertical 4:5 portrait. The scene MUST FILL THE ENTIRE FRAME edge to edge with clearly visible detail and texture. Balanced exposure with readable midtones, NOT mostly black or empty. Keep it moody and cinematic but legible across the whole frame; only the lower third may be a bit darker so white text can sit there.';
 
   const promptBase = ref
     ? [
-        'Use the provided image ONLY as a STYLE reference: match its mood, lighting, black-and-white editorial treatment, film grain, contrast and overall composition feel.',
+        'Use the provided image ONLY as a STYLE reference: match its mood, lighting, black-and-white editorial treatment, film grain and contrast.',
         'Generate a COMPLETELY NEW and DIFFERENT image in that same visual style, a new but related scene. Do NOT reproduce, copy or just recolor the reference.',
-        'Vertical 4:5 full-bleed social media cover background. Generous dark negative space so white text can be overlaid on top.',
+        ENCHER,
         'No text, no letters, no words, no logos, no watermark.',
         tema ? `Subtly evoke this theme without being literal: "${tema}".` : '',
       ].filter(Boolean).join(' ')
     : [
         promptDoEstilo(rotulo),
-        'Vertical 4:5 full-bleed social media cover background.',
-        'Leave generous negative space and dark areas so white text can be overlaid on top.',
+        ENCHER,
         'No text, no letters, no words, no logos, no watermark.',
         tema ? `Subtly evoke this theme without being literal: "${tema}".` : '',
       ].filter(Boolean).join(' ');

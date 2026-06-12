@@ -7,7 +7,7 @@ import mdx from '@astrojs/mdx';
 export default defineConfig({
   site: 'https://brunomassa.online',
   output: 'hybrid',
-  adapter: vercel(),
+  adapter: vercel({ maxDuration: 60 }),
   server: { host: true },
   integrations: [tailwind(), react(), mdx()],
   i18n: {
