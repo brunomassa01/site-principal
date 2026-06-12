@@ -4,6 +4,7 @@ import Header from '../../components/Header.astro';
 import Footer from '../../components/Footer.astro';
 import { getPostBySlug, incrementViews } from '../../lib/content/posts';
 import { renderBody } from '../../lib/content/render';
+import Reactions from '../../components/Reactions.tsx';
 
 export const prerender = false;
 
@@ -83,6 +84,8 @@ const linkedinShare = `https://www.linkedin.com/sharing/share-offsite/?url=${enc
         <article class="bg-apple-surface rounded-2xl shadow-card p-8 md:p-10">
           <div class="prose-content" set:html={renderBody(post.bodyHtml)} />
         </article>
+
+        <Reactions client:visible slug={slug!} />
 
         <div class="mt-8 pt-8 border-t border-apple-separator-light flex flex-wrap items-center justify-between gap-4">
           <a href="/posts" class="text-[15px] text-apple-accent hover:underline">← Voltar para conteúdo</a>
