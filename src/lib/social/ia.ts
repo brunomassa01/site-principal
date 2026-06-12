@@ -135,7 +135,7 @@ const TOOLS: Record<string, Anthropic.Tool> = {
   },
 };
 
-export async function gerarConteudo(peca: Peca, semana: Semana): Promise<{ conteudo: Record<string, unknown>; legenda?: string; usage?: { input_tokens: number; output_tokens: number } }> {
+export async function gerarConteudo(peca: Peca, semana: Semana, materia?: string): Promise<{ conteudo: Record<string, unknown>; legenda?: string; usage?: { input_tokens: number; output_tokens: number } }> {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) throw new Error('ANTHROPIC_API_KEY não configurada.');
   const client = new Anthropic({ apiKey });
@@ -146,11 +146,14 @@ export async function gerarConteudo(peca: Peca, semana: Semana): Promise<{ conte
     ? '\nEsta pauta é [PONTE IA]: estenda o argumento para o universo de IA, como OPINIÃO do Bruno (o livro não menciona IA). Não cite o livro como se ele falasse de IA.'
     : '';
   const cta = peca.manychat ? `\nNa chamada final, convide a comentar a palavra "${peca.manychat}" para receber o material.` : '';
+  const fonte = materia
+    ? `\n\nMATÉRIA-PRIMA: o artigo abaixo já foi publicado no blog do Bruno e já está na voz dele. TRANSFORME o artigo no formato pedido: aproveite as ideias, as frases fortes e os exemplos dele. NÃO invente fatos que não estejam no artigo. NÃO copie parágrafos inteiros: adapte ao ritmo do formato.\n"""\n${materia.slice(0, 6000)}\n"""`
+    : '';
 
   const system = `${PERSONA}\n\n${GABARITO[peca.formato]}`;
   const user = `Cluster da semana: ${semana.cluster ?? '—'}.
 Pauta (o ângulo desta peça): ${peca.gancho ?? '—'}.
-Lente do livro: ${peca.lente ?? '—'}.${ponte}${cta}
+Lente do livro: ${peca.lente ?? '—'}.${ponte}${cta}${fonte}
 
 Escreva o ${peca.formato === 'linkedin' ? 'post de LinkedIn' : peca.formato} no padrão e na voz do Bruno. Use a ferramenta para entregar.`;
 

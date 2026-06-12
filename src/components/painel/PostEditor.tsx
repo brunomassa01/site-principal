@@ -86,6 +86,7 @@ export default function PostEditor({ id }: Props) {
   const [enviandoCapa, setEnviandoCapa] = useState(false);
   const [gerandoCapaIA, setGerandoCapaIA] = useState(false);
   const [mostrarBiblioteca, setMostrarBiblioteca] = useState(false);
+  const [transformando, setTransformando] = useState<string | null>(null);
   const [avancado, setAvancado] = useState(false);
 
   useEffect(() => {
@@ -176,6 +177,23 @@ export default function PostEditor({ id }: Props) {
     if (!f.publicar_em) { setErro('Escolha a data e a hora em "Agendar publicação" antes de agendar.'); return; }
     if (new Date(f.publicar_em).getTime() <= Date.now()) { setErro('A data de agendamento precisa ser no futuro.'); return; }
     salvar('publicado', f.publicar_em);
+  }
+  // ponte inversa: transforma este post em conteúdo de redes sociais (cria a peça na semana atual e a IA já escreve)
+  async function paraSocial(formato: string) {
+    setTransformando(formato);
+    const r = await fetch('/api/painel/posts/para-social', {
+      method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ postId: id, formato }),
+    });
+    const j = await r.json().catch(() => ({}));
+    setTransformando(null);
+    if (r.ok && j.pecaId) {
+      if (confirm(`Pronto: a IA transformou o artigo em ${formato === 'post' ? 'post único' : formato} na semana ${j.semana}. Abrir o publicador pra revisar?`)) {
+        window.location.href = `/painel/social/${j.semana}`;
+      }
+    } else {
+      alert(j.error || (j.detail ? `Erro: ${j.detail}` : 'Não foi possível transformar o post.'));
+    }
   }
 
   if (carregando) return <p className="text-apple-secondary text-[14px]">Carregando…</p>;
@@ -313,6 +331,27 @@ export default function PostEditor({ id }: Props) {
                 <p className="text-[12px] text-apple-tertiary mt-2">Publique o post para liberar o compartilhamento.</p>
               </>
             )}
+          </div>
+        )}
+
+        {editando && (
+          <div className="bg-white rounded-2xl shadow-card p-5">
+            <label className={labelCls}>Redes sociais</label>
+            <p className="text-[12px] text-apple-tertiary mb-3">Transforme este artigo em conteúdo pro Instagram ou LinkedIn. A peça nasce na semana atual do publicador, já escrita pela IA, pra você revisar.</p>
+            <div className="grid grid-cols-1 gap-2">
+              <button onClick={() => paraSocial('carrossel')} disabled={!!transformando}
+                className="flex items-center justify-center gap-2 py-2.5 rounded-full bg-violet-600 text-white text-[14px] font-medium hover:bg-violet-700 disabled:opacity-60">
+                {transformando === 'carrossel' ? 'Transformando… (~30s)' : '▦ Virar carrossel'}
+              </button>
+              <button onClick={() => paraSocial('post')} disabled={!!transformando}
+                className="flex items-center justify-center gap-2 py-2.5 rounded-full border border-apple-separator text-[14px] text-apple-secondary hover:bg-apple-fill disabled:opacity-60">
+                {transformando === 'post' ? 'Transformando… (~30s)' : '◻ Virar post único'}
+              </button>
+              <button onClick={() => paraSocial('linkedin')} disabled={!!transformando}
+                className="flex items-center justify-center gap-2 py-2.5 rounded-full border border-apple-separator text-[14px] text-apple-secondary hover:bg-apple-fill disabled:opacity-60">
+                {transformando === 'linkedin' ? 'Transformando… (~30s)' : 'in Virar post de LinkedIn'}
+              </button>
+            </div>
           </div>
         )}
 
