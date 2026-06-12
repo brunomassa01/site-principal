@@ -15,6 +15,7 @@ type Conteudo = {
   notas?: string;
   bg?: string;
   estilo?: string;
+  refUpload?: string;
   manychatPedido?: string;
   manychatEntrega?: string;
 };
@@ -200,7 +201,11 @@ function PecaCard({ peca, fundos, onPatch, onPatchConteudo }: {
   const [gerandoIA, setGerandoIA] = useState(false);
   const [artes, setArtes] = useState<string[]>(peca.midiaUrls ?? []);
   const [subindo, setSubindo] = useState(false);
-  const [extras, setExtras] = useState<string[]>(() => (peca.conteudo?.bg ? [peca.conteudo.bg] : []));
+  const [extras, setExtras] = useState<string[]>(() => {
+    const r = peca.conteudo?.refUpload;
+    if (r) return [r];
+    return peca.conteudo?.estilo === 'upload' && peca.conteudo?.bg ? [peca.conteudo.bg] : [];
+  });
   const [gerandoMc, setGerandoMc] = useState(false);
   const [copiouMc, setCopiouMc] = useState<'p' | 'e' | null>(null);
   const meta = FMT[peca.formato] ?? { label: peca.formato, icon: '•' };
@@ -263,7 +268,10 @@ function PecaCard({ peca, fundos, onPatch, onPatchConteudo }: {
   const escolherTinta = () => persistirConteudo({ estilo: '', bg: '' });
   // estilo = referência visual; a IA gera uma imagem NOVA nesse estilo ao "Gerar artes"
   const escolherEstilo = (id: string) => persistirConteudo({ estilo: id, bg: '' });
-  const escolherFotoFixa = (url: string) => persistirConteudo({ estilo: 'upload', bg: url });
+  // foto enviada usada como REFERÊNCIA visual (IA cria nova) — padrão ao subir
+  const escolherFotoRef = (url: string) => persistirConteudo({ estilo: 'ref', refUpload: url, bg: '' });
+  // foto enviada usada como está (sem IA)
+  const usarFotoComoEsta = (url: string) => persistirConteudo({ estilo: 'upload', refUpload: url, bg: url });
   async function subirFundo(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     e.target.value = '';
@@ -274,7 +282,7 @@ function PecaCard({ peca, fundos, onPatch, onPatchConteudo }: {
     const r = await fetch('/api/painel/upload', { method: 'POST', body: fd });
     const j = await r.json().catch(() => ({}));
     setSubindo(false);
-    if (j.url) { setExtras((x) => (x.includes(j.url) ? x : [...x, j.url])); escolherFotoFixa(j.url); }
+    if (j.url) { setExtras((x) => (x.includes(j.url) ? x : [...x, j.url])); escolherFotoRef(j.url); }
     else alert(j.error || 'Falha ao subir a foto.');
   }
   async function gerarIA() {
@@ -405,7 +413,7 @@ function PecaCard({ peca, fundos, onPatch, onPatchConteudo }: {
         {(peca.formato === 'carrossel' || peca.formato === 'reel') && (
           <div>
             <label className="block text-[12px] font-medium text-apple-tertiary mb-1">Estilo visual da capa</label>
-            <p className="text-[11px] text-apple-tertiary mb-2">Escolha um <strong>estilo</strong>: a IA cria uma imagem nova nesse estilo ao "Gerar artes". Ou use Tinta / sua própria foto.</p>
+            <p className="text-[11px] text-apple-tertiary mb-2">Escolha um <strong>estilo</strong> (✨): a IA cria uma imagem nova ao "Gerar artes". <strong>Sua própria foto também vira referência</strong> — ou use ela como está. Ou Tinta (preto).</p>
             <div className="flex flex-wrap gap-2">
               <button onClick={escolherTinta} title="Tinta (fundo preto, sem foto)"
                 className={`w-16 h-20 rounded-lg overflow-hidden border-2 flex items-center justify-center bg-apple-label ${!c.estilo && !c.bg ? 'border-apple-accent' : 'border-transparent'}`}>
@@ -419,9 +427,10 @@ function PecaCard({ peca, fundos, onPatch, onPatchConteudo }: {
                 </button>
               ))}
               {extras.filter((u) => u && !fundos.some((f) => f.url === u)).map((url) => (
-                <button key={url} onClick={() => escolherFotoFixa(url)} title="Sua foto (usada como está)"
-                  className={`w-16 h-20 rounded-lg overflow-hidden border-2 ${c.estilo === 'upload' && c.bg === url ? 'border-apple-accent' : 'border-transparent'}`}>
+                <button key={url} onClick={() => escolherFotoRef(url)} title="Sua foto (referência de estilo)"
+                  className={`relative w-16 h-20 rounded-lg overflow-hidden border-2 ${c.refUpload === url ? 'border-apple-accent' : 'border-transparent'}`}>
                   <img src={url} alt="foto enviada" className="w-full h-full object-cover" />
+                  <span className="absolute top-0.5 right-0.5 text-[9px] bg-black/60 text-white rounded px-1 leading-tight">✨</span>
                 </button>
               ))}
               <label className={`w-16 h-20 rounded-lg border-2 border-dashed border-apple-separator flex items-center justify-center text-[10px] text-center px-1 ${subindo ? 'opacity-60' : 'text-apple-secondary cursor-pointer hover:bg-apple-fill'}`}>
@@ -429,6 +438,13 @@ function PecaCard({ peca, fundos, onPatch, onPatchConteudo }: {
                 <input type="file" accept="image/*" hidden disabled={subindo} onChange={subirFundo} />
               </label>
             </div>
+            {c.refUpload && (
+              <div className="flex flex-wrap items-center gap-2 mt-3">
+                <span className="text-[11px] text-apple-tertiary">Sua foto:</span>
+                <button onClick={() => escolherFotoRef(c.refUpload!)} className={`text-[11px] px-2.5 py-1 rounded-full border ${c.estilo === 'ref' ? 'border-apple-accent bg-apple-accent/10 text-apple-label font-medium' : 'border-apple-separator text-apple-secondary hover:bg-apple-fill'}`}>✨ Como referência (IA cria nova)</button>
+                <button onClick={() => usarFotoComoEsta(c.refUpload!)} className={`text-[11px] px-2.5 py-1 rounded-full border ${c.estilo === 'upload' ? 'border-apple-accent bg-apple-accent/10 text-apple-label font-medium' : 'border-apple-separator text-apple-secondary hover:bg-apple-fill'}`}>🖼 Usar a foto como está</button>
+              </div>
+            )}
           </div>
         )}
 

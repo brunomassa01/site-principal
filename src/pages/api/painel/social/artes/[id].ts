@@ -18,19 +18,28 @@ export const POST: APIRoute = async ({ params, request }) => {
   const [peca] = await db.select().from(socialPecas).where(eq(socialPecas.id, id));
   if (!peca) return json({ error: 'Peça não encontrada.' }, 404);
 
-  const conteudo = (peca.conteudo ?? {}) as { slides?: { titulo?: string }[]; capa?: string; bg?: string; estilo?: string };
+  const conteudo = (peca.conteudo ?? {}) as { slides?: { titulo?: string }[]; capa?: string; bg?: string; estilo?: string; refUpload?: string };
   if (peca.formato === 'linkedin') return json({ error: 'LinkedIn é texto puro — não tem arte de imagem.' }, 400);
   if (peca.formato === 'carrossel' && !conteudo.slides?.length) return json({ error: 'Monte os slides antes de gerar as artes.' }, 400);
   if (peca.formato === 'reel' && !conteudo.capa) return json({ error: 'Defina a capa do reel antes de gerar a arte.' }, 400);
 
   const base = new URL(request.url).origin;
   try {
-    // Se a peça tem um ESTILO escolhido (id de fundo), a IA gera uma imagem de capa NOVA nesse estilo.
+    // Estilo escolhido: a IA gera uma capa NOVA a partir de uma referência visual.
+    // 'ref' = foto que o Bruno subiu (conteudo.refUpload). Senão, é um id de fundo da biblioteca.
     if (conteudo.estilo && conteudo.estilo !== 'upload') {
-      const sql = neon(process.env.DATABASE_URL!);
-      const linhas = (await sql`SELECT url, rotulo FROM social_fundos WHERE id = ${conteudo.estilo}`) as { url: string; rotulo: string }[];
       const tema = (peca.gancho ?? conteudo.slides?.[0]?.titulo ?? '').toString();
-      const img = await gerarImagemEstilo(linhas[0]?.url ?? '', tema, linhas[0]?.rotulo ?? '');
+      let refUrl = '';
+      let rotulo = '';
+      if (conteudo.estilo === 'ref') {
+        refUrl = conteudo.refUpload ?? '';
+      } else {
+        const sql = neon(process.env.DATABASE_URL!);
+        const linhas = (await sql`SELECT url, rotulo FROM social_fundos WHERE id = ${conteudo.estilo}`) as { url: string; rotulo: string }[];
+        refUrl = linhas[0]?.url ?? '';
+        rotulo = linhas[0]?.rotulo ?? '';
+      }
+      const img = await gerarImagemEstilo(refUrl, tema, rotulo);
       if ('error' in img) return json({ error: img.error }, 502);
       conteudo.bg = img.url;
       await db.update(socialPecas).set({ conteudo: conteudo as never, updatedAt: new Date() }).where(eq(socialPecas.id, id));
