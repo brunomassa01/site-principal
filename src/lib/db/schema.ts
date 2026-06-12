@@ -166,6 +166,8 @@ export const identidade = pgTable('identidade', {
   email: text('email'),
   linkedinUrl: text('linkedin_url'),
   ogImage: text('og_image'),
+  logoUrl: text('logo_url'),
+  logoAltura: integer('logo_altura'),
   updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' }).defaultNow().notNull(),
 });
 

@@ -1,0 +1,10 @@
+---
+import PainelLayout from '../../layouts/PainelLayout.astro';
+import DesignEditor from '../../components/painel/DesignEditor.tsx';
+export const prerender = false;
+---
+<PainelLayout titulo="Design">
+  <h1 class="text-[24px] font-bold text-apple-label tracking-tight mb-1">Design</h1>
+  <p class="text-[14px] text-apple-secondary mb-6">A identidade visual do site. Por enquanto o logotipo: envie ou escolha da biblioteca, ajuste o tamanho, e ele aparece no topo do site na hora.</p>
+  <DesignEditor client:load />
+</PainelLayout>

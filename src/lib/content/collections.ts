@@ -73,6 +73,8 @@ export async function getIdentidade() {
       email: d.email ?? null,
       linkedin_url: d.linkedinUrl ?? null,
       og_image: d.ogImage ?? null,
+      logo_url: d.logoUrl ?? null,
+      logo_altura: d.logoAltura ?? null,
     },
   };
 }

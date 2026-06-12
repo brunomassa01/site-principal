@@ -1,7 +1,8 @@
 ---
 import { getIdentidade } from '../lib/content/collections';
 import { getMenu } from '../lib/content/menus';
-const nome = (await getIdentidade()).data.nome;
+const id = (await getIdentidade()).data;
+const nome = id.nome;
 
 const fallback = [
   { href: '/', label: 'Início' },
@@ -21,8 +22,9 @@ const ehAtual = (href: string) => href === '/' ? pathname === '/' : pathname.sta
 <header class="sticky top-0 z-50 nav-blur bg-white/80 border-b border-apple-separator/40 shadow-nav">
   <div class="max-w-5xl mx-auto px-5 sm:px-6 h-11 flex items-center justify-between gap-3">
     <a href="/" class="flex items-center gap-2 min-w-0 hover:opacity-80 transition-opacity duration-200">
-      <img src="/favicon.png" alt="" class="w-7 h-7 rounded-md flex-none" aria-hidden="true" />
-      <span class="text-[15px] font-semibold text-apple-label truncate">{nome}</span>
+      {id.logo_url && <img src={id.logo_url} alt={nome} style={`height:${id.logo_altura ?? 28}px`} class="w-auto flex-none" />}
+      {!id.logo_url && <img src="/favicon.png" alt="" class="w-7 h-7 rounded-md flex-none" aria-hidden="true" />}
+      {!id.logo_url && <span class="text-[15px] font-semibold text-apple-label truncate">{nome}</span>}
     </a>
 
     <!-- nav desktop -->
