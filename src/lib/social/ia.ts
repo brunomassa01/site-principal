@@ -140,3 +140,60 @@ Escreva o ${peca.formato === 'linkedin' ? 'post de LinkedIn' : peca.formato} no 
   }
   return { conteudo, legenda, usage: resp.usage };
 }
+
+// Gera a RESPOSTA AUTOMÁTICA do Manychat (DM disparado quando o seguidor comenta a palavra-chave).
+// Duas partes: (1) pedido de automação — o gatilho; (2) entrega — o diagnóstico/material que o post prometeu.
+export async function gerarRespostaManychat(
+  peca: Peca,
+): Promise<{ pedido: string; entrega: string; usage?: { input_tokens: number; output_tokens: number } }> {
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) throw new Error('ANTHROPIC_API_KEY não configurada.');
+  const client = new Anthropic({ apiKey });
+  const palavra = peca.manychat || 'a palavra-chave';
+
+  const tool: Anthropic.Tool = {
+    name: 'resposta_manychat',
+    description: 'Entrega a resposta automática do Manychat em duas partes.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        pedido: { type: 'string', description: 'O 1º DM, disparado quando o seguidor comenta a palavra: agradece de leve e pede UMA interação simples que destrava a sequência (ex.: "me responde FEITO", "toca no botão abaixo"). Curtíssimo. É o gatilho do fluxo.' },
+        entrega: { type: 'string', description: 'O 2º DM: o diagnóstico / material que o post prometeu, no método e na voz do Bruno. É um BRINDE de valor real e AUTOSSUFICIENTE (passos ou pontos curtos) — sem venda e sem link de produto. Fecha com um convite leve a SEGUIR pra mais método.' },
+      },
+      required: ['pedido', 'entrega'],
+    },
+  };
+
+  const system = `${PERSONA}
+
+CONTEXTO: agora você escreve a RESPOSTA AUTOMÁTICA do Instagram via Manychat — o DM disparado quando o seguidor COMENTA a palavra-chave de um post. NÃO é um post. É conversa no direct: mais curta e calorosa que um post, mas 100% na voz do Bruno (nada de "Olá! Tudo bem? 😊" de robô de atendimento).
+
+OBJETIVO ATUAL DO BRUNO: ele NÃO tem nada pra vender agora. A meta é AUMENTAR SEGUIDORES e SE POSICIONAR como autoridade de método. Então: nada de venda, nada de link de produto. A entrega é um BRINDE de valor real que prova o método e faz a pessoa querer seguir. As interações pedidas são as que o algoritmo premia (responder, salvar, seguir).
+
+São DUAS partes:
+1) PEDIDO DE AUTOMAÇÃO (1º DM): agradece de leve e pede UMA interação simples que destrava a entrega E ajuda o alcance (ex.: "me responde FEITO", "salva esse post", "toca no botão"). Curtíssimo. É o gatilho do fluxo.
+2) ENTREGA (2º DM): o diagnóstico / material que o post prometeu — valor real e AUTOSSUFICIENTE, no método do Bruno, em pontos ou passos curtos. Sem venda, sem link de produto. Fecha com um convite leve a SEGUIR pra mais método.
+
+Sem hashtags. No máximo 1-2 emojis e só se couber no tom. Quebras de linha curtas (é DM).`;
+
+  const user = `Palavra-chave que o seguidor comentou: "${palavra}".
+Assunto do post (gancho): ${peca.gancho ?? '—'}.
+Lente do livro: ${peca.lente ?? '—'}.
+Formato do post: ${peca.formato}.
+
+Escreva as duas partes do DM (pedido de automação + entrega). Use a ferramenta.`;
+
+  const resp = await client.messages.create({
+    model: MODELO,
+    max_tokens: 1500,
+    system,
+    tools: [tool],
+    tool_choice: { type: 'tool', name: tool.name },
+    messages: [{ role: 'user', content: user }],
+  });
+
+  const block = resp.content.find((b) => b.type === 'tool_use') as Anthropic.ToolUseBlock | undefined;
+  if (!block) throw new Error('A IA não retornou a resposta.');
+  const out = block.input as { pedido?: string; entrega?: string };
+  return { pedido: out.pedido ?? '', entrega: out.entrega ?? '', usage: resp.usage };
+}
