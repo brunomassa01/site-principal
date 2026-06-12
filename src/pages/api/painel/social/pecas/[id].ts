@@ -12,7 +12,7 @@ const upd: APIRoute = async ({ params, request }) => {
   const b = await request.json().catch(() => ({} as Record<string, unknown>));
 
   const set: Record<string, unknown> = { updatedAt: new Date() };
-  for (const k of ['gancho', 'lente', 'legenda', 'manychat', 'diaPublicacao', 'status', 'urlPublicada'] as const) {
+  for (const k of ['gancho', 'lente', 'legenda', 'manychat', 'diaPublicacao', 'status', 'urlPublicada', 'midiaUrls'] as const) {
     if (k in b) set[k] = b[k];
   }
   if ('conteudo' in b) set.conteudo = b.conteudo;

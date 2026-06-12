@@ -47,10 +47,14 @@ export async function gerarImagemEstilo(refUrl: string, tema: string, rotulo = '
 
   const ref = refUrl ? await carregarRef(refUrl) : null;
 
-  const prompt = ref
+  // varia a composição a cada chamada pra "Gerar outra" sair diferente
+  const VARIACOES = ['wider establishing shot', 'tighter intimate crop', 'low-key side lighting', 'high-contrast silhouette', 'soft diffused window light', 'deep-shadow foreground', 'reflective surfaces with bokeh', 'top-down overhead angle'];
+  const variacao = VARIACOES[Math.floor(Math.random() * VARIACOES.length)];
+
+  const promptBase = ref
     ? [
         'Use the provided image ONLY as a STYLE reference: match its mood, lighting, black-and-white editorial treatment, film grain, contrast and overall composition feel.',
-        'Generate a COMPLETELY NEW and DIFFERENT image in that same visual style — a new but related scene. Do NOT reproduce, copy or just recolor the reference.',
+        'Generate a COMPLETELY NEW and DIFFERENT image in that same visual style, a new but related scene. Do NOT reproduce, copy or just recolor the reference.',
         'Vertical 4:5 full-bleed social media cover background. Generous dark negative space so white text can be overlaid on top.',
         'No text, no letters, no words, no logos, no watermark.',
         tema ? `Subtly evoke this theme without being literal: "${tema}".` : '',
@@ -62,6 +66,8 @@ export async function gerarImagemEstilo(refUrl: string, tema: string, rotulo = '
         'No text, no letters, no words, no logos, no watermark.',
         tema ? `Subtly evoke this theme without being literal: "${tema}".` : '',
       ].filter(Boolean).join(' ');
+
+  const prompt = `${promptBase} Composition variation: ${variacao}.`;
 
   const parts: any[] = [];
   if (ref) parts.push({ inlineData: { mimeType: ref.mime, data: ref.data } });

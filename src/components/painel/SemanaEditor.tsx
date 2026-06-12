@@ -246,6 +246,14 @@ function PecaCard({ peca, fundos, onPatch, onPatchConteudo }: {
       await new Promise((r) => setTimeout(r, 500));
     }
   }
+  async function excluirArtes() {
+    if (!confirm('Excluir as artes geradas? Você pode gerar de novo depois.')) return;
+    setArtes([]);
+    await fetch(`/api/painel/social/pecas/${peca.id}`, {
+      method: 'PUT', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ midiaUrls: [] }),
+    });
+  }
   // aplica um patch no conteúdo da capa e persiste na hora
   async function persistirConteudo(patch: Partial<Conteudo>) {
     onPatchConteudo(peca.id, patch);
@@ -440,7 +448,7 @@ function PecaCard({ peca, fundos, onPatch, onPatchConteudo }: {
           </button>
           {(peca.formato === 'carrossel' || peca.formato === 'reel') && (
             <button onClick={gerarArtes} disabled={gerando} className="px-4 py-2 rounded-full border border-apple-separator text-[13px] text-apple-secondary hover:bg-apple-fill disabled:opacity-60">
-              {gerando ? 'Gerando artes…' : '🎨 Gerar artes'}
+              {gerando ? 'Gerando…' : artes.length ? '🎨 Gerar outra' : '🎨 Gerar artes'}
             </button>
           )}
         </div>
@@ -449,7 +457,10 @@ function PecaCard({ peca, fundos, onPatch, onPatchConteudo }: {
           <div className="pt-2">
             <div className="flex items-center justify-between mb-2">
               <p className="text-[12px] font-medium text-apple-tertiary">Artes geradas ({artes.length})</p>
-              <button onClick={baixarTodas} className="text-[12px] font-medium text-apple-accent hover:underline">⬇ Baixar todas</button>
+              <div className="flex items-center gap-3">
+                <button onClick={baixarTodas} className="text-[12px] font-medium text-apple-accent hover:underline">⬇ Baixar todas</button>
+                <button onClick={excluirArtes} className="text-[12px] font-medium text-red-600 hover:underline">🗑 Excluir</button>
+              </div>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
               {artes.map((url, i) => (
