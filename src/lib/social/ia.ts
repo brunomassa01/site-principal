@@ -157,18 +157,34 @@ Lente do livro: ${peca.lente ?? '—'}.${ponte}${cta}${fonte}
 
 Escreva o ${peca.formato === 'linkedin' ? 'post de LinkedIn' : peca.formato} no padrão e na voz do Bruno. Use a ferramenta para entregar.`;
 
-  const resp = await client.messages.create({
-    model: MODELO,
-    max_tokens: 2200,
-    system,
-    tools: [tool],
-    tool_choice: { type: 'tool', name: tool.name },
-    messages: [{ role: 'user', content: user }],
-  });
-
-  const block = resp.content.find((b) => b.type === 'tool_use') as Anthropic.ToolUseBlock | undefined;
-  if (!block) throw new Error('A IA não retornou conteúdo estruturado.');
-  const out = block.input as Record<string, unknown>;
+  // Até 2 tentativas: a IA às vezes devolve arrays como texto JSON (com escape quebrado). Valida e re-tenta.
+  let out: Record<string, unknown> | null = null;
+  let resp: Anthropic.Message | null = null;
+  for (let tentativa = 1; tentativa <= 2 && !out; tentativa++) {
+    resp = await client.messages.create({
+      model: MODELO,
+      max_tokens: 3500,
+      system,
+      tools: [tool],
+      tool_choice: { type: 'tool', name: tool.name },
+      messages: [{ role: 'user', content: user }],
+    });
+    const block = resp.content.find((b) => b.type === 'tool_use') as Anthropic.ToolUseBlock | undefined;
+    if (!block) continue;
+    let cand = block.input as Record<string, unknown> | string;
+    try {
+      if (typeof cand === 'string') cand = JSON.parse(cand) as Record<string, unknown>;
+      for (const k of ['slides', 'cenas'] as const) {
+        if (typeof cand[k] === 'string') cand[k] = JSON.parse(cand[k] as string);
+      }
+      if (peca.formato === 'carrossel' && !Array.isArray(cand.slides)) throw new Error('slides não é lista');
+      if (peca.formato === 'reel' && !Array.isArray(cand.cenas)) throw new Error('cenas não é lista');
+      out = cand;
+    } catch {
+      out = null; // formato quebrado: tenta de novo
+    }
+  }
+  if (!out || !resp) throw new Error('A IA devolveu um formato inválido duas vezes. Clique em gerar novamente.');
 
   let conteudo: Record<string, unknown>;
   let legenda: string | undefined;
