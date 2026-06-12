@@ -16,6 +16,7 @@ type Conteudo = {
   bg?: string;
   estilo?: string;
   refUpload?: string;
+  refNota?: string;
   manychatPedido?: string;
   manychatEntrega?: string;
 };
@@ -239,6 +240,8 @@ function PecaCard({ peca, fundos, onPatch, onPatchConteudo }: {
   }
   async function gerarArtes() {
     setGerando(true);
+    // salva o conteúdo atual (estilo + instrução da referência) antes de gerar
+    await fetch(`/api/painel/social/pecas/${peca.id}`, { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ conteudo: peca.conteudo }) });
     const r = await fetch(`/api/painel/social/artes/${peca.id}`, { method: 'POST' });
     const j = await r.json().catch(() => ({}));
     setGerando(false);
@@ -443,6 +446,12 @@ function PecaCard({ peca, fundos, onPatch, onPatchConteudo }: {
                 <span className="text-[11px] text-apple-tertiary">Sua foto:</span>
                 <button onClick={() => escolherFotoRef(c.refUpload!)} className={`text-[11px] px-2.5 py-1 rounded-full border ${c.estilo === 'ref' ? 'border-apple-accent bg-apple-accent/10 text-apple-label font-medium' : 'border-apple-separator text-apple-secondary hover:bg-apple-fill'}`}>✨ Como referência (IA cria nova)</button>
                 <button onClick={() => usarFotoComoEsta(c.refUpload!)} className={`text-[11px] px-2.5 py-1 rounded-full border ${c.estilo === 'upload' ? 'border-apple-accent bg-apple-accent/10 text-apple-label font-medium' : 'border-apple-separator text-apple-secondary hover:bg-apple-fill'}`}>🖼 Usar a foto como está</button>
+              </div>
+            )}
+            {c.estilo && c.estilo !== 'upload' && (
+              <div className="mt-3">
+                <label className="block text-[11px] font-medium text-apple-tertiary mb-1">O que você quer nessa imagem? <span className="opacity-70">(opcional — guia a IA)</span></label>
+                <textarea className={`${inputCls} min-h-[44px] text-[13px]`} placeholder="Ex.: mantém o clima da foto mas num escritório; tom mais quente; menos pessoas…" value={c.refNota ?? ''} onChange={(e) => onPatchConteudo(peca.id, { refNota: e.target.value })} />
               </div>
             )}
           </div>

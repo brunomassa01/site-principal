@@ -18,7 +18,7 @@ export const POST: APIRoute = async ({ params, request }) => {
   const [peca] = await db.select().from(socialPecas).where(eq(socialPecas.id, id));
   if (!peca) return json({ error: 'Peça não encontrada.' }, 404);
 
-  const conteudo = (peca.conteudo ?? {}) as { slides?: { titulo?: string }[]; capa?: string; bg?: string; estilo?: string; refUpload?: string };
+  const conteudo = (peca.conteudo ?? {}) as { slides?: { titulo?: string }[]; capa?: string; bg?: string; estilo?: string; refUpload?: string; refNota?: string };
   if (peca.formato === 'linkedin') return json({ error: 'LinkedIn é texto puro — não tem arte de imagem.' }, 400);
   if (peca.formato === 'carrossel' && !conteudo.slides?.length) return json({ error: 'Monte os slides antes de gerar as artes.' }, 400);
   if (peca.formato === 'reel' && !conteudo.capa) return json({ error: 'Defina a capa do reel antes de gerar a arte.' }, 400);
@@ -39,7 +39,7 @@ export const POST: APIRoute = async ({ params, request }) => {
         refUrl = linhas[0]?.url ?? '';
         rotulo = linhas[0]?.rotulo ?? '';
       }
-      const img = await gerarImagemEstilo(refUrl, tema, rotulo);
+      const img = await gerarImagemEstilo(refUrl, tema, rotulo, conteudo.refNota ?? '');
       if ('error' in img) return json({ error: img.error }, 502);
       conteudo.bg = img.url;
       await db.update(socialPecas).set({ conteudo: conteudo as never, updatedAt: new Date() }).where(eq(socialPecas.id, id));

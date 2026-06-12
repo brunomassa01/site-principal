@@ -41,7 +41,7 @@ async function carregarRef(url: string): Promise<{ data: string; mime: string } 
 
 // refUrl = a foto de referência (o estilo escolhido). A IA OLHA essa foto e gera uma imagem NOVA no mesmo estilo.
 // Se a referência não carregar, cai no prompt de texto (promptDoEstilo(rotulo)).
-export async function gerarImagemEstilo(refUrl: string, tema: string, rotulo = ''): Promise<Resultado> {
+export async function gerarImagemEstilo(refUrl: string, tema: string, rotulo = '', nota = ''): Promise<Resultado> {
   const key = process.env.GEMINI_API_KEY;
   if (!key) return { error: 'Gerador de imagem não configurado (falta GEMINI_API_KEY no Vercel).' };
 
@@ -66,7 +66,7 @@ export async function gerarImagemEstilo(refUrl: string, tema: string, rotulo = '
         'No text, no letters, no words, no logos, no charts, no diagrams, no watermark.',
       ].filter(Boolean).join(' ');
 
-  const prompt = `${promptBase} Composition variation: ${variacao}.`;
+  const prompt = `${promptBase}${nota ? ` Extra instruction from the user, follow it closely: "${nota}".` : ''} Composition variation: ${variacao}.`;
 
   const parts: any[] = [];
   if (ref) parts.push({ inlineData: { mimeType: ref.mime, data: ref.data } });
