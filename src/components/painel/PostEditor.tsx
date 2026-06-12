@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import RichTextEditor from './RichTextEditor';
+import MediaPicker from './MediaPicker';
 
 type Props = { id?: string };
 
@@ -84,6 +85,7 @@ export default function PostEditor({ id }: Props) {
   const [erro, setErro] = useState('');
   const [enviandoCapa, setEnviandoCapa] = useState(false);
   const [gerandoCapaIA, setGerandoCapaIA] = useState(false);
+  const [mostrarBiblioteca, setMostrarBiblioteca] = useState(false);
   const [avancado, setAvancado] = useState(false);
 
   useEffect(() => {
@@ -254,6 +256,7 @@ export default function PostEditor({ id }: Props) {
                     <input type="file" accept="image/*" hidden onChange={trocarCapa} />
                   </label>
                   <button onClick={gerarCapaIA} disabled={gerandoCapaIA} className="text-violet-600 hover:underline disabled:opacity-60">{gerandoCapaIA ? 'Gerando…' : '✨ Gerar outra com IA'}</button>
+                  <button onClick={() => setMostrarBiblioteca(true)} className="text-apple-accent hover:underline">📁 Biblioteca</button>
                   <button onClick={() => setF((p) => ({ ...p, capa_url: '' }))} className="text-red-600 hover:underline">Remover</button>
                 </div>
               </div>
@@ -266,8 +269,10 @@ export default function PostEditor({ id }: Props) {
                   {enviandoCapa ? 'Enviando…' : '+ ou enviar imagem do computador'}
                   <input type="file" accept="image/*" hidden onChange={trocarCapa} />
                 </label>
+                <button onClick={() => setMostrarBiblioteca(true)} className="w-full h-10 rounded-lg border border-apple-separator text-[13px] text-apple-accent hover:bg-apple-fill">📁 Escolher da biblioteca</button>
               </div>
             )}
+            {mostrarBiblioteca && <MediaPicker onPick={(url) => { setF((p) => ({ ...p, capa_url: url })); setMostrarBiblioteca(false); }} onClose={() => setMostrarBiblioteca(false)} />}
           </div>
           <div>
             <label className={labelCls}>Tags (separadas por vírgula)</label>

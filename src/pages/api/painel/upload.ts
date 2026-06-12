@@ -1,6 +1,7 @@
 import type { APIRoute } from 'astro';
 import { put } from '@vercel/blob';
 import { json } from '../../../lib/http';
+import { catalogarMidia } from '../../../lib/media';
 
 export const prerender = false;
 
@@ -25,6 +26,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
   const base = (file.name || 'arquivo').replace(/[^a-zA-Z0-9._-]/g, '-').slice(-60) || 'arquivo';
   try {
     const blob = await put(`posts/${base}`, file, { access: 'public', addRandomSuffix: true });
+    await catalogarMidia({ url: blob.url, nome: base, tamanho: file.size, tipo: file.type?.startsWith('video') ? 'video' : 'imagem', origem: 'upload' });
     return json({ url: blob.url });
   } catch (e) {
     return json({ error: 'Falha ao enviar: ' + (e as Error).message }, 500);

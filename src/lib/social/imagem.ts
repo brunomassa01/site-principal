@@ -1,4 +1,5 @@
 import { put } from '@vercel/blob';
+import { catalogarMidia } from '../media';
 
 // Gera uma imagem de fundo NOVA com o Gemini 2.5 Flash Image (nano banana), no estilo escolhido.
 // Recebe o prompt do estilo (descrição da estética) + o tema do post; devolve a URL no Blob.
@@ -110,6 +111,7 @@ export async function gerarImagemEstilo(refUrl: string, tema: string, rotulo = '
       addRandomSuffix: true,
       contentType: img.mimeType ?? img.mime_type ?? 'image/png',
     });
+    await catalogarMidia({ url: blob.url, origem: 'ia' });
     return { url: blob.url };
   } catch (e) {
     return { error: 'Imagem gerada, mas falhou ao salvar no Blob: ' + String((e as Error)?.message ?? e) };
@@ -154,6 +156,7 @@ export async function gerarCapaBlog(titulo: string): Promise<Resultado> {
     const blob = await put('posts/capa-ia.png', Buffer.from(img.data, 'base64'), {
       access: 'public', addRandomSuffix: true, contentType: img.mimeType ?? img.mime_type ?? 'image/png',
     });
+    await catalogarMidia({ url: blob.url, origem: 'ia-capa' });
     return { url: blob.url };
   } catch (e) {
     return { error: 'Capa gerada, mas falhou ao salvar no Blob: ' + String((e as Error)?.message ?? e) };
