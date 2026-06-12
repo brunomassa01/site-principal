@@ -15,6 +15,7 @@ const ano = new Date().getFullYear();
           <li><a href="/timeline" class="text-[13px] text-apple-secondary hover:text-apple-label transition-colors">Trajetória</a></li>
           <li><a href="/projetos" class="text-[13px] text-apple-secondary hover:text-apple-label transition-colors">Projetos</a></li>
           <li><a href="/skills" class="text-[13px] text-apple-secondary hover:text-apple-label transition-colors">Skills</a></li>
+          <li><a href="/palestras" class="text-[13px] text-apple-secondary hover:text-apple-label transition-colors">Palestras</a></li>
           <li><a href="/agora" class="text-[13px] text-apple-secondary hover:text-apple-label transition-colors">Agora</a></li>
           <li><a href="/contato" class="text-[13px] text-apple-secondary hover:text-apple-label transition-colors">Contato</a></li>
         </ul>
@@ -22,16 +23,27 @@ const ano = new Date().getFullYear();
     </div>
     <div class="mt-8 pt-6 border-t border-apple-separator-light flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
       <p class="text-[12px] text-apple-tertiary">© {ano} {id.nome}. Currículo vivo, sempre em construção.</p>
-      {id.linkedin_url && (
+      <div class="flex items-center gap-5">
         <a
-          href={id.linkedin_url}
+          href="https://selo7.com.br"
           target="_blank"
           rel="noopener"
+          title="Selo7, minha agência de marketing"
           class="text-[12px] text-apple-secondary hover:text-apple-accent transition-colors"
         >
-          LinkedIn ↗
+          Selo7 · minha agência ↗
         </a>
-      )}
+        {id.linkedin_url && (
+          <a
+            href={id.linkedin_url}
+            target="_blank"
+            rel="noopener"
+            class="text-[12px] text-apple-secondary hover:text-apple-accent transition-colors"
+          >
+            LinkedIn ↗
+          </a>
+        )}
+      </div>
     </div>
   </div>
 </footer>
