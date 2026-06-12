@@ -6,7 +6,9 @@ import { getUsoResumo } from '../../../lib/social/uso';
 
 export const prerender = false;
 
-const semanas = await getSemanas();
+const todas = await getSemanas();
+const avulsos = todas.find((s) => s.numero === 0); // "Conteúdos avulsos" (a partir do blog), fora do calendário
+const semanas = todas.filter((s) => s.numero > 0);
 const destaque = numeroSemanaDestaque(semanas);
 const atual = semanas.find((s) => s.numero === destaque);
 const uso = await getUsoResumo();
@@ -83,6 +85,17 @@ const semanasJson = semanas.map((s) => ({
         ))}
       </div>
     </div>
+  )}
+
+  <!-- Conteúdos avulsos (a partir do blog) -->
+  {avulsos && avulsos.pecas.length > 0 && (
+    <a href="/painel/social/0" class="flex items-center justify-between gap-3 bg-white rounded-2xl shadow-card px-5 py-4 mb-8 hover:shadow-card-hover transition-shadow">
+      <div>
+        <p class="text-[15px] font-semibold text-apple-label">📎 Conteúdos avulsos <span class="text-apple-tertiary font-normal">({avulsos.pecas.length} {avulsos.pecas.length === 1 ? 'peça' : 'peças'})</span></p>
+        <p class="text-[13px] text-apple-secondary mt-0.5">Peças criadas a partir de posts do blog, fora do calendário editorial.</p>
+      </div>
+      <span class="text-apple-tertiary text-[14px] flex-none">→</span>
+    </a>
   )}
 
   <!-- Calendário completo -->

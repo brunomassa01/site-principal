@@ -177,16 +177,19 @@ export default function SemanaEditor({ semana }: { semana: Semana }) {
       <div className="bg-white rounded-2xl shadow-card p-4 sm:p-5 flex flex-wrap items-center gap-x-3 gap-y-2">
         <a href="/painel/social" className="text-[13px] text-apple-accent hover:underline">← Calendário</a>
         <span className="text-apple-separator">|</span>
-        <h1 className="text-[20px] font-bold text-apple-label">Semana {semana.numero}</h1>
+        <h1 className="text-[20px] font-bold text-apple-label">{semana.numero === 0 ? 'Conteúdos avulsos' : `Semana ${semana.numero}`}</h1>
+        {semana.numero === 0 && <span className="text-[12px] text-apple-tertiary">peças criadas a partir do blog, fora do calendário</span>}
         <span className="text-[13px] text-apple-tertiary">{fmtData(semana.inicio)}</span>
         {semana.cluster && <span className="text-[12px] px-2 py-0.5 rounded-full bg-apple-fill text-apple-secondary">{semana.cluster}</span>}
         {semana.ponteIa && <span className="text-[11px] px-2 py-0.5 rounded-full bg-violet-50 text-violet-700 border border-violet-200 font-medium">PONTE IA</span>}
         {semana.coringa && <span className="text-[11px] px-2 py-0.5 rounded-full bg-orange-50 text-orange-700 border border-orange-200 font-medium">Coringa</span>}
         {semana.slotReativo && <span className="text-[11px] px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200 font-medium">Reativo</span>}
         <div className="w-full sm:w-auto sm:ml-auto flex flex-wrap items-center gap-2">
-          <button onClick={gerarTodos} disabled={gerandoTodos} className="px-4 py-2 rounded-full bg-violet-600 text-white text-[13px] font-medium hover:bg-violet-700 disabled:opacity-60">
-            {gerandoTodos ? 'Gerando os 3…' : '✨ Gerar os 3 com IA'}
-          </button>
+          {semana.numero > 0 && (
+            <button onClick={gerarTodos} disabled={gerandoTodos} className="px-4 py-2 rounded-full bg-violet-600 text-white text-[13px] font-medium hover:bg-violet-700 disabled:opacity-60">
+              {gerandoTodos ? 'Gerando os 3…' : '✨ Gerar os 3 com IA'}
+            </button>
+          )}
           <span className="text-[12px] text-apple-tertiary">Status</span>
           <select className={`${inputCls} w-auto py-1.5`} value={statusSem} onChange={(e) => setStatusSemana(e.target.value)}>
             <option value="planejado">Planejado</option>
@@ -202,7 +205,7 @@ export default function SemanaEditor({ semana }: { semana: Semana }) {
 
       {/* As peças da semana */}
       {pecas.map((p) => (
-        <PecaCard key={p.id} peca={p} fundos={fundos} onPatch={patchPeca} onPatchConteudo={patchConteudo} onRemove={removerPeca} />
+        <PecaCard key={p.id} peca={p} fundos={fundos} onPatch={patchPeca} onPatchConteudo={patchConteudo} onRemove={removerPeca} podeRemover={semana.numero === 0 || p.formato === 'post'} />
       ))}
 
       <button onClick={adicionarPost} className="w-full py-3 rounded-2xl border-2 border-dashed border-apple-separator text-[14px] text-apple-secondary hover:bg-apple-fill hover:text-apple-label transition-colors">
@@ -261,12 +264,13 @@ function ManychatBloco({ peca, onPatchConteudo }: { peca: Peca; onPatchConteudo:
   );
 }
 
-function PecaCard({ peca, fundos, onPatch, onPatchConteudo, onRemove }: {
+function PecaCard({ peca, fundos, onPatch, onPatchConteudo, onRemove, podeRemover }: {
   peca: Peca;
   fundos: { id: string; url: string; rotulo: string }[];
   onPatch: (id: string, patch: Partial<Peca>) => void;
   onPatchConteudo: (id: string, patch: Partial<Conteudo>) => void;
   onRemove: (id: string) => void;
+  podeRemover: boolean;
 }) {
   const [salvando, setSalvando] = useState(false);
   const [salvo, setSalvo] = useState(false);
@@ -410,8 +414,8 @@ function PecaCard({ peca, fundos, onPatch, onPatchConteudo, onRemove }: {
             </button>
           ))}
         </div>
-        {peca.formato === 'post' && (
-          <button onClick={() => onRemove(peca.id)} title="Remover este post" className="text-[12px] text-red-600 hover:underline">✕ remover</button>
+        {podeRemover && (
+          <button onClick={() => onRemove(peca.id)} title="Remover esta peça" className="text-[12px] text-red-600 hover:underline">✕ remover</button>
         )}
       </div>
 

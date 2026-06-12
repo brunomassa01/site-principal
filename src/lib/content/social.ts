@@ -31,12 +31,14 @@ export async function getClusters(): Promise<SocialCluster[]> {
   return db.select().from(socialClusters).orderBy(asc(socialClusters.ordem));
 }
 
-/** Número da semana em destaque: a vigente hoje, ou a próxima se o calendário ainda não começou. */
+/** Número da semana em destaque: a vigente hoje, ou a próxima se o calendário ainda não começou.
+ *  A semana 0 ("Conteúdos avulsos", fora do calendário) nunca é destaque. */
 export function numeroSemanaDestaque(semanas: SemanaComPecas[], hoje = new Date()): number {
+  const validas = semanas.filter((s) => s.numero > 0);
   const t = hoje.getTime();
-  const iniciadas = semanas.filter((s) => s.inicio && new Date(s.inicio).getTime() <= t);
+  const iniciadas = validas.filter((s) => s.inicio && new Date(s.inicio).getTime() <= t);
   if (iniciadas.length) return iniciadas[iniciadas.length - 1].numero;
-  return semanas[0]?.numero ?? 1;
+  return validas[0]?.numero ?? 1;
 }
 
 /** Progresso de produção: quantas peças já estão escritas/aprovadas/publicadas. */

@@ -188,7 +188,7 @@ export default function PostEditor({ id }: Props) {
     const j = await r.json().catch(() => ({}));
     setTransformando(null);
     if (r.ok && j.pecaId) {
-      if (confirm(`Pronto: a IA transformou o artigo em ${formato === 'post' ? 'post único' : formato} na semana ${j.semana}. Abrir o publicador pra revisar?`)) {
+      if (confirm(`Pronto: a IA transformou o artigo em ${formato === 'post' ? 'post único' : formato}. Abrir em Conteúdos avulsos pra revisar?`)) {
         window.location.href = `/painel/social/${j.semana}`;
       }
     } else {
@@ -337,7 +337,7 @@ export default function PostEditor({ id }: Props) {
         {editando && (
           <div className="bg-white rounded-2xl shadow-card p-5">
             <label className={labelCls}>Redes sociais</label>
-            <p className="text-[12px] text-apple-tertiary mb-3">Transforme este artigo em conteúdo pro Instagram ou LinkedIn. A peça nasce na semana atual do publicador, já escrita pela IA, pra você revisar.</p>
+            <p className="text-[12px] text-apple-tertiary mb-3">Transforme este artigo em conteúdo pro Instagram ou LinkedIn. A peça nasce em <strong>Conteúdos avulsos</strong> no publicador (sem mexer nas semanas do calendário), já escrita pela IA.</p>
             <div className="grid grid-cols-1 gap-2">
               <button onClick={() => paraSocial('carrossel')} disabled={!!transformando}
                 className="flex items-center justify-center gap-2 py-2.5 rounded-full bg-violet-600 text-white text-[14px] font-medium hover:bg-violet-700 disabled:opacity-60">
