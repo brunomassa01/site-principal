@@ -85,12 +85,20 @@
 
 - **Fases 0, 1 e 2 COMPLETAS e no ar.** Login em `/painel`; Blog com editor visual Tiptap, upload de imagem otimizada (Vercel Blob), filtro/busca, contador de views. Trajetória/Projetos/Skills/Agora/Identidade editáveis via config declarativa (`src/lib/painel/config.ts`); site público lê do banco (SSR). Conteúdo reescrito na voz do Bruno a partir do CV/persona (regra de discrição: zero números da Quali no público).
 - **FASE 8 — PUBLICADOR (Redes Sociais) no ar** em `/painel/social`: calendário editorial de 52 semanas (semana atual em destaque), editor da semana com 3 formatos (LinkedIn, carrossel, reel). **A máquina:** ideia → **IA escreve na voz do Bruno** (`/api/painel/social/gerar/[id]`, Claude `claude-sonnet-4-6`) → **artes na marca** server-side (satori + @resvg/resvg-js, `src/lib/marca/render.ts`) → **enviar pro blog** (vira rascunho) / baixar. Medidor de custo de IA na tela. Tabelas `social_clusters/semanas/pecas/fundos`.
-- **FEITO em 11/06 (no ar):** (a) **baixar artes** — botão por arte (⬇ Baixar) + "Baixar todas" na galeria. (b) **upload de foto de fundo corrigido** — agora otimiza no navegador antes de enviar (não estoura o limite de 4,4MB) e mostra miniatura.
-- **FEITO em 11/06, no ar e TESTADO ✅ (código OK):** **seletor de ESTILO + geração de imagem com Gemini (nano banana)**. O seletor de capa virou escolha de **estilo** (não foto fixa); ao "Gerar artes", se a peça tem estilo escolhido, a IA gera uma **imagem de fundo nova** nesse estilo (`src/lib/social/imagem.ts`, modelo `gemini-2.5-flash-image`, `GEMINI_API_KEY` no Vercel). Tinta e "Subir foto" seguem como antes. **FUNCIONANDO 100% ✅ (11/06):** Bruno ativou o billing no Google → testado ao vivo, gerou 9 artes com a **capa em foto NOVA do Gemini no estilo escolhido + a marca por cima** (motivo "texto selecionado" iOS + barra lime). Máquina de imagem completa. ~$0.039/imagem.
+- **FEITO 11–12/06 (tudo no ar):**
+  - **Imagem por IA (Gemini "nano banana") completa:** seletor de **estilo**; ao "Gerar artes" a IA cria uma imagem NOVA. A **foto de referência** (biblioteca ou enviada por você) é usada como **style transfer** — adota cor, luz e clima reais, não cola. Dois modos pra foto enviada (✨ referência / 🖼 usar como está), campo de **instrução** ("o que você quer na imagem"), **variação** a cada "Gerar outra", botão **Excluir** arte, e a imagem **preenche o quadro**. `src/lib/social/imagem.ts`. **GEMINI_API_KEY no Vercel + billing ativo** (~$0.039/img). ⚠️ Gotcha que custou caro: NÃO forçar "preto e branco" no prompt da referência, senão a IA descarta a cor real da foto.
+  - **IA de texto com humanizer determinístico:** pós-processador mata travessão (`humanizar`/`humanizarTudo` em `ia.ts`) + bloqueio de clichês na persona. Vale pro Manychat e pros posts.
+  - **Resposta do Manychat por IA:** card **próprio da semana** (apartado do carrossel), 1x por semana, em 2 partes (pedido de automação + entrega/diagnóstico), foco em **posicionamento/seguidores** (não venda).
+  - **Baixar artes** (por arte + todas) · **capa sem o menu iOS** · **timeout 60s** no Gerar com IA (`maxDuration` global).
+  - **Reações de 1 clique** (👏 💡 🔥) nos posts do blog (`/api/posts/[slug]/react`, coluna `posts.reactions`).
+  - **Mobile:** menu hambúrguer no **painel** e no **site público** (`Header.astro`); publicador mais folgado.
+  - **Blog: "Gerar capa com IA" de volta** no editor (via Gemini, capa editorial pelo título) — `/api/painel/posts/gerar-capa` + `gerarCapaBlog`.
+  - **Post de bastidores** escrito e inserido como **RASCUNHO** (slug `minha-maquina-de-conteudo-por-dentro`, capa gerada por IA) — Bruno aprova e publica.
 - **PENDENTE (próximos passos):**
-  1. ✅ ~~Ativar billing do Gemini~~ — FEITO, geração de imagem funcionando.
-  2. **Resposta do Manychat gerada por IA** (na voz/conteúdo do livro do Bruno) + **opção de "post único"** (Instagram, hoje só tem carrossel/reel).
-  3. **Apex DNS:** remover o redirecionamento/IP de estacionamento na Hostinger (ver seção DNS acima).
-  4. **Remover o pin do `hosts`** na máquina do escritório (ver seção DNS acima).
-  5. Roadmap original: Fase 3 (Mídia), Fase 4 (Páginas/Menus + remover Tina), Fase 6 (Design) — Bruno pediu Mídia/Páginas-Menus/Design como próximas seções.
+  1. **Opção de "post único"** (Instagram, hoje só carrossel/reel).
+  2. **Apex DNS:** remover o redirecionamento/IP de estacionamento na Hostinger (ver seção DNS acima).
+  3. **Remover o pin do `hosts`** na máquina do escritório (ver seção DNS acima).
+  4. **Métricas automáticas** (app no Meta p/ IG; LinkedIn pessoal via CSV).
+  5. Roadmap original: Fase 3 (Mídia), Fase 4 (Páginas/Menus + remover Tina), Fase 6 (Design).
+  6. Limpeza: código morto do Manychat antigo dentro de `PecaCard` (state/funções sem uso) — inofensivo, limpar quando der.
 - Admin antigo (Tina) ainda em `/admin` (removido na Fase 4).
