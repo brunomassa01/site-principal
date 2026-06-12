@@ -153,7 +153,7 @@ export default function SemanaEditor({ semana }: { semana: Semana }) {
   return (
     <div className="space-y-5">
       {/* Cabeçalho da semana */}
-      <div className="bg-white rounded-2xl shadow-card p-5 flex flex-wrap items-center gap-3">
+      <div className="bg-white rounded-2xl shadow-card p-4 sm:p-5 flex flex-wrap items-center gap-x-3 gap-y-2">
         <a href="/painel/social" className="text-[13px] text-apple-accent hover:underline">← Calendário</a>
         <span className="text-apple-separator">|</span>
         <h1 className="text-[20px] font-bold text-apple-label">Semana {semana.numero}</h1>
@@ -162,7 +162,7 @@ export default function SemanaEditor({ semana }: { semana: Semana }) {
         {semana.ponteIa && <span className="text-[11px] px-2 py-0.5 rounded-full bg-violet-50 text-violet-700 border border-violet-200 font-medium">PONTE IA</span>}
         {semana.coringa && <span className="text-[11px] px-2 py-0.5 rounded-full bg-orange-50 text-orange-700 border border-orange-200 font-medium">Coringa</span>}
         {semana.slotReativo && <span className="text-[11px] px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200 font-medium">Reativo</span>}
-        <div className="ml-auto flex items-center gap-2">
+        <div className="w-full sm:w-auto sm:ml-auto flex flex-wrap items-center gap-2">
           <button onClick={gerarTodos} disabled={gerandoTodos} className="px-4 py-2 rounded-full bg-violet-600 text-white text-[13px] font-medium hover:bg-violet-700 disabled:opacity-60">
             {gerandoTodos ? 'Gerando os 3…' : '✨ Gerar os 3 com IA'}
           </button>
@@ -320,7 +320,7 @@ function PecaCard({ peca, fundos, onPatch, onPatchConteudo }: {
   return (
     <div className="bg-white rounded-2xl shadow-card overflow-hidden">
       {/* topo da peça */}
-      <div className="flex flex-wrap items-center gap-3 px-5 py-3 border-b border-apple-separator/40 bg-apple-surface">
+      <div className="flex flex-wrap items-center gap-2 sm:gap-3 px-4 sm:px-5 py-3 border-b border-apple-separator/40 bg-apple-surface">
         <span className="text-[15px] font-semibold text-apple-label">{meta.label}</span>
         <span className={`text-[11px] px-2 py-0.5 rounded-full border font-medium ${STATUS_CLS[peca.status] ?? ''}`}>{STATUS_LABEL[peca.status] ?? peca.status}</span>
         {peca.manychat && <span className="text-[11px] px-2 py-0.5 rounded-full bg-apple-fill text-apple-tertiary">Manychat: {peca.manychat}</span>}
@@ -335,7 +335,7 @@ function PecaCard({ peca, fundos, onPatch, onPatchConteudo }: {
         </div>
       </div>
 
-      <div className="p-5 space-y-4">
+      <div className="p-4 sm:p-5 space-y-4">
         {/* gancho + lente */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <div>

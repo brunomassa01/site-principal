@@ -55,11 +55,11 @@ export default function SocialCalendario({ semanas, destaque }: { semanas: Seman
       <div className="bg-white rounded-2xl shadow-card divide-y divide-apple-separator/40 overflow-hidden">
         {filtradas.map((sm) => (
           <a key={sm.numero} href={`/painel/social/${sm.numero}`}
-            className={`flex items-center gap-4 px-5 py-3 hover:bg-apple-fill transition-colors ${sm.numero === destaque ? 'bg-apple-accent/5' : ''}`}>
-            <div className="w-10 text-center flex-none">
+            className={`flex items-center gap-2 sm:gap-4 px-3 sm:px-5 py-3 hover:bg-apple-fill transition-colors ${sm.numero === destaque ? 'bg-apple-accent/5' : ''}`}>
+            <div className="w-7 sm:w-10 text-center flex-none">
               <span className="text-[15px] font-bold text-apple-label">{sm.numero}</span>
             </div>
-            <div className="w-16 flex-none text-[12px] text-apple-tertiary">{fmtData(sm.inicio)}</div>
+            <div className="hidden sm:block w-16 flex-none text-[12px] text-apple-tertiary">{fmtData(sm.inicio)}</div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
                 {sm.numero === destaque && <span className="text-[10px] font-bold uppercase tracking-wide text-apple-accent">Atual</span>}
