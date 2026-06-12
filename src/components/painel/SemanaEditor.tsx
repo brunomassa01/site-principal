@@ -184,6 +184,55 @@ export default function SemanaEditor({ semana }: { semana: Semana }) {
       {pecas.map((p) => (
         <PecaCard key={p.id} peca={p} fundos={fundos} onPatch={patchPeca} onPatchConteudo={patchConteudo} />
       ))}
+
+      {/* Resposta do Manychat — card próprio da semana (a palavra-chave é a mesma p/ todos os posts) */}
+      {pecas.some((p) => p.formato === 'carrossel') && (
+        <ManychatBloco peca={pecas.find((p) => p.formato === 'carrossel')!} onPatchConteudo={patchConteudo} />
+      )}
+    </div>
+  );
+}
+
+function ManychatBloco({ peca, onPatchConteudo }: { peca: Peca; onPatchConteudo: (id: string, patch: Partial<Conteudo>) => void }) {
+  const [gerando, setGerando] = useState(false);
+  const [copiou, setCopiou] = useState<'p' | 'e' | null>(null);
+  const c = peca.conteudo ?? {};
+  async function persist(patch: Partial<Conteudo>) {
+    onPatchConteudo(peca.id, patch);
+    const novo = { ...(peca.conteudo ?? {}), ...patch };
+    await fetch(`/api/painel/social/pecas/${peca.id}`, { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ conteudo: novo }) });
+  }
+  async function gerar() {
+    setGerando(true);
+    const r = await fetch(`/api/painel/social/manychat/${peca.id}`, { method: 'POST' });
+    const j = await r.json().catch(() => ({}));
+    setGerando(false);
+    if (r.ok && (j.pedido || j.entrega)) onPatchConteudo(peca.id, { manychatPedido: j.pedido, manychatEntrega: j.entrega });
+    else alert(j.error || (j.detail ? `Erro: ${j.detail}` : 'Não foi possível gerar a resposta do Manychat.'));
+  }
+  const copiar = (qual: 'p' | 'e', txt: string) => { navigator.clipboard.writeText(txt || ''); setCopiou(qual); setTimeout(() => setCopiou(null), 1500); };
+  return (
+    <div className="bg-white rounded-2xl shadow-card p-4 sm:p-5">
+      <div className="flex items-center justify-between flex-wrap gap-2 mb-1">
+        <div>
+          <span className="text-[15px] font-semibold text-apple-label">Resposta do Manychat</span>
+          {peca.manychat && <span className="text-[12px] text-apple-tertiary ml-2">palavra: <strong>{peca.manychat}</strong></span>}
+        </div>
+        <button onClick={gerar} disabled={gerando} className="px-4 py-2 rounded-full bg-violet-600 text-white text-[13px] font-medium hover:bg-violet-700 disabled:opacity-60">
+          {gerando ? 'Gerando…' : '✨ Gerar resposta'}
+        </button>
+      </div>
+      <p className="text-[12px] text-apple-tertiary mb-4">O DM automático quando alguém comenta a palavra da semana. Vale pra todos os posts: o pedido de automação (1º DM) + o diagnóstico/entrega (2º DM).</p>
+      <div className="flex items-center justify-between mb-1">
+        <label className="text-[12px] font-medium text-apple-tertiary">1) Pedido de automação <span className="opacity-70">(1º DM · o gatilho)</span></label>
+        <button onClick={() => copiar('p', c.manychatPedido ?? '')} className="text-[11px] text-apple-accent hover:underline">{copiou === 'p' ? 'Copiado ✓' : 'Copiar'}</button>
+      </div>
+      <textarea className={`${inputCls} min-h-[64px] mb-4`} placeholder="O 1º DM que agradece e pede a interação…" value={c.manychatPedido ?? ''} onChange={(e) => onPatchConteudo(peca.id, { manychatPedido: e.target.value })} onBlur={(e) => persist({ manychatPedido: e.target.value })} />
+      <div className="flex items-center justify-between mb-1">
+        <label className="text-[12px] font-medium text-apple-tertiary">2) Diagnóstico / entrega <span className="opacity-70">(2º DM · o material)</span></label>
+        <button onClick={() => copiar('e', c.manychatEntrega ?? '')} className="text-[11px] text-apple-accent hover:underline">{copiou === 'e' ? 'Copiado ✓' : 'Copiar'}</button>
+      </div>
+      <textarea className={`${inputCls} min-h-[130px]`} placeholder="O diagnóstico/material que o post prometeu…" value={c.manychatEntrega ?? ''} onChange={(e) => onPatchConteudo(peca.id, { manychatEntrega: e.target.value })} onBlur={(e) => persist({ manychatEntrega: e.target.value })} />
     </div>
   );
 }
@@ -383,32 +432,6 @@ function PecaCard({ peca, fundos, onPatch, onPatchConteudo }: {
                   legenda={peca.legenda} onLegenda={(v) => onPatch(peca.id, { legenda: v })} />
               </div>
             </details>
-          </div>
-        )}
-
-        {/* Resposta do Manychat (Instagram) — uma vez por semana, no carrossel (a palavra-chave é a mesma da semana) */}
-        {peca.formato === 'carrossel' && (
-          <div className="rounded-xl border border-apple-separator/60 bg-apple-surface/50 p-4">
-            <div className="flex items-center justify-between flex-wrap gap-2 mb-1">
-              <div>
-                <span className="text-[13px] font-semibold text-apple-label">Resposta do Manychat</span>
-                {peca.manychat && <span className="text-[11px] text-apple-tertiary ml-2">palavra: <strong>{peca.manychat}</strong></span>}
-              </div>
-              <button onClick={gerarManychat} disabled={gerandoMc} className="px-3 py-1.5 rounded-full bg-violet-600 text-white text-[12px] font-medium hover:bg-violet-700 disabled:opacity-60">
-                {gerandoMc ? 'Gerando…' : '✨ Gerar resposta'}
-              </button>
-            </div>
-            <p className="text-[11px] text-apple-tertiary mb-3">O DM automático quando comentam a palavra: o pedido de automação (1º) + o diagnóstico/entrega (2º).</p>
-            <div className="flex items-center justify-between mb-1">
-              <label className="text-[12px] font-medium text-apple-tertiary">1) Pedido de automação <span className="opacity-70">(1º DM · o gatilho)</span></label>
-              <button onClick={() => copiarMc('p', c.manychatPedido ?? '')} className="text-[11px] text-apple-accent hover:underline">{copiouMc === 'p' ? 'Copiado ✓' : 'Copiar'}</button>
-            </div>
-            <textarea className={`${inputCls} min-h-[64px] mb-3`} placeholder="O 1º DM que agradece e pede a interação…" value={c.manychatPedido ?? ''} onChange={(e) => onPatchConteudo(peca.id, { manychatPedido: e.target.value })} />
-            <div className="flex items-center justify-between mb-1">
-              <label className="text-[12px] font-medium text-apple-tertiary">2) Diagnóstico / entrega <span className="opacity-70">(2º DM · o material)</span></label>
-              <button onClick={() => copiarMc('e', c.manychatEntrega ?? '')} className="text-[11px] text-apple-accent hover:underline">{copiouMc === 'e' ? 'Copiado ✓' : 'Copiar'}</button>
-            </div>
-            <textarea className={`${inputCls} min-h-[130px]`} placeholder="O diagnóstico/material que o post prometeu…" value={c.manychatEntrega ?? ''} onChange={(e) => onPatchConteudo(peca.id, { manychatEntrega: e.target.value })} />
           </div>
         )}
 
