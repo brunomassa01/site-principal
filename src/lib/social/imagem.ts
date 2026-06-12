@@ -55,8 +55,8 @@ export async function gerarImagemEstilo(refUrl: string, tema: string, rotulo = '
 
   const promptBase = ref
     ? [
-        'Use the provided image ONLY as a STYLE reference: match its mood, lighting, black-and-white editorial treatment, film grain and contrast.',
-        'Generate a COMPLETELY NEW and DIFFERENT image in that same visual style, a new but related scene. Do NOT reproduce, copy or just recolor the reference.',
+        'Use the provided image as the STYLE reference. Faithfully MATCH its COLOR PALETTE and color treatment (if it is warm, brown or colorful, keep it warm/brown/colorful; if it is black-and-white, keep it black-and-white), plus its mood, lighting, film grain, contrast and overall look.',
+        'Generate a COMPLETELY NEW and DIFFERENT scene in that SAME style and SAME colors. Do NOT reproduce or copy the reference, but its palette and look MUST be clearly recognizable in the result.',
         ENCHER,
         'No text, no letters, no words, no logos, no watermark.',
         tema ? `Subtly evoke this theme without being literal: "${tema}".` : '',
