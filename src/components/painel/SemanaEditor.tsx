@@ -395,7 +395,7 @@ function PecaCard({ peca, fundos, onPatch, onPatchConteudo }: {
                 {peca.manychat && <span className="text-[11px] text-apple-tertiary ml-2">palavra: <strong>{peca.manychat}</strong></span>}
               </div>
               <button onClick={gerarManychat} disabled={gerandoMc} className="px-3 py-1.5 rounded-full bg-violet-600 text-white text-[12px] font-medium hover:bg-violet-700 disabled:opacity-60">
-                {gerandoMc ? 'Gerando…' : '✨ Gerar com IA'}
+                {gerandoMc ? 'Gerando…' : '✨ Gerar resposta'}
               </button>
             </div>
             <p className="text-[11px] text-apple-tertiary mb-3">O DM automático quando comentam a palavra: o pedido de automação (1º) + o diagnóstico/entrega (2º).</p>
@@ -460,7 +460,7 @@ function PecaCard({ peca, fundos, onPatch, onPatchConteudo }: {
         {/* ações */}
         <div className="flex flex-wrap items-center gap-2 pt-1">
           <button onClick={gerarIA} disabled={gerandoIA} className="px-4 py-2 rounded-full bg-violet-600 text-white text-[13px] font-medium hover:bg-violet-700 disabled:opacity-60">
-            {gerandoIA ? 'Gerando…' : '✨ Gerar com IA'}
+            {gerandoIA ? 'Gerando…' : `✨ Gerar ${peca.formato === 'linkedin' ? 'post' : peca.formato} com IA`}
           </button>
           <button onClick={salvar} disabled={salvando} className="px-4 py-2 rounded-full bg-apple-label text-white text-[13px] font-medium hover:bg-black disabled:opacity-60">
             {salvando ? 'Salvando…' : salvo ? 'Salvo ✓' : 'Salvar'}
