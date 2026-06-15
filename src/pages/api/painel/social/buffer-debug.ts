@@ -5,7 +5,7 @@ export const prerender = false;
 
 // TEMP: mapeia o que falta pra finalizar o agendar com imagem: formato do retorno (PostActionPayload)
 // e o formato dos assets (imagens) no CreatePostInput.
-const VERSAO = 'debug-v3';
+const VERSAO = 'debug-v4';
 
 const tn = (t: any): string => {
   if (!t) return '?';
@@ -37,8 +37,20 @@ export const GET: APIRoute = async () => {
     assetCampos = (at.data?.__type?.inputFields ?? []).map((f: any) => `${f.name}:${tn(f.type)}`);
   }
 
+  // 3) sub-tipos de asset (image/video) pra anexar as artes
+  const subTipo = async (n: string) => {
+    const r = await bufferGraphQL<{ __type: { inputFields: any[] } }>(`{ __type(name:"${n}"){ inputFields { name type { name kind ofType { name kind ofType { name } } } } } }`);
+    return (r.data?.__type?.inputFields ?? []).map((f: any) => `${f.name}:${tn(f.type)}`);
+  };
+  const assetSubtipos = {
+    ImageAssetInput: await subTipo('ImageAssetInput'),
+    VideoAssetInput: await subTipo('VideoAssetInput'),
+    LinkAssetInput: await subTipo('LinkAssetInput'),
+  };
+
   return resp({
     versao: VERSAO,
+    assetSubtipos,
     postActionPayload: papT ? {
       kind: papT.kind,
       fields: (papT.fields ?? []).map((f: any) => `${f.name}:${tn(f.type)}`),
