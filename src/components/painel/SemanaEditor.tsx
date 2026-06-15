@@ -443,12 +443,16 @@ function PecaCard({ peca, fundos, onPatch, onPatchConteudo, onRemove, podeRemove
         {peca.diaPublicacao && <span className="text-[11px] text-apple-tertiary capitalize">{peca.diaPublicacao}-feira</span>}
         <div className="ml-auto flex items-center gap-1">
           {STATUS.map((s) => (
-            <button key={s} onClick={() => mudarStatus(s)}
+            <button key={s} onClick={() => onPatch(peca.id, { status: s })}
               className={`text-[11px] px-2 py-1 rounded-md ${peca.status === s ? 'bg-apple-label text-white' : 'text-apple-secondary hover:bg-apple-fill'}`}>
               {STATUS_LABEL[s]}
             </button>
           ))}
         </div>
+        <button onClick={salvar} disabled={salvando} title="Salva o status e os textos desta peça"
+          className="px-3 py-1.5 rounded-full bg-apple-label text-white text-[12px] font-medium hover:bg-black disabled:opacity-60">
+          {salvando ? 'Salvando…' : salvo ? 'Salvo ✓' : '💾 Salvar'}
+        </button>
         {podeRemover && (
           <button onClick={() => onRemove(peca.id)} title="Remover esta peça" className="text-[12px] text-red-600 hover:underline">✕ remover</button>
         )}
