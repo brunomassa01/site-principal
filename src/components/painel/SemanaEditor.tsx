@@ -315,6 +315,14 @@ function PecaCard({ peca, fundos, onPatch, onPatchConteudo, onRemove, podeRemove
     else setErroPerf(j.error || 'Não consegui ler esse arquivo.');
   }
 
+  // muda o status E persiste na hora (clicar no status precisa salvar sozinho)
+  async function mudarStatus(s: string) {
+    onPatch(peca.id, { status: s });
+    await fetch(`/api/painel/social/pecas/${peca.id}`, {
+      method: 'PATCH', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ status: s }),
+    });
+  }
+
   async function salvar() {
     setSalvando(true); setSalvo(false);
     const r = await fetch(`/api/painel/social/pecas/${peca.id}`, {
@@ -435,7 +443,7 @@ function PecaCard({ peca, fundos, onPatch, onPatchConteudo, onRemove, podeRemove
         {peca.diaPublicacao && <span className="text-[11px] text-apple-tertiary capitalize">{peca.diaPublicacao}-feira</span>}
         <div className="ml-auto flex items-center gap-1">
           {STATUS.map((s) => (
-            <button key={s} onClick={() => onPatch(peca.id, { status: s })}
+            <button key={s} onClick={() => mudarStatus(s)}
               className={`text-[11px] px-2 py-1 rounded-md ${peca.status === s ? 'bg-apple-label text-white' : 'text-apple-secondary hover:bg-apple-fill'}`}>
               {STATUS_LABEL[s]}
             </button>
