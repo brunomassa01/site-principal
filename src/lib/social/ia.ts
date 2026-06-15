@@ -267,39 +267,31 @@ Escreva as duas partes do DM (pedido de automação + entrega). Use a ferramenta
   return { pedido: humanizar(out.pedido ?? ''), entrega: humanizar(out.entrega ?? ''), usage: resp.usage };
 }
 
-// Acentuação: devolve os textos com acentos/ortografia corretos, SEM mudar palavras.
+// Acentuação: devolve os textos COM os acentos certos, mesmas palavras. Saída em lista numerada (parse por linha).
 export async function acentuar(textos: string[]): Promise<string[]> {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) throw new Error('ANTHROPIC_API_KEY não configurada.');
   const client = new Anthropic({ apiKey });
-  const tool: Anthropic.Tool = {
-    name: 'acentuar',
-    description: 'Devolve os textos com acentuação correta, na mesma ordem.',
-    input_schema: {
-      type: 'object',
-      properties: {
-        itens: {
-          type: 'array',
-          description: 'um item por texto recebido, na MESMA ordem',
-          items: { type: 'object', properties: { n: { type: 'number' }, texto: { type: 'string' } }, required: ['n', 'texto'] },
-        },
-      },
-      required: ['itens'],
-    },
-  };
   const lista = textos.map((t, i) => `${i + 1}. ${t}`).join('\n');
-  const system = 'Você corrige APENAS a acentuação e a ortografia do português brasileiro (ç, ã, õ, á, é, í, ó, ú, â, ê, ô, à). Regras absolutas: NÃO mude, adicione ou remova nenhuma palavra; NÃO altere ordem, pontuação, números ou maiúsculas/minúsculas. Devolva cada texto idêntico, só com os acentos certos.';
+  const system = `Sua tarefa: reescrever cada texto em português brasileiro ADICIONANDO a acentuação e a cedilha corretas. Os textos chegam SEM acento; você devolve COM acento. Mantenha exatamente as mesmas palavras, mesma ordem, mesma pontuação e maiúsculas/minúsculas — a ÚNICA mudança é ACRESCENTAR os acentos que faltam.
+Exemplos:
+"nao tira ferias ha 4 anos" vira "não tira férias há 4 anos"
+"orcamento ou negociacao trimestral" vira "orçamento ou negociação trimestral"
+"grafica digital interna" vira "gráfica digital interna"
+"metricas de vaidade" vira "métricas de vaidade"
+Responda SÓ com a mesma lista numerada, um item por linha, no formato "N. texto".`;
   const resp = await client.messages.create({
     model: MODELO, max_tokens: 4000, system,
-    tools: [tool], tool_choice: { type: 'tool', name: tool.name },
-    messages: [{ role: 'user', content: `Corrija a acentuação destes ${textos.length} textos:\n${lista}` }],
+    messages: [{ role: 'user', content: `Acentue estes ${textos.length} textos:\n${lista}` }],
   });
-  const block = resp.content.find((b) => b.type === 'tool_use') as Anthropic.ToolUseBlock | undefined;
-  const itens = (block?.input as { itens?: { n: number; texto: string }[] })?.itens ?? [];
+  const txt = resp.content.filter((b) => b.type === 'text').map((b) => (b as Anthropic.TextBlock).text).join('\n');
   const out = [...textos];
-  for (const it of itens) {
-    const idx = (it.n ?? 0) - 1;
-    if (idx >= 0 && idx < out.length && typeof it.texto === 'string') out[idx] = it.texto;
+  for (const line of txt.split('\n')) {
+    const m = line.match(/^\s*(\d+)\.\s*(.+)$/);
+    if (m) {
+      const idx = Number(m[1]) - 1;
+      if (idx >= 0 && idx < out.length) out[idx] = m[2].trim();
+    }
   }
   return out;
 }
