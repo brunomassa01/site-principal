@@ -45,6 +45,27 @@ export async function inputFields(tipo: string): Promise<string[]> {
   return (r.data?.__type?.inputFields ?? []).map((f) => `${f.name}:${tn(f.type)}`);
 }
 
+/** Canais conectados (leve: id + service + nome). */
+export async function getCanais(): Promise<{ id: string; service: string; name: string; displayName?: string }[]> {
+  if (!process.env.BUFFER_ACCESS_TOKEN) return [];
+  const acc = await bufferGraphQL<{ account: { organizations: { id: string }[] } }>('{ account { organizations { id } } }');
+  const orgId = acc.data?.account?.organizations?.[0]?.id;
+  if (!orgId) return [];
+  const ch = await bufferGraphQL<{ channels: any[] }>(
+    'query($in: ChannelsInput!){ channels(input:$in){ id service name displayName isDisconnected } }',
+    { in: { organizationId: orgId } },
+  );
+  return (ch.data?.channels ?? []).filter((c) => !c.isDisconnected);
+}
+
+/** Cria um RASCUNHO no Buffer (saveToDraft:true NUNCA publica direto). */
+export async function criarRascunhoBuffer(channelId: string, text: string): Promise<{ ok: boolean; erro?: string }> {
+  const M = 'mutation($in: CreatePostInput!){ createPost(input:$in){ __typename } }';
+  const r = await bufferGraphQL(M, { in: { channelId, text, saveToDraft: true } });
+  if (r.errors?.length) return { ok: false, erro: r.errors.map((e) => e.message).join('; ') };
+  return { ok: true };
+}
+
 export type CanalBuffer = {
   id: string; service: string; name: string; displayName?: string; avatar?: string;
   serviceId?: string; type?: string;

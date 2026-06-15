@@ -2,6 +2,13 @@
 // Persona + filtro humanizer + discrição + gabarito (os modelos da semana 1).
 
 import Anthropic from '@anthropic-ai/sdk';
+import { getInstrucoesIA } from '../content/config';
+
+// Bloco de instruções extras do Bruno (editável no painel), com prioridade.
+async function blocoInstrucoes(): Promise<string> {
+  const extra = (await getInstrucoesIA()).trim();
+  return extra ? `\n\nINSTRUÇÕES ADICIONAIS DO BRUNO (têm PRIORIDADE máxima, siga à risca):\n${extra}` : '';
+}
 
 const MODELO = 'claude-sonnet-4-6';
 
@@ -31,7 +38,7 @@ function humanizarTudo<T>(v: T): T {
 const PERSONA = `Você é o ghostwriter do Bruno Massa e escreve EXATAMENTE na voz dele. O texto precisa passar como escrito de próprio punho — se soar como IA, falhou.
 
 QUEM É O BRUNO
-- Gerente de marketing há 20 anos; autor de dois livros (Narrativa em KPI; Marketing na Era da IA); cursando MBA de IA para Negócios na FIAP. Ele é "o tradutor do marketing": explica como a área funciona por dentro.
+- Gerente de marketing há 20 anos; autor; cursando MBA de IA para Negócios na FIAP. Ele é "o tradutor do marketing": explica como a área funciona por dentro.
 - Teses (use como assinatura, sem repetir toda hora): "Se não vira receita, não é marketing, é decoração." e "IA não vai substituir o gestor de marketing. Vai expor quem nunca teve método."
 - Audiência: CMO/head e gestor de marketing que precisa de método. NÃO escreve para iniciante nem para caçador de "renda extra com IA".
 - Anti-avatar (NUNCA soar como): guru de marketing digital, entusiasta de IA de listinha de ferramentas, influenciador de lifestyle, ressentido de ex-empregador.
@@ -51,9 +58,9 @@ FILTRO HUMANIZER — a regra mais importante, NUNCA viole:
 - PROIBIDAS estas muletas de IA e clichês de copy: "a verdade é que", "vamos ser honestos", "no fim do dia", "mais do que nunca", "em um mundo cada vez mais", "o segredo é", "a chave para", "isso muda tudo", "spoiler:", "plot twist", "a real é que", "bora?", "aqui vai um", "pode parecer clichê, mas". Se uma frase soa como legenda motivacional genérica, troque pela experiência concreta do Bruno.
 - ANTES de devolver, releia e corte qualquer frase que você não diria em voz alta numa conversa real.
 
-DISCRIÇÃO (regra de ouro): NUNCA cite número, resultado ou caso identificável do empregador atual (Grupo Quali). Pode usar: histórias anonimizadas, casos públicos, os livros, os SaaS próprios e a experiência antiga.
+DISCRIÇÃO (regra de ouro): NUNCA cite número, resultado ou caso identificável do empregador atual (Grupo Quali). Pode usar: histórias anonimizadas, casos públicos, o método e as ideias próprias, os SaaS próprios e a experiência antiga.
 
-REGRA EDITORIAL: a matéria-prima é o MUNDO. O livro entra só como LENTE — um conceito por peça, citado como "no meu livro eu chamo isso de…". Nunca recontar o capítulo.`;
+REGRA EDITORIAL: a matéria-prima é o MUNDO. Os conceitos e o método do Bruno entram como LENTE pra interpretar o caso, apresentados como o JEITO DELE de pensar. ⛔ PROIBIDO citar, mencionar ou aludir a "meu livro", "no meu livro", "no livro", títulos de livro ou qualquer obra publicada. O momento é de POSICIONAMENTO e crescimento de audiência, NÃO de venda. Apresente as ideias como pensamento próprio, sem apontar pra um produto.`;
 
 const GABARITO: Record<string, string> = {
   linkedin: `EXEMPLO de post de LinkedIn dele (gabarito de TOM e ESTRUTURA, não copie o assunto):
@@ -143,17 +150,17 @@ export async function gerarConteudo(peca: Peca, semana: Semana, materia?: string
   if (!tool) throw new Error('Formato sem geração.');
 
   const ponte = semana.ponteIa
-    ? '\nEsta pauta é [PONTE IA]: estenda o argumento para o universo de IA, como OPINIÃO do Bruno (o livro não menciona IA). Não cite o livro como se ele falasse de IA.'
+    ? '\nEsta pauta é [PONTE IA]: estenda o argumento para o universo de IA, como OPINIÃO e método do Bruno.'
     : '';
   const cta = peca.manychat ? `\nNa chamada final, convide a comentar a palavra "${peca.manychat}" para receber o material.` : '';
   const fonte = materia
     ? `\n\nMATÉRIA-PRIMA: o artigo abaixo já foi publicado no blog do Bruno e já está na voz dele. TRANSFORME o artigo no formato pedido: aproveite as ideias, as frases fortes e os exemplos dele. NÃO invente fatos que não estejam no artigo. NÃO copie parágrafos inteiros: adapte ao ritmo do formato.\n"""\n${materia.slice(0, 6000)}\n"""`
     : '';
 
-  const system = `${PERSONA}\n\n${GABARITO[peca.formato]}`;
+  const system = `${PERSONA}\n\n${GABARITO[peca.formato]}${await blocoInstrucoes()}`;
   const user = `Cluster da semana: ${semana.cluster ?? '—'}.
 Pauta (o ângulo desta peça): ${peca.gancho ?? '—'}.
-Lente do livro: ${peca.lente ?? '—'}.${ponte}${cta}${fonte}
+Lente (conceito): ${peca.lente ?? '—'}.${ponte}${cta}${fonte}
 
 Escreva o ${peca.formato === 'linkedin' ? 'post de LinkedIn' : peca.formato} no padrão e na voz do Bruno. Use a ferramenta para entregar.`;
 
@@ -236,7 +243,7 @@ São DUAS partes:
 1) PEDIDO DE AUTOMAÇÃO (1º DM): agradece de leve e pede UMA interação simples que destrava a entrega E ajuda o alcance (ex.: "me responde FEITO", "salva esse post", "toca no botão"). Curtíssimo. É o gatilho do fluxo.
 2) ENTREGA (2º DM): o diagnóstico / material que o post prometeu — valor real e AUTOSSUFICIENTE, no método do Bruno, em pontos ou passos curtos. Sem venda, sem link de produto. Fecha com um convite leve a SEGUIR pra mais método.
 
-Sem hashtags. No máximo 1-2 emojis e só se couber no tom. Quebras de linha curtas (é DM).`;
+Sem hashtags. No máximo 1-2 emojis e só se couber no tom. Quebras de linha curtas (é DM).${await blocoInstrucoes()}`;
 
   const user = `Palavra-chave que o seguidor comentou: "${palavra}".
 Assunto do post (gancho): ${peca.gancho ?? '—'}.
