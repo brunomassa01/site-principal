@@ -267,6 +267,43 @@ Escreva as duas partes do DM (pedido de automação + entrega). Use a ferramenta
   return { pedido: humanizar(out.pedido ?? ''), entrega: humanizar(out.entrega ?? ''), usage: resp.usage };
 }
 
+// Acentuação: devolve os textos com acentos/ortografia corretos, SEM mudar palavras.
+export async function acentuar(textos: string[]): Promise<string[]> {
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) throw new Error('ANTHROPIC_API_KEY não configurada.');
+  const client = new Anthropic({ apiKey });
+  const tool: Anthropic.Tool = {
+    name: 'acentuar',
+    description: 'Devolve os textos com acentuação correta, na mesma ordem.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        itens: {
+          type: 'array',
+          description: 'um item por texto recebido, na MESMA ordem',
+          items: { type: 'object', properties: { n: { type: 'number' }, texto: { type: 'string' } }, required: ['n', 'texto'] },
+        },
+      },
+      required: ['itens'],
+    },
+  };
+  const lista = textos.map((t, i) => `${i + 1}. ${t}`).join('\n');
+  const system = 'Você corrige APENAS a acentuação e a ortografia do português brasileiro (ç, ã, õ, á, é, í, ó, ú, â, ê, ô, à). Regras absolutas: NÃO mude, adicione ou remova nenhuma palavra; NÃO altere ordem, pontuação, números ou maiúsculas/minúsculas. Devolva cada texto idêntico, só com os acentos certos.';
+  const resp = await client.messages.create({
+    model: MODELO, max_tokens: 4000, system,
+    tools: [tool], tool_choice: { type: 'tool', name: tool.name },
+    messages: [{ role: 'user', content: `Corrija a acentuação destes ${textos.length} textos:\n${lista}` }],
+  });
+  const block = resp.content.find((b) => b.type === 'tool_use') as Anthropic.ToolUseBlock | undefined;
+  const itens = (block?.input as { itens?: { n: number; texto: string }[] })?.itens ?? [];
+  const out = [...textos];
+  for (const it of itens) {
+    const idx = (it.n ?? 0) - 1;
+    if (idx >= 0 && idx < out.length && typeof it.texto === 'string') out[idx] = it.texto;
+  }
+  return out;
+}
+
 // ───────────────────────── Leitura de Performance ─────────────────────────
 // Lê os números de um post (planilha do LinkedIn em texto, OU print) e devolve métricas
 // estruturadas + uma análise na cabeça do Bruno + uma recomendação que alimenta o calendário.
