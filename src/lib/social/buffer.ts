@@ -45,6 +45,45 @@ export async function inputFields(tipo: string): Promise<string[]> {
   return (r.data?.__type?.inputFields ?? []).map((f) => `${f.name}:${tn(f.type)}`);
 }
 
+export type CanalBuffer = {
+  id: string; service: string; name: string; displayName?: string; avatar?: string;
+  serviceId?: string; type?: string;
+  metricas: { type: string; name: string; description?: string; value: number; unit?: string }[];
+  atualizadoEm?: string | null;
+};
+
+/** Dados do PLANEJAMENTO: organização + canais conectados, cada um com as métricas agregadas do período. */
+export async function getPlanejamentoBuffer(dias = 30): Promise<{ canais: CanalBuffer[]; dias: number; erro?: string }> {
+  if (!process.env.BUFFER_ACCESS_TOKEN) return { canais: [], dias, erro: 'sem-token' };
+  const acc = await bufferGraphQL<{ account: { organizations: { id: string }[] } }>('{ account { organizations { id } } }');
+  const orgId = acc.data?.account?.organizations?.[0]?.id;
+  if (!orgId) return { canais: [], dias, erro: 'sem-organizacao' };
+
+  const ch = await bufferGraphQL<{ channels: any[] }>(
+    'query($in: ChannelsInput!){ channels(input:$in){ id service name displayName avatar serviceId type isDisconnected } }',
+    { in: { organizationId: orgId } },
+  );
+  const canais = (ch.data?.channels ?? []).filter((c) => !c.isDisconnected);
+
+  const end = new Date();
+  const start = new Date(end.getTime() - dias * 86400000);
+  const METQ = 'query($in: AggregatedPostMetricsInput!){ aggregatedPostMetrics(input:$in){ metrics { type name description value unit } metricsUpdatedAt } }';
+  const comMetricas = await Promise.all(
+    canais.map(async (c): Promise<CanalBuffer> => {
+      const m = await bufferGraphQL<{ aggregatedPostMetrics: { metrics: any[]; metricsUpdatedAt: string } }>(METQ, {
+        in: { organizationId: orgId, startDateTime: start.toISOString(), endDateTime: end.toISOString(), channelIds: [c.id] },
+      });
+      return {
+        id: c.id, service: c.service, name: c.name, displayName: c.displayName, avatar: c.avatar,
+        serviceId: c.serviceId, type: c.type,
+        metricas: m.data?.aggregatedPostMetrics?.metrics ?? [],
+        atualizadoEm: m.data?.aggregatedPostMetrics?.metricsUpdatedAt ?? null,
+      };
+    }),
+  );
+  return { canais: comMetricas, dias };
+}
+
 /** Nome do tipo de um campo dentro de um tipo (resolve LIST/NON_NULL). Ex.: AggregatedPostMetrics.metrics -> 'PostMetric'. */
 export async function tipoDoCampo(tipoPai: string, campo: string): Promise<string | null> {
   const q = `{ __type(name:"${tipoPai}"){ fields { name type { name kind ofType { name kind ofType { name kind ofType { name } } } } } } }`;

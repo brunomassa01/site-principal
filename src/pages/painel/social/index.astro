@@ -32,9 +32,12 @@ const semanasJson = semanas.map((s) => ({
 }));
 ---
 <PainelLayout titulo="Redes Sociais">
-  <div class="flex items-center justify-between mb-1">
+  <div class="flex items-center justify-between gap-3 mb-1 flex-wrap">
     <h1 class="text-[24px] font-bold text-apple-label tracking-tight">Redes Sociais</h1>
-    <span class="text-[13px] text-apple-tertiary">Calendário editorial · 52 semanas</span>
+    <div class="flex items-center gap-2">
+      <a href="/painel/social/planejamento" class="px-4 py-2 rounded-full bg-violet-600 text-white text-[13px] font-medium hover:bg-violet-700 transition-colors">📊 Planejamento</a>
+      <a href="https://publish.buffer.com/" target="_blank" rel="noopener" class="px-4 py-2 rounded-full border border-apple-separator text-[13px] text-apple-secondary hover:bg-apple-fill transition-colors">Abrir Buffer ↗</a>
+    </div>
   </div>
   <p class="text-[14px] text-apple-secondary mb-6">Uma ideia por semana, três formatos. Da pauta ao texto pronto pra publicar.</p>
 

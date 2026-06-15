@@ -1,0 +1,107 @@
+---
+import PainelLayout from '../../../layouts/PainelLayout.astro';
+import SocialCalendario from '../../../components/painel/SocialCalendario.tsx';
+import { getSemanas, numeroSemanaDestaque } from '../../../lib/content/social';
+import { getPlanejamentoBuffer } from '../../../lib/social/buffer';
+
+export const prerender = false;
+
+const dias = Math.min(90, Math.max(1, Number(Astro.url.searchParams.get('dias')) || 30));
+const buffer = await getPlanejamentoBuffer(dias);
+
+const todas = await getSemanas();
+const semanas = todas.filter((s) => s.numero > 0);
+const destaque = numeroSemanaDestaque(semanas);
+const semanasJson = semanas.map((s) => ({
+  numero: s.numero, inicio: s.inicio ? new Date(s.inicio).toISOString() : null, cluster: s.cluster,
+  ponteIa: s.ponteIa, coringa: s.coringa, slotReativo: s.slotReativo, status: s.status,
+  pecas: s.pecas.map((p) => ({ formato: p.formato, status: p.status, gancho: p.gancho })),
+}));
+
+const SERVICO: Record<string, { nome: string; icon: string; cor: string }> = {
+  linkedin: { nome: 'LinkedIn', icon: 'in', cor: 'bg-[#0A66C2]' },
+  instagram: { nome: 'Instagram', icon: '◎', cor: 'bg-gradient-to-br from-[#f58529] via-[#dd2a7b] to-[#8134af]' },
+  youtube: { nome: 'YouTube', icon: '▶', cor: 'bg-[#FF0000]' },
+  twitter: { nome: 'X / Twitter', icon: '𝕏', cor: 'bg-black' },
+  facebook: { nome: 'Facebook', icon: 'f', cor: 'bg-[#1877F2]' },
+};
+const svc = (s: string) => SERVICO[s] ?? { nome: s, icon: '•', cor: 'bg-apple-label' };
+const fmtNum = (v: number, unit?: string) => {
+  if (unit === 'percentage' || unit === 'percent') return `${(+v).toLocaleString('pt-BR', { maximumFractionDigits: 1 })}%`;
+  return (+v).toLocaleString('pt-BR');
+};
+const PERIODOS = [7, 30, 90];
+---
+<PainelLayout titulo="Planejamento">
+  <div class="flex items-center justify-between gap-3 mb-1 flex-wrap">
+    <h1 class="text-[24px] font-bold text-apple-label tracking-tight">Planejamento</h1>
+    <div class="flex items-center gap-2">
+      <a href="/painel/social" class="text-[13px] text-apple-accent hover:underline">← Calendário</a>
+      <a href="https://publish.buffer.com/" target="_blank" rel="noopener" class="px-4 py-2 rounded-full border border-apple-separator text-[13px] text-apple-secondary hover:bg-apple-fill transition-colors">Abrir Buffer ↗</a>
+    </div>
+  </div>
+  <p class="text-[14px] text-apple-secondary mb-6">A performance real dos seus canais (via Buffer) ao lado do calendário, pra ajustar a rota olhando o que funciona.</p>
+
+  <!-- Performance (Buffer) -->
+  <section class="mb-8">
+    <div class="flex items-center justify-between gap-3 mb-3 flex-wrap">
+      <h2 class="text-[16px] font-semibold text-apple-label">Performance · últimos {dias} dias</h2>
+      <div class="flex items-center gap-1 text-[12px]">
+        {PERIODOS.map((d) => (
+          <a href={`?dias=${d}`} class={`px-2.5 py-1 rounded-full ${d === dias ? 'bg-apple-label text-white' : 'text-apple-secondary hover:bg-apple-fill'}`}>{d}d</a>
+        ))}
+      </div>
+    </div>
+
+    {buffer.erro === 'sem-token' && (
+      <div class="bg-white rounded-2xl shadow-card p-5 text-[14px] text-apple-secondary">
+        Buffer ainda não conectado neste ambiente. Falta a chave <code>BUFFER_ACCESS_TOKEN</code> no Vercel.
+      </div>
+    )}
+    {buffer.erro && buffer.erro !== 'sem-token' && (
+      <div class="bg-white rounded-2xl shadow-card p-5 text-[14px] text-apple-secondary">
+        Não consegui ler o Buffer agora ({buffer.erro}). A leitura manual (planilha/print) na peça continua funcionando.
+      </div>
+    )}
+
+    {!buffer.erro && (
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {buffer.canais.map((c) => {
+          const s = svc(c.service);
+          const principais = c.metricas.filter((m) => ['postCount', 'impressions', 'reach', 'reactions', 'comments', 'engagementRate', 'shares', 'saves', 'views', 'newFollowers'].includes(m.type));
+          const lista = principais.length ? principais : c.metricas;
+          return (
+            <div class="bg-white rounded-2xl shadow-card overflow-hidden">
+              <div class="px-4 py-3 flex items-center gap-2.5 border-b border-apple-separator/40">
+                <span class={`w-7 h-7 rounded-lg ${s.cor} text-white flex items-center justify-center text-[13px] font-bold`}>{s.icon}</span>
+                <div class="min-w-0">
+                  <p class="text-[14px] font-semibold text-apple-label leading-tight truncate">{s.nome}</p>
+                  <p class="text-[12px] text-apple-tertiary truncate">{c.displayName || c.name}</p>
+                </div>
+              </div>
+              {lista.length ? (
+                <div class="grid grid-cols-2 gap-px bg-apple-separator/30">
+                  {lista.slice(0, 6).map((m) => (
+                    <div class="bg-white p-3">
+                      <p class="text-[18px] font-bold text-apple-label leading-none">{fmtNum(m.value, m.unit)}</p>
+                      <p class="text-[11px] text-apple-tertiary mt-1" title={m.description}>{m.name}</p>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p class="p-4 text-[13px] text-apple-tertiary">Sem dados no período.</p>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    )}
+    <p class="text-[11px] text-apple-tertiary mt-2">Números puxados do Buffer (IG/LinkedIn/YouTube). Para os dashboards completos, use “Abrir Buffer”.</p>
+  </section>
+
+  <!-- Calendário + sequência -->
+  <section>
+    <h2 class="text-[16px] font-semibold text-apple-label mb-3">Calendário & sequência</h2>
+    <SocialCalendario client:load semanas={semanasJson} destaque={destaque} />
+  </section>
+</PainelLayout>
