@@ -44,3 +44,12 @@ export async function inputFields(tipo: string): Promise<string[]> {
   const r = await bufferGraphQL<{ __type: { inputFields: { name: string; type: any }[] } }>(q);
   return (r.data?.__type?.inputFields ?? []).map((f) => `${f.name}:${tn(f.type)}`);
 }
+
+/** Nome do tipo de um campo dentro de um tipo (resolve LIST/NON_NULL). Ex.: AggregatedPostMetrics.metrics -> 'PostMetric'. */
+export async function tipoDoCampo(tipoPai: string, campo: string): Promise<string | null> {
+  const q = `{ __type(name:"${tipoPai}"){ fields { name type { name kind ofType { name kind ofType { name kind ofType { name } } } } } } }`;
+  const r = await bufferGraphQL<{ __type: { fields: { name: string; type: any }[] } }>(q);
+  const f = r.data?.__type?.fields?.find((x) => x.name === campo);
+  if (!f) return null;
+  return tn(f.type).replace(/[[\]]/g, '');
+}
