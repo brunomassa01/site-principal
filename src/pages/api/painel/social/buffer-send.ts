@@ -23,8 +23,11 @@ export const POST: APIRoute = async ({ request }) => {
   const dueAt = String(b.dueAt ?? '');
   const dry = b.dry === true;
   if (!pecaId) return json({ error: 'pecaId é obrigatório.' }, 400);
-  if (!dueAt || Number.isNaN(Date.parse(dueAt))) return json({ error: 'Escolha a data e a hora do agendamento.' }, 400);
-  if (Date.parse(dueAt) <= Date.now()) return json({ error: 'A data de agendamento precisa ser no futuro.' }, 400);
+  // o input vem como horário LOCAL do Bruno (São Paulo, UTC-3). Converte pra UTC corretamente.
+  const m = dueAt.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/);
+  if (!m) return json({ error: 'Escolha a data e a hora do agendamento.' }, 400);
+  const dueIso = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3], +m[4] + 3, +m[5])).toISOString();
+  if (Date.parse(dueIso) <= Date.now()) return json({ error: 'A data de agendamento precisa ser no futuro.' }, 400);
 
   const [peca] = await db.select().from(socialPecas).where(eq(socialPecas.id, pecaId));
   if (!peca) return json({ error: 'Peça não encontrada.' }, 404);
@@ -43,7 +46,7 @@ export const POST: APIRoute = async ({ request }) => {
     return json({ dry: true, canal: { service: canal.service, name: canal.displayName || canal.name }, dueAt, imagens: imagens.length, textoPreview: texto.slice(0, 280) });
   }
 
-  const r = await agendarNoBuffer(canal.id, texto, new Date(dueAt).toISOString(), imagens, servico);
+  const r = await agendarNoBuffer(canal.id, texto, dueIso, imagens, servico);
   if (!r.ok) {
     // grava o erro exato pra diagnóstico (lido depois, sem o Bruno transcrever)
     await setConfig('buffer_ultimo_erro', JSON.stringify({ erro: r.erro, formato: peca.formato, canal: servico, dueAt, imagens: imagens.length, em: new Date().toISOString() })).catch(() => {});

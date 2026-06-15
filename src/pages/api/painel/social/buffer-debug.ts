@@ -1,68 +1,40 @@
 import type { APIRoute } from 'astro';
-import { apagarNoBuffer, bufferGraphQL, temBuffer } from '../../../../lib/social/buffer';
+import { apagarNoBuffer, bufferGraphQL, getCanais, temBuffer } from '../../../../lib/social/buffer';
 
 export const prerender = false;
 
-// TEMP: mapeia o que falta pra finalizar o agendar com imagem: formato do retorno (PostActionPayload)
-// e o formato dos assets (imagens) no CreatePostInput.
-const VERSAO = 'debug-v4';
-
-const tn = (t: any): string => {
-  if (!t) return '?';
-  if (t.name) return t.name;
-  if (t.ofType) return t.kind === 'LIST' ? `[${tn(t.ofType)}]` : tn(t.ofType);
-  return t.kind ?? '?';
-};
+// TEMP: lista canais (pra ver IG) + posts recentes do LinkedIn (pra achar o de 27/06 e ver status/data).
+const VERSAO = 'debug-v5';
 
 export const GET: APIRoute = async ({ url }) => {
   if (!temBuffer()) return resp({ erro: 'sem token' });
-
-  // limpeza de teste: ?cancelar=<postId> apaga o post no Buffer
   const cancelar = url.searchParams.get('cancelar');
   if (cancelar) return resp({ cancelar, ...(await apagarNoBuffer(cancelar)) });
 
-  // 1) PostActionPayload (pra ler sucesso/erro/id do post criado)
-  const pap = await bufferGraphQL<{ __type: any }>(
-    '{ __type(name:"PostActionPayload"){ kind fields { name type { name kind ofType { name kind ofType { name } } } } possibleTypes { name kind fields { name type { name kind ofType { name } } } } } }',
-  );
-  const papT = pap.data?.__type;
+  const acc = await bufferGraphQL<{ account: { organizations: { id: string }[] } }>('{ account { organizations { id } } }');
+  const orgId = acc.data?.account?.organizations?.[0]?.id;
 
-  // 2) CreatePostInput.assets -> nome do tipo do elemento
-  const cpi = await bufferGraphQL<{ __type: { inputFields: any[] } }>(
-    '{ __type(name:"CreatePostInput"){ inputFields { name type { name kind ofType { name kind ofType { name kind ofType { name } } } } } } }',
+  // todos os canais (cru), pra entender o IG
+  const chAll = await bufferGraphQL<{ channels: any[] }>(
+    'query($in: ChannelsInput!){ channels(input:$in){ id service name displayName isDisconnected isLocked } }',
+    { in: { organizationId: orgId } },
   );
-  const assetsField = cpi.data?.__type?.inputFields?.find((f: any) => f.name === 'assets');
-  const assetTipo = assetsField ? tn(assetsField.type).replace(/[![\]]/g, '') : null;
-  let assetCampos: string[] | null = null;
-  if (assetTipo && assetTipo !== '?') {
-    const at = await bufferGraphQL<{ __type: { inputFields: any[]; kind: string } }>(
-      `{ __type(name:"${assetTipo}"){ kind inputFields { name type { name kind ofType { name kind ofType { name } } } } } }`,
+  const canais = (chAll.data?.channels ?? []).map((c) => ({ service: c.service, name: c.displayName || c.name, isDisconnected: c.isDisconnected, isLocked: c.isLocked }));
+  const canaisLib = await getCanais();
+
+  // posts recentes do LinkedIn (todos os status) pra achar o de 27/06
+  const li = canaisLib.find((c) => c.service === 'linkedin');
+  let postsLi: any[] = [];
+  if (li) {
+    const r = await bufferGraphQL<{ posts: { edges: { node: any }[] } }>(
+      'query($in: PostsInput!){ posts(input:$in, first: 15){ edges { node { id status dueAt text channelService } } } }',
+      { in: { organizationId: orgId, filter: { channelIds: [li.id], status: ['scheduled', 'draft', 'needs_approval', 'sending', 'error'] } } },
     );
-    assetCampos = (at.data?.__type?.inputFields ?? []).map((f: any) => `${f.name}:${tn(f.type)}`);
+    postsLi = (r.data?.posts?.edges ?? []).map((e) => ({ status: e.node.status, dueAt: e.node.dueAt, txt: (e.node.text || '').slice(0, 45) }));
+    if (r.errors) postsLi = [{ erro: r.errors.map((x) => x.message).join('; ') }];
   }
 
-  // 3) sub-tipos de asset (image/video) pra anexar as artes
-  const subTipo = async (n: string) => {
-    const r = await bufferGraphQL<{ __type: { inputFields: any[] } }>(`{ __type(name:"${n}"){ inputFields { name type { name kind ofType { name kind ofType { name } } } } } }`);
-    return (r.data?.__type?.inputFields ?? []).map((f: any) => `${f.name}:${tn(f.type)}`);
-  };
-  const assetSubtipos = {
-    ImageAssetInput: await subTipo('ImageAssetInput'),
-    VideoAssetInput: await subTipo('VideoAssetInput'),
-    LinkAssetInput: await subTipo('LinkAssetInput'),
-  };
-
-  return resp({
-    versao: VERSAO,
-    assetSubtipos,
-    postActionPayload: papT ? {
-      kind: papT.kind,
-      fields: (papT.fields ?? []).map((f: any) => `${f.name}:${tn(f.type)}`),
-      possibleTypes: (papT.possibleTypes ?? []).map((p: any) => ({ nome: p.name, kind: p.kind, fields: (p.fields ?? []).map((f: any) => `${f.name}:${tn(f.type)}`) })),
-    } : null,
-    assetTipo,
-    assetCampos,
-  });
+  return resp({ versao: VERSAO, canaisCru: canais, canaisLib: canaisLib.map((c) => ({ service: c.service, name: c.name })), linkedinPosts: postsLi });
 };
 
 function resp(obj: unknown) {
