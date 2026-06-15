@@ -345,7 +345,7 @@ function PecaCard({ peca, fundos, onPatch, onPatchConteudo, onRemove, podeRemove
       setMsgBuffer({ texto: `Agendado no Buffer (${j.canal}) para ${q} ✓`, erro: false });
       onPatch(peca.id, { status: 'aprovado' });
     } else {
-      setMsgBuffer({ texto: j.error || j.detail || 'Falha ao agendar.', erro: true });
+      setMsgBuffer({ texto: `${j.error || 'Falha ao agendar.'}${j.detail ? ' — ' + j.detail : ''}`, erro: true });
     }
   }
 

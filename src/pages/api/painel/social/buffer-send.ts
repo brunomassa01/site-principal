@@ -4,6 +4,7 @@ import { db } from '../../../../lib/db';
 import { socialPecas } from '../../../../lib/db/schema';
 import { json } from '../../../../lib/http';
 import { agendarNoBuffer, getCanais, temBuffer } from '../../../../lib/social/buffer';
+import { setConfig } from '../../../../lib/content/config';
 
 export const prerender = false;
 
@@ -43,6 +44,10 @@ export const POST: APIRoute = async ({ request }) => {
   }
 
   const r = await agendarNoBuffer(canal.id, texto, new Date(dueAt).toISOString(), imagens);
-  if (!r.ok) return json({ error: 'O Buffer recusou o agendamento.', detail: r.erro }, 502);
+  if (!r.ok) {
+    // grava o erro exato pra diagnóstico (lido depois, sem o Bruno transcrever)
+    await setConfig('buffer_ultimo_erro', JSON.stringify({ erro: r.erro, formato: peca.formato, canal: servico, dueAt, imagens: imagens.length, em: new Date().toISOString() })).catch(() => {});
+    return json({ error: 'O Buffer recusou o agendamento.', detail: r.erro }, 502);
+  }
   return json({ ok: true, canal: canal.service, dueAt, imagens: imagens.length, postId: r.postId, status: r.status });
 };
