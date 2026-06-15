@@ -5,7 +5,7 @@ export const prerender = false;
 
 // TEMP: mapeia createPost (retorno) e deletePost (args) pra construir o "Enviar pro Buffer" (rascunho)
 // com teste seguro (cria rascunho e apaga). GET só introspecta — NÃO cria post.
-const VERSAO = 'send-introspect-v2';
+const VERSAO = 'send-introspect-v3';
 
 const tn = (t: any): string => {
   if (!t) return '?';
@@ -34,10 +34,21 @@ export const GET: APIRoute = async () => {
     return r.data?.__type?.enumValues?.map((e) => e.name) ?? null;
   };
 
+  // detalha o PostActionPayload (objeto ou união)
+  const pap = returnTypeName
+    ? await bufferGraphQL<{ __type: any }>(`{ __type(name:"${returnTypeName}"){ name kind fields { name type { name kind ofType { name kind ofType { name } } } } possibleTypes { name fields { name type { name kind ofType { name } } } } } }`)
+    : null;
+  const papT = pap?.data?.__type;
+  const papDetalhe = papT ? {
+    kind: papT.kind,
+    fields: (papT.fields ?? []).map((f: any) => `${f.name}:${tn(f.type)}`),
+    possibleTypes: (papT.possibleTypes ?? []).map((p: any) => ({ nome: p.name, fields: (p.fields ?? []).map((f: any) => `${f.name}:${tn(f.type)}`) })),
+  } : null;
+
   const dpInputType = dp?.args?.[0] ? tn(dp.args[0].type).replace(/[![\]]/g, '') : null;
   return resp({
     versao: VERSAO,
-    createPostReturn: { tipo: returnTypeName, campos: await introFields(returnTypeName) },
+    createPostReturn: { tipo: returnTypeName, detalhe: papDetalhe },
     deletePost: { args: (dp?.args ?? []).map((x: any) => `${x.name}:${tn(x.type)}`), inputType: dpInputType, inputFields: dpInputType ? await inputFields(dpInputType) : null },
     SchedulingType: await enumQ('SchedulingType'),
     ShareMode: await enumQ('ShareMode'),
