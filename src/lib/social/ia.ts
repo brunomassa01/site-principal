@@ -77,7 +77,7 @@ Antes de abrir a próxima vaga, teste: o que essa função precisa gerar para o 
 
 Já viu (ou ocupou) uma vaga dessas? Me conta como terminou.
 """`,
-  carrossel: `EXEMPLO de carrossel dele (gabarito de estrutura): 9 slides. Slide 1 é a CAPA (tag curta em caixa-alta + título-gancho curto entre aspas + subtítulo explicando). Slides 2 a 7-8 são as ideias, cada um com um título curto e 1-2 frases de texto. O penúltimo amarra o conceito do livro. O último é a CTA com a pergunta + "Comenta {PALAVRA} que eu te mando...". Frases curtas, afiadas, uma ideia por slide.`,
+  carrossel: `EXEMPLO de carrossel dele (gabarito de estrutura): 9 slides. Slide 1 é a CAPA (tag curta em caixa-alta + título-gancho curto entre aspas + subtítulo explicando). Slides 2 a 7-8 são as ideias, cada um com um título curto e 1-2 frases de texto. O penúltimo amarra o conceito-chave (o método do Bruno, sem citar livro). O último é a CTA com a pergunta + "Comenta {PALAVRA} que eu te mando...". Frases curtas, afiadas, uma ideia por slide.`,
   reel: `EXEMPLO de reel dele (gabarito): vídeo de ~60s, 8 cenas curtas. Capa com frase-gancho. Cada cena tem uma FALA (como ele diria, natural, falada) e uma LEGENDA destacada de 2-4 palavras em caixa-alta. Abre com gancho forte, desenvolve, fecha com a CTA "Comenta {PALAVRA}...". Também entregue um "roteiro" em texto corrido (as falas em sequência, pra ele ler e gravar).`,
   post: `EXEMPLO de post único dele (gabarito): UMA imagem só, não é carrossel. Uma tag curta em caixa-alta, um título-gancho curto e afiado (a tese da imagem, no estilo dele), um subtítulo de uma linha que explica, e a legenda pro feed. É o formato mais direto: uma ideia, uma imagem, uma legenda.`,
 };

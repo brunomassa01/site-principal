@@ -160,6 +160,11 @@ export default function SemanaEditor({ semana }: { semana: Semana }) {
     setGerandoTodos(true);
     for (const p of firmes) {
       try {
+        // salva o gancho/lente atuais antes de gerar (senão usa o gancho antigo do banco)
+        await fetch(`/api/painel/social/pecas/${p.id}`, {
+          method: 'PUT', headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ gancho: p.gancho, lente: p.lente }),
+        });
         const r = await fetch(`/api/painel/social/gerar/${p.id}`, { method: 'POST' });
         const j = await r.json();
         if (r.ok && j.conteudo) patchPeca(p.id, { conteudo: j.conteudo, legenda: j.legenda ?? p.legenda, status: j.status ?? 'escrito' });
@@ -425,6 +430,11 @@ function PecaCard({ peca, fundos, onPatch, onPatchConteudo, onRemove, podeRemove
     const temConteudo = peca.conteudo && Object.keys(peca.conteudo).length > 0;
     if (temConteudo && !confirm('Isso substitui o conteúdo atual desta peça pela versão gerada pela IA. Continuar?')) return;
     setGerandoIA(true);
+    // SALVA o gancho/lente atuais ANTES de gerar — senão a IA usa o gancho antigo do banco
+    await fetch(`/api/painel/social/pecas/${peca.id}`, {
+      method: 'PUT', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ gancho: peca.gancho, lente: peca.lente }),
+    });
     const r = await fetch(`/api/painel/social/gerar/${peca.id}`, { method: 'POST' });
     const j = await r.json().catch(() => ({}));
     setGerandoIA(false);
