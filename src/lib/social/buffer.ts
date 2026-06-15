@@ -58,10 +58,12 @@ export async function getCanais(): Promise<{ id: string; service: string; name: 
   return (ch.data?.channels ?? []).filter((c) => !c.isDisconnected);
 }
 
-/** Cria um RASCUNHO no Buffer (saveToDraft:true NUNCA publica direto). */
-export async function criarRascunhoBuffer(channelId: string, text: string): Promise<{ ok: boolean; erro?: string }> {
+/** Agenda uma publicação no Buffer para a data/hora (ISO) no canal. customScheduled = horário específico.
+ *  LinkedIn publica automático; Instagram costuma exigir lembrete (notification). */
+export async function agendarNoBuffer(channelId: string, text: string, dueAtISO: string, service: string): Promise<{ ok: boolean; erro?: string }> {
+  const schedulingType = service === 'instagram' ? 'notification' : 'automatic';
   const M = 'mutation($in: CreatePostInput!){ createPost(input:$in){ __typename } }';
-  const r = await bufferGraphQL(M, { in: { channelId, text, saveToDraft: true } });
+  const r = await bufferGraphQL(M, { in: { channelId, text, dueAt: dueAtISO, mode: 'customScheduled', schedulingType } });
   if (r.errors?.length) return { ok: false, erro: r.errors.map((e) => e.message).join('; ') };
   return { ok: true };
 }

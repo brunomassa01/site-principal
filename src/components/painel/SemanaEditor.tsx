@@ -299,6 +299,9 @@ function PecaCard({ peca, fundos, onPatch, onPatchConteudo, onRemove, podeRemove
   const [metricas, setMetricas] = useState<Metricas | null>(peca.metricas ?? null);
   const [lendoPerf, setLendoPerf] = useState(false);
   const [erroPerf, setErroPerf] = useState('');
+  const [agendarEm, setAgendarEm] = useState('');
+  const [agendandoBuffer, setAgendandoBuffer] = useState(false);
+  const [msgBuffer, setMsgBuffer] = useState<{ texto: string; erro: boolean } | null>(null);
   const meta = FMT[peca.formato] ?? { label: peca.formato, icon: '•' };
 
   async function lerPerformance(e: React.ChangeEvent<HTMLInputElement>) {
@@ -321,6 +324,24 @@ function PecaCard({ peca, fundos, onPatch, onPatchConteudo, onRemove, podeRemove
     await fetch(`/api/painel/social/pecas/${peca.id}`, {
       method: 'PATCH', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ status: s }),
     });
+  }
+
+  async function agendarBuffer() {
+    if (!agendarEm) return;
+    setAgendandoBuffer(true); setMsgBuffer(null);
+    const r = await fetch('/api/painel/social/buffer-send', {
+      method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ pecaId: peca.id, dueAt: agendarEm }),
+    });
+    const j = await r.json().catch(() => ({}));
+    setAgendandoBuffer(false);
+    if (r.ok && j.ok) {
+      const q = new Date(agendarEm).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+      setMsgBuffer({ texto: `Agendado no Buffer (${j.canal}) para ${q} ✓`, erro: false });
+      onPatch(peca.id, { status: 'aprovado' });
+    } else {
+      setMsgBuffer({ texto: j.error || j.detail || 'Falha ao agendar.', erro: true });
+    }
   }
 
   async function salvar() {
@@ -592,6 +613,20 @@ function PecaCard({ peca, fundos, onPatch, onPatchConteudo, onRemove, podeRemove
             </button>
           )}
         </div>
+
+        {/* Agendar no Buffer (por dentro do painel; o Buffer publica na data marcada) */}
+        {peca.formato !== 'post' && (
+          <div className="pt-1 flex flex-wrap items-center gap-2">
+            <span className="text-[12px] text-apple-tertiary">📅 Agendar no Buffer:</span>
+            <input type="datetime-local" value={agendarEm} onChange={(e) => setAgendarEm(e.target.value)}
+              className="px-2.5 py-1.5 rounded-lg border border-apple-separator text-[13px] focus:outline-none focus:ring-2 focus:ring-apple-accent/40" />
+            <button onClick={agendarBuffer} disabled={agendandoBuffer || !agendarEm}
+              className="px-4 py-2 rounded-full bg-[#1d2433] text-white text-[13px] font-medium hover:bg-black disabled:opacity-50">
+              {agendandoBuffer ? 'Agendando…' : '📤 Agendar'}
+            </button>
+            {msgBuffer && <span className={`text-[12px] ${msgBuffer.erro ? 'text-red-600' : 'text-green-700'}`}>{msgBuffer.texto}</span>}
+          </div>
+        )}
 
         {artes.length > 0 && (
           <div className="pt-2">
