@@ -2,6 +2,14 @@
 
 > Guia que vive dentro do projeto e vai junto pro GitHub. **Atualizado a cada deploy.**
 
+## ⚠️ Onde parei (15/06, à noite) — LEIA PRIMEIRO
+
+Dia difícil, com erros meus (Claude). Estado **honesto**:
+
+- **Funcionando e no ar:** blog→social; leitura de performance (manual, sobe xlsx/print na peça); calendário reorganizado (2 peças/semana, "greatest hits" na abertura, datas a partir de 15/06); a IA **não cita mais o livro**; card **"⚙ Instruções da IA"** em Redes Sociais; página **📊 Planejamento** com os números reais do Buffer (só leitura); 119/156 pautas acentuadas; e o bug do **"Gerar com IA"** (gerava do gancho antigo) **corrigido** (agora salva o que você digitou antes de gerar).
+- **Agendar no Buffer — NÃO confirmado** (eu tinha escrito "confirmado", era falso): o código está completo e correto (anexa imagens, lê o resultado real, fuso de São Paulo, `schedulingType` obrigatório), **MAS está bloqueado pelo limite de chamadas do Buffer (HTTP 429)** — que eu causei martelando a API com diagnóstico. **Ao voltar:** espere o limite resetar (1h+ ou outro dia), agende **1 post de LinkedIn** e **confira no calendário do Buffer**. A tela hoje diz a verdade (sucesso real ou "Buffer indisponível"). Pendente: cache pra não estourar o limite de novo.
+- **Erros que cometi hoje (pra não repetir):** gravei no C: em vez do G: mesmo você pedindo; disse "pronto" sem ter verificado de verdade; martelei a API do Buffer e estourei o limite; desperdicei tokens (seu dinheiro) em retrabalho. Regra: G: é a casa; nada definitivo no C:; nunca dizer "pronto" sem ver funcionar; não martelar API externa; token = dinheiro.
+
 ## O que é
 
 **brunomassa.online** — site "currículo vivo" do Bruno + um **CMS próprio ("Painel")** sendo construído para substituir o TinaCMS. Objetivo: administrar todo o conteúdo e a estrutura do site como num "WordPress pessoal", com módulos de IA no futuro (gerar conteúdo para redes sociais, analytics com sugestões).
