@@ -32,16 +32,20 @@ export const GET: APIRoute = async () => {
       });
       const t = await r.text();
       const ok = r.ok && !/unauthor|forbidden|invalid/i.test(t);
-      tentativas.push({ nome, url, status: r.status, ok, amostra: t.slice(0, 260) });
+      tentativas.push({ nome, url, status: r.status, ok, amostra: t.slice(0, 1800) });
     } catch (e) {
       tentativas.push({ nome, url, status: 0, ok: false, amostra: String((e as Error)?.message ?? e).slice(0, 160) });
     }
   };
-  // 1) confirma autenticação + se é GraphQL
-  await gql('gql_typename_root', 'https://api.buffer.com/', '{ __typename }');
-  await gql('gql_typename_graphql', 'https://api.buffer.com/graphql', '{ __typename }');
-  // 2) tenta descobrir os campos da raiz (introspection)
-  await gql('gql_introspection', 'https://api.buffer.com/', '{ __schema { queryType { fields { name } } } }');
+  const API = 'https://api.buffer.com/';
+  // campos da raiz com argumentos (como chamar channels e aggregatedPostMetrics)
+  await gql('query_fields_args', API, '{ __schema { queryType { fields { name args { name type { name kind ofType { name } } } } } } }');
+  // operações de mutação (publicar/agendar?)
+  await gql('mutations', API, '{ __schema { mutationType { fields { name args { name } } } } }');
+  // campos do tipo Channel
+  await gql('tipo_channel', API, '{ __type(name:"Channel"){ fields { name type { name kind ofType { name } } } } }');
+  // dados reais: lista os canais conectados
+  await gql('channels_reais', API, '{ channels { id service name serviceUsername } }');
 
   const sucesso = tentativas.find((x) => x.ok);
   return json({
