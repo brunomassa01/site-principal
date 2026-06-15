@@ -60,9 +60,11 @@ export async function getCanais(): Promise<{ id: string; service: string; name: 
 
 /** Agenda uma publicação no Buffer para a data/hora (ISO), anexando as imagens (artes). Lê o resultado
  *  REAL (PostActionPayload é union) — só retorna ok em PostActionSuccess; senão, devolve o erro do Buffer. */
-export async function agendarNoBuffer(channelId: string, text: string, dueAtISO: string, midiaUrls: string[] = []): Promise<{ ok: boolean; erro?: string; postId?: string; status?: string }> {
+export async function agendarNoBuffer(channelId: string, text: string, dueAtISO: string, midiaUrls: string[] = [], service = 'linkedin'): Promise<{ ok: boolean; erro?: string; postId?: string; status?: string }> {
   const assets = (midiaUrls ?? []).filter(Boolean).map((url) => ({ image: { url } }));
-  const input: Record<string, unknown> = { channelId, text, dueAt: dueAtISO, mode: 'customScheduled' };
+  // schedulingType é OBRIGATÓRIO: 'automatic' publica sozinho (LinkedIn); 'notification' manda lembrete (Instagram).
+  const schedulingType = service === 'instagram' ? 'notification' : 'automatic';
+  const input: Record<string, unknown> = { channelId, text, dueAt: dueAtISO, mode: 'customScheduled', schedulingType };
   if (assets.length) input.assets = assets;
   const M = `mutation($in: CreatePostInput!){ createPost(input:$in){
     __typename

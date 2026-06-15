@@ -43,7 +43,7 @@ export const POST: APIRoute = async ({ request }) => {
     return json({ dry: true, canal: { service: canal.service, name: canal.displayName || canal.name }, dueAt, imagens: imagens.length, textoPreview: texto.slice(0, 280) });
   }
 
-  const r = await agendarNoBuffer(canal.id, texto, new Date(dueAt).toISOString(), imagens);
+  const r = await agendarNoBuffer(canal.id, texto, new Date(dueAt).toISOString(), imagens, servico);
   if (!r.ok) {
     // grava o erro exato pra diagnóstico (lido depois, sem o Bruno transcrever)
     await setConfig('buffer_ultimo_erro', JSON.stringify({ erro: r.erro, formato: peca.formato, canal: servico, dueAt, imagens: imagens.length, em: new Date().toISOString() })).catch(() => {});
