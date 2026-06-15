@@ -40,6 +40,7 @@ type Peca = {
   id: string; formato: string; gancho: string | null; lente: string | null;
   conteudo: Conteudo | null; legenda: string | null; manychat: string | null;
   diaPublicacao: string | null; status: string; midiaUrls: string[] | null;
+  opcional?: boolean;
 };
 type Semana = {
   numero: number; inicio: string | null; cluster: string | null;
@@ -147,9 +148,11 @@ export default function SemanaEditor({ semana }: { semana: Semana }) {
     });
   }
   async function gerarTodos() {
-    if (!confirm('Gerar (ou regerar) os 3 formatos desta semana com IA? Isso substitui o conteúdo atual das peças.')) return;
+    // só as peças firmes (não o reel-bônus): cadência 2/semana
+    const firmes = pecas.filter((p) => !p.opcional);
+    if (!confirm(`Gerar (ou regerar) as ${firmes.length} peças firmes desta semana com IA? Isso substitui o conteúdo atual delas. O reel-bônus você gera à parte, se quiser.`)) return;
     setGerandoTodos(true);
-    for (const p of pecas) {
+    for (const p of firmes) {
       try {
         const r = await fetch(`/api/painel/social/gerar/${p.id}`, { method: 'POST' });
         const j = await r.json();
@@ -187,7 +190,7 @@ export default function SemanaEditor({ semana }: { semana: Semana }) {
         <div className="w-full sm:w-auto sm:ml-auto flex flex-wrap items-center gap-2">
           {semana.numero > 0 && (
             <button onClick={gerarTodos} disabled={gerandoTodos} className="px-4 py-2 rounded-full bg-violet-600 text-white text-[13px] font-medium hover:bg-violet-700 disabled:opacity-60">
-              {gerandoTodos ? 'Gerando os 3…' : '✨ Gerar os 3 com IA'}
+              {gerandoTodos ? 'Gerando…' : `✨ Gerar as ${pecas.filter((p) => !p.opcional).length} com IA`}
             </button>
           )}
           <span className="text-[12px] text-apple-tertiary">Status</span>
@@ -403,6 +406,7 @@ function PecaCard({ peca, fundos, onPatch, onPatchConteudo, onRemove, podeRemove
       {/* topo da peça */}
       <div className="flex flex-wrap items-center gap-2 sm:gap-3 px-4 sm:px-5 py-3 border-b border-apple-separator/40 bg-apple-surface">
         <span className="text-[15px] font-semibold text-apple-label">{meta.label}</span>
+        {peca.opcional && <span className="text-[11px] px-2 py-0.5 rounded-full bg-sky-50 text-sky-700 border border-sky-200 font-medium" title="Peça bônus: não conta na meta da semana (cadência 2/semana). Gere quando sobrar fôlego.">bônus</span>}
         <span className={`text-[11px] px-2 py-0.5 rounded-full border font-medium ${STATUS_CLS[peca.status] ?? ''}`}>{STATUS_LABEL[peca.status] ?? peca.status}</span>
         {peca.manychat && <span className="text-[11px] px-2 py-0.5 rounded-full bg-apple-fill text-apple-tertiary">Manychat: {peca.manychat}</span>}
         {peca.diaPublicacao && <span className="text-[11px] text-apple-tertiary capitalize">{peca.diaPublicacao}-feira</span>}

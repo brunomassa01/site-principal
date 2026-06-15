@@ -75,8 +75,9 @@ export default function SocialCalendario({ semanas, destaque }: { semanas: Seman
             <div className="flex items-center gap-2 flex-none">
               {['linkedin', 'carrossel', 'reel'].map((f) => {
                 const p = sm.pecas.find((x) => x.formato === f);
+                const bonus = f === 'reel'; // reel é bônus na cadência 2/semana
                 return (
-                  <span key={f} className="flex items-center gap-1" title={`${f}: ${p?.status ?? '—'}`}>
+                  <span key={f} className={`flex items-center gap-1 ${bonus ? 'opacity-40' : ''}`} title={`${f}${bonus ? ' (bônus)' : ''}: ${p?.status ?? '—'}`}>
                     <span className={`w-2 h-2 rounded-full ${STATUS_DOT[p?.status ?? 'planejado']}`} />
                     <span className="text-[11px] text-apple-tertiary w-3">{FMT_LABEL[f]}</span>
                   </span>

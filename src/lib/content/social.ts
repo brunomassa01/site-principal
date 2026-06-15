@@ -41,9 +41,10 @@ export function numeroSemanaDestaque(semanas: SemanaComPecas[], hoje = new Date(
   return validas[0]?.numero ?? 1;
 }
 
-/** Progresso de produção: quantas peças já estão escritas/aprovadas/publicadas. */
+/** Progresso de produção: quantas peças já estão escritas/aprovadas/publicadas.
+ *  Conta só as peças firmes (ignora reels-bônus da cadência 2/semana). */
 export function progresso(semanas: SemanaComPecas[]) {
-  const pecas = semanas.flatMap((s) => s.pecas);
+  const pecas = semanas.flatMap((s) => s.pecas).filter((p) => !p.opcional);
   const conta = (st: string) => pecas.filter((p) => p.status === st).length;
   return {
     total: pecas.length,
