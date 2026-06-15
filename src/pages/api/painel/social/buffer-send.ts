@@ -36,11 +36,13 @@ export const POST: APIRoute = async ({ request }) => {
   const canal = canais.find((c) => c.service === servico);
   if (!canal) return json({ error: `Você não tem um canal de ${servico} conectado no Buffer.` }, 400);
 
+  const imagens = Array.isArray(peca.midiaUrls) ? (peca.midiaUrls as string[]) : [];
+
   if (dry) {
-    return json({ dry: true, canal: { service: canal.service, name: canal.displayName || canal.name }, dueAt, textoPreview: texto.slice(0, 280) });
+    return json({ dry: true, canal: { service: canal.service, name: canal.displayName || canal.name }, dueAt, imagens: imagens.length, textoPreview: texto.slice(0, 280) });
   }
 
-  const r = await agendarNoBuffer(canal.id, texto, new Date(dueAt).toISOString(), servico);
+  const r = await agendarNoBuffer(canal.id, texto, new Date(dueAt).toISOString(), imagens);
   if (!r.ok) return json({ error: 'O Buffer recusou o agendamento.', detail: r.erro }, 502);
-  return json({ ok: true, canal: canal.service, dueAt });
+  return json({ ok: true, canal: canal.service, dueAt, imagens: imagens.length, postId: r.postId, status: r.status });
 };

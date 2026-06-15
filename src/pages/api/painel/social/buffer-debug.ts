@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro';
-import { bufferGraphQL, temBuffer } from '../../../../lib/social/buffer';
+import { apagarNoBuffer, bufferGraphQL, temBuffer } from '../../../../lib/social/buffer';
 
 export const prerender = false;
 
@@ -14,8 +14,12 @@ const tn = (t: any): string => {
   return t.kind ?? '?';
 };
 
-export const GET: APIRoute = async () => {
+export const GET: APIRoute = async ({ url }) => {
   if (!temBuffer()) return resp({ erro: 'sem token' });
+
+  // limpeza de teste: ?cancelar=<postId> apaga o post no Buffer
+  const cancelar = url.searchParams.get('cancelar');
+  if (cancelar) return resp({ cancelar, ...(await apagarNoBuffer(cancelar)) });
 
   // 1) PostActionPayload (pra ler sucesso/erro/id do post criado)
   const pap = await bufferGraphQL<{ __type: any }>(

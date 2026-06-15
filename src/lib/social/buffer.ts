@@ -58,14 +58,33 @@ export async function getCanais(): Promise<{ id: string; service: string; name: 
   return (ch.data?.channels ?? []).filter((c) => !c.isDisconnected);
 }
 
-/** Agenda uma publicação no Buffer para a data/hora (ISO) no canal. customScheduled = horário específico.
- *  LinkedIn publica automático; Instagram costuma exigir lembrete (notification). */
-export async function agendarNoBuffer(channelId: string, text: string, dueAtISO: string, service: string): Promise<{ ok: boolean; erro?: string }> {
-  const schedulingType = service === 'instagram' ? 'notification' : 'automatic';
-  const M = 'mutation($in: CreatePostInput!){ createPost(input:$in){ __typename } }';
-  const r = await bufferGraphQL(M, { in: { channelId, text, dueAt: dueAtISO, mode: 'customScheduled', schedulingType } });
+/** Agenda uma publicação no Buffer para a data/hora (ISO), anexando as imagens (artes). Lê o resultado
+ *  REAL (PostActionPayload é union) — só retorna ok em PostActionSuccess; senão, devolve o erro do Buffer. */
+export async function agendarNoBuffer(channelId: string, text: string, dueAtISO: string, midiaUrls: string[] = []): Promise<{ ok: boolean; erro?: string; postId?: string; status?: string }> {
+  const assets = (midiaUrls ?? []).filter(Boolean).map((url) => ({ image: { url } }));
+  const input: Record<string, unknown> = { channelId, text, dueAt: dueAtISO, mode: 'customScheduled' };
+  if (assets.length) input.assets = assets;
+  const M = `mutation($in: CreatePostInput!){ createPost(input:$in){
+    __typename
+    ... on PostActionSuccess { post { id status dueAt } }
+    ... on RestProxyError { message code }
+    ... on InvalidInputError { message }
+    ... on LimitReachedError { message }
+    ... on UnexpectedError { message }
+    ... on UnauthorizedError { message }
+    ... on NotFoundError { message }
+  } }`;
+  const r = await bufferGraphQL<{ createPost: any }>(M, { in: input });
   if (r.errors?.length) return { ok: false, erro: r.errors.map((e) => e.message).join('; ') };
-  return { ok: true };
+  const cp = r.data?.createPost;
+  if (cp?.__typename === 'PostActionSuccess') return { ok: true, postId: cp.post?.id, status: cp.post?.status };
+  return { ok: false, erro: `${cp?.__typename ?? 'Erro'}: ${cp?.message ?? 'o Buffer recusou'}${cp?.code ? ' (' + cp.code + ')' : ''}` };
+}
+
+/** Cancela/apaga um post no Buffer (usado p/ limpar testes ou desfazer agendamento). */
+export async function apagarNoBuffer(id: string): Promise<{ ok: boolean; erro?: string }> {
+  const r = await bufferGraphQL('mutation($in: DeletePostInput!){ deletePost(input:$in){ __typename } }', { in: { id } });
+  return { ok: !r.errors?.length, erro: r.errors?.map((e) => e.message).join('; ') };
 }
 
 export type CanalBuffer = {
