@@ -7,7 +7,7 @@ export function temBuffer(): boolean {
   return !!process.env.BUFFER_ACCESS_TOKEN;
 }
 
-export async function bufferGraphQL<T = any>(query: string, variables?: Record<string, unknown>): Promise<{ data?: T; errors?: { message: string }[] }> {
+export async function bufferGraphQL<T = any>(query: string, variables?: Record<string, unknown>): Promise<{ data?: T; errors?: { message: string }[]; status?: number }> {
   const token = process.env.BUFFER_ACCESS_TOKEN;
   if (!token) return { errors: [{ message: 'BUFFER_ACCESS_TOKEN ausente.' }] };
   const r = await fetch(ENDPOINT, {
@@ -15,8 +15,14 @@ export async function bufferGraphQL<T = any>(query: string, variables?: Record<s
     headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({ query, variables }),
   });
-  return (await r.json().catch(() => ({ errors: [{ message: 'Resposta inválida do Buffer.' }] }))) as { data?: T; errors?: { message: string }[] };
+  // 429/5xx ou corpo não-JSON = indisponibilidade (ex.: limite de chamadas) — sinaliza com status
+  if (r.status === 429 || r.status >= 500) return { status: r.status, errors: [{ message: `Buffer indisponível (HTTP ${r.status})` }] };
+  const j = await r.json().catch(() => null);
+  if (!j) return { status: r.status, errors: [{ message: 'Resposta inválida do Buffer.' }] };
+  return { ...(j as { data?: T; errors?: { message: string }[] }), status: r.status };
 }
+
+export class BufferIndisponivel extends Error {}
 
 const tn = (t: any): string => {
   if (!t) return '?';
@@ -48,14 +54,25 @@ export async function inputFields(tipo: string): Promise<string[]> {
 /** Canais conectados (leve: id + service + nome). */
 export async function getCanais(): Promise<{ id: string; service: string; name: string; displayName?: string }[]> {
   if (!process.env.BUFFER_ACCESS_TOKEN) return [];
-  const acc = await bufferGraphQL<{ account: { organizations: { id: string }[] } }>('{ account { organizations { id } } }');
-  const orgId = acc.data?.account?.organizations?.[0]?.id;
-  if (!orgId) return [];
-  const ch = await bufferGraphQL<{ channels: any[] }>(
-    'query($in: ChannelsInput!){ channels(input:$in){ id service name displayName isDisconnected } }',
-    { in: { organizationId: orgId } },
-  );
-  return (ch.data?.channels ?? []).filter((c) => !c.isDisconnected);
+  // tenta 2x com respiro: a API do Buffer às vezes devolve vazio/erro transitório (ex.: limite de chamadas).
+  // Distingue "indisponível" (lança BufferIndisponivel) de "sem canais" (retorna []), pra não mostrar mensagem enganosa.
+  let ultimoErro = '';
+  for (let i = 0; i < 2; i++) {
+    const acc = await bufferGraphQL<{ account: { organizations: { id: string }[] } }>('{ account { organizations { id } } }');
+    const orgId = acc.data?.account?.organizations?.[0]?.id;
+    if (orgId) {
+      const ch = await bufferGraphQL<{ channels: any[] }>(
+        'query($in: ChannelsInput!){ channels(input:$in){ id service name displayName isDisconnected } }',
+        { in: { organizationId: orgId } },
+      );
+      if (!ch.errors?.length && ch.data?.channels) return ch.data.channels.filter((c) => !c.isDisconnected);
+      ultimoErro = ch.errors?.map((e) => e.message).join('; ') || 'sem resposta';
+    } else {
+      ultimoErro = acc.errors?.map((e) => e.message).join('; ') || 'conta/organização não retornou';
+    }
+    if (i === 0) await new Promise((r) => setTimeout(r, 1200));
+  }
+  throw new BufferIndisponivel(`Não consegui ler seus canais do Buffer agora (${ultimoErro}).`);
 }
 
 /** Agenda uma publicação no Buffer para a data/hora (ISO), anexando as imagens (artes). Lê o resultado

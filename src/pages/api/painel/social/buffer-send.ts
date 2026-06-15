@@ -3,7 +3,7 @@ import { eq } from 'drizzle-orm';
 import { db } from '../../../../lib/db';
 import { socialPecas } from '../../../../lib/db/schema';
 import { json } from '../../../../lib/http';
-import { agendarNoBuffer, getCanais, temBuffer } from '../../../../lib/social/buffer';
+import { agendarNoBuffer, BufferIndisponivel, getCanais, temBuffer } from '../../../../lib/social/buffer';
 import { setConfig } from '../../../../lib/content/config';
 
 export const prerender = false;
@@ -36,9 +36,15 @@ export const POST: APIRoute = async ({ request }) => {
   if (!texto || texto.length < 5) return json({ error: 'Esta peça ainda não tem texto/legenda pra enviar.' }, 400);
 
   const servico = servicoDoFormato(peca.formato);
-  const canais = await getCanais();
+  let canais: { id: string; service: string; name: string; displayName?: string }[];
+  try {
+    canais = await getCanais();
+  } catch (e) {
+    if (e instanceof BufferIndisponivel) return json({ error: 'O Buffer não respondeu agora (instabilidade ou limite de chamadas). Espere 1-2 minutos e tente de novo.', detail: String((e as Error).message) }, 503);
+    throw e;
+  }
   const canal = canais.find((c) => c.service === servico);
-  if (!canal) return json({ error: `Você não tem um canal de ${servico} conectado no Buffer.` }, 400);
+  if (!canal) return json({ error: `Você não tem um canal de ${servico} conectado no Buffer. Canais que apareceram: ${canais.map((c) => c.service).join(', ') || 'nenhum'}.` }, 400);
 
   const imagens = Array.isArray(peca.midiaUrls) ? (peca.midiaUrls as string[]) : [];
 
