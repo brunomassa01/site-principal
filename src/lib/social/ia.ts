@@ -259,3 +259,101 @@ Escreva as duas partes do DM (pedido de automação + entrega). Use a ferramenta
   const out = block.input as { pedido?: string; entrega?: string };
   return { pedido: humanizar(out.pedido ?? ''), entrega: humanizar(out.entrega ?? ''), usage: resp.usage };
 }
+
+// ───────────────────────── Leitura de Performance ─────────────────────────
+// Lê os números de um post (planilha do LinkedIn em texto, OU print) e devolve métricas
+// estruturadas + uma análise na cabeça do Bruno + uma recomendação que alimenta o calendário.
+export type Metricas = {
+  impressoes?: number; alcance?: number; reacoes?: number; comentarios?: number;
+  compartilhamentos?: number; salvamentos?: number; envios?: number;
+  cliques?: number; visualizacoesPerfil?: number; seguidoresGanhos?: number;
+  taxaEngajamento?: number; // % sobre impressões
+};
+
+export async function analisarPerformance(args: {
+  gancho?: string | null; formato?: string | null; lente?: string | null;
+  texto?: string;             // conteúdo da planilha já convertido em texto
+  imagemBase64?: string; mime?: string; // print do painel
+}): Promise<{ metricas: Metricas; analise: string; recomendacao: string; usage?: { input_tokens: number; output_tokens: number } }> {
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) throw new Error('ANTHROPIC_API_KEY não configurada.');
+  const client = new Anthropic({ apiKey });
+
+  const tool: Anthropic.Tool = {
+    name: 'leitura_performance',
+    description: 'Extrai as métricas do post e devolve a análise e a recomendação.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        impressoes: { type: 'number', description: 'total de impressões/visualizações' },
+        alcance: { type: 'number', description: 'usuários únicos alcançados' },
+        reacoes: { type: 'number', description: 'total de reações/curtidas' },
+        comentarios: { type: 'number' },
+        compartilhamentos: { type: 'number' },
+        salvamentos: { type: 'number' },
+        envios: { type: 'number', description: 'envios/compartilhamentos por DM' },
+        cliques: { type: 'number' },
+        visualizacoesPerfil: { type: 'number', description: 'visitas ao perfil a partir do post' },
+        seguidoresGanhos: { type: 'number', description: 'seguidores ganhos com o post' },
+        taxaEngajamento: { type: 'number', description: 'engajamento total dividido por impressões, em % (calcule)' },
+        analise: { type: 'string', description: 'A LEITURA, em 3-5 frases, na cabeça do Bruno: o que puxou o alcance (comentário? salvamento?), quem foi atingido, o que converteu. Direto, sem floreio, sem travessão.' },
+        recomendacao: { type: 'string', description: 'UMA recomendação acionável pro calendário: que tipo de gancho repetir/antecipar e por quê, ligado ao objetivo de crescer seguidores e se posicionar.' },
+      },
+      required: ['analise', 'recomendacao'],
+    },
+  };
+
+  const system = `Você é o analista de conteúdo do Bruno Massa. Lê dados de desempenho de um post (LinkedIn ou Instagram) e devolve uma leitura afiada e prática, na cabeça dele.
+
+O QUE O BRUNO SABE E PERSEGUE (use como lente da análise):
+- Objetivo atual: CRESCER SEGUIDORES e SE POSICIONAR como autoridade de método. Não vende nada agora.
+- Mecânica que funciona: provocação + pergunta gera COMENTÁRIO, e comentário é o que o algoritmo premia com alcance. Carrossel salvável (framework, lista, método) gera SALVAMENTO e autoridade, dá vida longa ao conteúdo.
+- Sinais que importam: taxa de comentário sobre reação (alta = conversa de verdade), salvamentos+compartilhamentos (vida longa), seguidores ganhos (conversão do objetivo), e QUEM foi atingido (cargo/setor/empresa = se é o público-alvo).
+
+REGRAS:
+- Extraia os números que conseguir identificar (deixe em branco o que não aparecer). Calcule a taxa de engajamento (engajamento total ÷ impressões, em %).
+- A análise é OBJETIVA e CURTA. Sem travessão, sem "neste artigo", sem elogio vazio. Aponte a CAUSA do resultado, não só o número.
+- A recomendação é UMA, acionável, ligada ao calendário (que gancho repetir/antecipar).`;
+
+  const instrucao = `Post analisado:
+- Gancho: ${args.gancho ?? '—'}
+- Formato: ${args.formato ?? '—'}
+- Lente do livro: ${args.lente ?? '—'}
+
+${args.texto ? `Dados de desempenho (exportados):\n"""\n${args.texto}\n"""` : 'Os dados estão na imagem anexada (print do painel de analytics). Leia os números da imagem.'}
+
+Extraia as métricas, faça a leitura e dê a recomendação. Use a ferramenta.`;
+
+  const content: Anthropic.ContentBlockParam[] = [];
+  if (args.imagemBase64) {
+    content.push({ type: 'image', source: { type: 'base64', media_type: (args.mime as 'image/png' | 'image/jpeg') || 'image/png', data: args.imagemBase64 } });
+  }
+  content.push({ type: 'text', text: instrucao });
+
+  const resp = await client.messages.create({
+    model: MODELO,
+    max_tokens: 1500,
+    system,
+    tools: [tool],
+    tool_choice: { type: 'tool', name: tool.name },
+    messages: [{ role: 'user', content }],
+  });
+
+  const block = resp.content.find((b) => b.type === 'tool_use') as Anthropic.ToolUseBlock | undefined;
+  if (!block) throw new Error('A IA não conseguiu ler os dados.');
+  const o = block.input as Record<string, unknown>;
+  const num = (k: string) => (typeof o[k] === 'number' ? (o[k] as number) : undefined);
+  const metricas: Metricas = {
+    impressoes: num('impressoes'), alcance: num('alcance'), reacoes: num('reacoes'),
+    comentarios: num('comentarios'), compartilhamentos: num('compartilhamentos'),
+    salvamentos: num('salvamentos'), envios: num('envios'), cliques: num('cliques'),
+    visualizacoesPerfil: num('visualizacoesPerfil'), seguidoresGanhos: num('seguidoresGanhos'),
+    taxaEngajamento: num('taxaEngajamento'),
+  };
+  return {
+    metricas,
+    analise: humanizar(String(o.analise ?? '')),
+    recomendacao: humanizar(String(o.recomendacao ?? '')),
+    usage: resp.usage,
+  };
+}

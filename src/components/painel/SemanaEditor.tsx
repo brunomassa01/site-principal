@@ -36,11 +36,17 @@ function montarRoteiro(c: Conteudo): string {
   });
   return linhas.join('\n').trim();
 }
+type Metricas = {
+  impressoes?: number; alcance?: number; reacoes?: number; comentarios?: number;
+  compartilhamentos?: number; salvamentos?: number; envios?: number; cliques?: number;
+  visualizacoesPerfil?: number; seguidoresGanhos?: number; taxaEngajamento?: number;
+  analise?: string; recomendacao?: string; fonte?: string; atualizadoEm?: string;
+};
 type Peca = {
   id: string; formato: string; gancho: string | null; lente: string | null;
   conteudo: Conteudo | null; legenda: string | null; manychat: string | null;
   diaPublicacao: string | null; status: string; midiaUrls: string[] | null;
-  opcional?: boolean;
+  opcional?: boolean; metricas?: Metricas | null;
 };
 type Semana = {
   numero: number; inicio: string | null; cluster: string | null;
@@ -290,7 +296,24 @@ function PecaCard({ peca, fundos, onPatch, onPatchConteudo, onRemove, podeRemove
   });
   const [gerandoMc, setGerandoMc] = useState(false);
   const [copiouMc, setCopiouMc] = useState<'p' | 'e' | null>(null);
+  const [metricas, setMetricas] = useState<Metricas | null>(peca.metricas ?? null);
+  const [lendoPerf, setLendoPerf] = useState(false);
+  const [erroPerf, setErroPerf] = useState('');
   const meta = FMT[peca.formato] ?? { label: peca.formato, icon: '•' };
+
+  async function lerPerformance(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+    setLendoPerf(true); setErroPerf('');
+    const fd = new FormData();
+    fd.append('file', file);
+    const r = await fetch(`/api/painel/social/performance/${peca.id}`, { method: 'POST', body: fd });
+    const j = await r.json().catch(() => ({}));
+    setLendoPerf(false);
+    if (r.ok && j.metricas) { setMetricas(j.metricas); onPatch(peca.id, { metricas: j.metricas }); }
+    else setErroPerf(j.error || 'Não consegui ler esse arquivo.');
+  }
 
   async function salvar() {
     setSalvando(true); setSalvo(false);
@@ -582,6 +605,41 @@ function PecaCard({ peca, fundos, onPatch, onPatchConteudo, onRemove, podeRemove
             </div>
           </div>
         )}
+
+        {/* Leitura de Performance: sobe a planilha do LinkedIn ou um print, a IA lê e guarda */}
+        <div className="pt-3 mt-1 border-t border-apple-separator/40">
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <p className="text-[12px] font-semibold text-apple-tertiary">📊 Performance {metricas?.atualizadoEm && <span className="font-normal">· lida em {new Date(metricas.atualizadoEm).toLocaleDateString('pt-BR')}</span>}</p>
+            <label className={`text-[12px] font-medium cursor-pointer ${lendoPerf ? 'text-apple-tertiary' : 'text-apple-accent hover:underline'}`}>
+              {lendoPerf ? 'Lendo… (~15s)' : metricas ? '↻ Atualizar (planilha ou print)' : '⬆ Subir planilha ou print'}
+              <input type="file" accept=".xlsx,image/png,image/jpeg,image/webp" className="hidden" onChange={lerPerformance} disabled={lendoPerf} />
+            </label>
+          </div>
+          {erroPerf && <p className="text-[12px] text-red-600 mt-1">{erroPerf}</p>}
+          {!metricas && !erroPerf && (
+            <p className="text-[11px] text-apple-tertiary mt-1">Exporte o xlsx de analytics do post (LinkedIn) ou tire um print do painel. A IA lê os números e te entrega a leitura.</p>
+          )}
+          {metricas && (
+            <div className="mt-2 space-y-2">
+              <div className="flex flex-wrap gap-1.5">
+                {([
+                  ['Impressões', metricas.impressoes], ['Alcance', metricas.alcance],
+                  ['Reações', metricas.reacoes], ['Comentários', metricas.comentarios],
+                  ['Compart.', metricas.compartilhamentos], ['Salvos', metricas.salvamentos],
+                  ['Seguidores', metricas.seguidoresGanhos], ['Engaj. %', metricas.taxaEngajamento],
+                ] as [string, number | undefined][]).filter(([, v]) => v !== undefined && v !== null).map(([k, v]) => (
+                  <span key={k} className="text-[11px] px-2 py-1 rounded-lg bg-apple-fill text-apple-secondary">
+                    <span className="font-semibold text-apple-label">{typeof v === 'number' ? v.toLocaleString('pt-BR') : v}</span> {k}
+                  </span>
+                ))}
+              </div>
+              {metricas.analise && <p className="text-[12px] text-apple-secondary leading-relaxed">{metricas.analise}</p>}
+              {metricas.recomendacao && (
+                <p className="text-[12px] text-violet-800 bg-violet-50 border border-violet-100 rounded-lg px-3 py-2"><span className="font-semibold">↪ Pro calendário:</span> {metricas.recomendacao}</p>
+              )}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
