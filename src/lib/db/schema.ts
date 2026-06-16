@@ -223,8 +223,9 @@ export const socialPecas = pgTable('social_pecas', {
   legenda: text('legenda'),
   manychat: text('manychat'),           // palavra-chave do Manychat
   diaPublicacao: text('dia_publicacao'),// terca | quarta | quinta | sexta
-  status: text('status').notNull().default('planejado'), // planejado | escrito | aprovado | publicado
+  status: text('status').notNull().default('planejado'), // planejado | escrito | aprovado | agendado | publicado
   opcional: boolean('opcional').notNull().default(false), // peça bônus (ex.: reel na cadência 2/semana) — não conta na meta
+  agendadoPara: timestamp('agendado_para', { withTimezone: true, mode: 'date' }), // quando publicar (status 'agendado')
   publicadoEm: timestamp('publicado_em', { withTimezone: true, mode: 'date' }),
   urlPublicada: text('url_publicada'),  // link do post no ar (p/ casar métricas)
   midiaUrls: jsonb('midia_urls').$type<string[]>().default([]),

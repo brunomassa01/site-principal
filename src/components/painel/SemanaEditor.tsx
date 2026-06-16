@@ -329,6 +329,23 @@ function PecaCard({ peca, fundos, onPatch, onPatchConteudo, onRemove, podeRemove
     }
   }
 
+  async function agendarLinkedIn() {
+    if (!agendarEm) { setMsgLi({ texto: 'Escolha a data e a hora.', erro: true }); return; }
+    setAgendandoBuffer(true); setMsgLi(null);
+    const r = await fetch('/api/painel/social/linkedin-agendar', {
+      method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ pecaId: peca.id, dueAt: agendarEm }),
+    });
+    const j = await r.json().catch(() => ({}));
+    setAgendandoBuffer(false);
+    if (r.ok && j.ok) {
+      const q = new Date(agendarEm).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+      setMsgLi({ texto: `Agendado no LinkedIn para ${q} ✓`, erro: false });
+      onPatch(peca.id, { status: 'agendado' });
+    } else {
+      setMsgLi({ texto: `${j.error || 'Falha ao agendar.'}${j.detail ? ' — ' + j.detail : ''}`, erro: true });
+    }
+  }
+
   async function lerPerformance(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     e.target.value = '';
@@ -647,12 +664,19 @@ function PecaCard({ peca, fundos, onPatch, onPatchConteudo, onRemove, podeRemove
         {/* Publicar no LinkedIn (perfil pessoal, via API oficial, direto do CMS) */}
         {peca.formato === 'linkedin' && (
           <div className="pt-1 flex flex-wrap items-center gap-2">
-            <button onClick={publicarLinkedIn} disabled={publicandoLi}
+            <button onClick={publicarLinkedIn} disabled={publicandoLi || agendandoBuffer}
               className="px-4 py-2 rounded-full bg-[#0A66C2] text-white text-[13px] font-medium hover:bg-[#004182] disabled:opacity-60">
-              {publicandoLi ? 'Publicando…' : '▶ Publicar no LinkedIn agora'}
+              {publicandoLi ? 'Publicando…' : '▶ Publicar agora'}
+            </button>
+            <span className="text-apple-separator">ou</span>
+            <input type="datetime-local" value={agendarEm} onChange={(e) => setAgendarEm(e.target.value)}
+              className="px-2.5 py-1.5 rounded-lg border border-apple-separator text-[13px] focus:outline-none focus:ring-2 focus:ring-apple-accent/40" />
+            <button onClick={agendarLinkedIn} disabled={agendandoBuffer || publicandoLi || !agendarEm}
+              className="px-4 py-2 rounded-full bg-[#1d2433] text-white text-[13px] font-medium hover:bg-black disabled:opacity-50">
+              {agendandoBuffer ? 'Agendando…' : '📅 Agendar'}
             </button>
             {msgLi && (
-              <span className={`text-[12px] ${msgLi.erro ? 'text-red-600' : 'text-green-700'}`}>
+              <span className={`text-[12px] w-full ${msgLi.erro ? 'text-red-600' : 'text-green-700'}`}>
                 {msgLi.texto}{msgLi.url && <> · <a href={msgLi.url} target="_blank" rel="noopener" className="underline">ver no LinkedIn ↗</a></>}
               </span>
             )}
