@@ -4,11 +4,21 @@
 
 ## ⚠️ Onde parei (16/06) — LEIA PRIMEIRO
 
-- **Buffer foi abandonado** (API instável, deu 429 persistente). No lugar: **publicação direto pela API oficial do LinkedIn, dentro do CMS.**
-- **Publicar no LinkedIn: FUNCIONANDO** — testado com post real no seu perfil. Botão "▶ Publicar agora" na peça de LinkedIn. (Token `LINKEDIN_ACCESS_TOKEN` no Vercel, dura 2 meses; quando expirar, a tela avisa e você regera no Token Generator.)
-- **Agendar no LinkedIn: construído e verificado**, falta você **ativar o gatilho**: (1) criar `CRON_SECRET` no Vercel; (2) um cron externo grátis (cron-job.org) batendo em `https://www.brunomassa.online/api/cron/linkedin-agendados?key=SEU_CRON_SECRET` a cada ~10 min. Sem isso, o "Publicar agora" funciona, mas o agendado não dispara sozinho.
-- **Instagram:** API da Meta **em revisão** (permissão de publicar conteúdo). Quando aprovar, eu construo o publicar no IG. Precisa: IG Business/Creator + Página do Facebook.
-- **Também no ar:** blog→social; performance (manual xlsx/print); calendário reorganizado; IA não cita o livro; "⚙ Instruções da IA"; pautas acentuadas; bug do gancho corrigido.
+**LinkedIn (pronto e funcionando):**
+- Buffer foi **abandonado** (API instável, 429 persistente). No lugar: **publicação direto pela API oficial do LinkedIn, dentro do CMS.**
+- **Publicar: FUNCIONANDO** — testado com post real no seu perfil. Botão "▶ Publicar agora" na peça de LinkedIn. Token `LINKEDIN_ACCESS_TOKEN` no Vercel (dura 2 meses; quando expirar, a tela avisa e você regera no Token Generator do LinkedIn e atualiza a variável).
+- **Agendar: construído e verificado.** Falta SÓ você **ativar o gatilho** (1x): (1) criar `CRON_SECRET` no Vercel e redeployar; (2) cron grátis no **cron-job.org** batendo a cada ~10 min em `https://www.brunomassa.online/api/cron/linkedin-agendados?key=SEU_CRON_SECRET`. Teste: abrir essa URL no navegador deve dar `{"ok":true,"processadas":0}`. Sem isso, o "Publicar agora" funciona, mas o agendado não dispara sozinho.
+
+**Páginas legais (no ar, pro review da Meta):**
+- `https://www.brunomassa.online/privacidade` e `https://www.brunomassa.online/termos` — criadas, com LGPD + integrações LinkedIn/Instagram. Links discretos no rodapé (global).
+
+**Instagram (esperando a Meta):**
+- API da Meta **em revisão** (mantida só a permissão de publicar conteúdo). Quando aprovar, eu construo o publicar no IG igual ao LinkedIn. Pré-requisitos: IG **Business/Creator** + ligado a uma **Página do Facebook**.
+- No formulário da Meta: Privacy = `/privacidade`, Terms = `/termos`, Data Deletion = `/privacidade`, **OAuth callback** = `https://www.brunomassa.online/api/social/meta/callback` (endpoint ainda NÃO construído — faço quando aprovar; a Meta não pinga o callback).
+
+**Também no ar:** blog→social; performance (manual, sobe xlsx/print na peça); calendário reorganizado (2/sem, greatest hits); IA não cita o livro; "⚙ Instruções da IA"; pautas acentuadas; bug do gancho corrigido.
+
+**Pendências quando voltar:** (1) ativar o gatilho do agendamento (CRON_SECRET + cron-job.org); (2) terminar/enviar o review da Meta; (3) limpar código morto do Buffer; (4) a aba 📊 Planejamento puxava analytics do Buffer (que saiu) — a leitura manual por peça segue funcionando; decidir nova fonte. Erros do dia anterior e regras: ver memória `feedback_erros_15-06`/`feedback_colaboracao`.
 
 ## O que é
 
