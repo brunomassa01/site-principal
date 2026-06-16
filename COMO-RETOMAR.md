@@ -2,13 +2,13 @@
 
 > Guia que vive dentro do projeto e vai junto pro GitHub. **Atualizado a cada deploy.**
 
-## ⚠️ Onde parei (15/06, à noite) — LEIA PRIMEIRO
+## ⚠️ Onde parei (16/06) — LEIA PRIMEIRO
 
-Dia difícil, com erros meus (Claude). Estado **honesto**:
-
-- **Funcionando e no ar:** blog→social; leitura de performance (manual, sobe xlsx/print na peça); calendário reorganizado (2 peças/semana, "greatest hits" na abertura, datas a partir de 15/06); a IA **não cita mais o livro**; card **"⚙ Instruções da IA"** em Redes Sociais; página **📊 Planejamento** com os números reais do Buffer (só leitura); 119/156 pautas acentuadas; e o bug do **"Gerar com IA"** (gerava do gancho antigo) **corrigido** (agora salva o que você digitou antes de gerar).
-- **Agendar no Buffer — NÃO confirmado** (eu tinha escrito "confirmado", era falso): o código está completo e correto (anexa imagens, lê o resultado real, fuso de São Paulo, `schedulingType` obrigatório), **MAS está bloqueado pelo limite de chamadas do Buffer (HTTP 429)** — que eu causei martelando a API com diagnóstico. **Ao voltar:** espere o limite resetar (1h+ ou outro dia), agende **1 post de LinkedIn** e **confira no calendário do Buffer**. A tela hoje diz a verdade (sucesso real ou "Buffer indisponível"). Pendente: cache pra não estourar o limite de novo.
-- **Erros que cometi hoje (pra não repetir):** gravei no C: em vez do G: mesmo você pedindo; disse "pronto" sem ter verificado de verdade; martelei a API do Buffer e estourei o limite; desperdicei tokens (seu dinheiro) em retrabalho. Regra: G: é a casa; nada definitivo no C:; nunca dizer "pronto" sem ver funcionar; não martelar API externa; token = dinheiro.
+- **Buffer foi abandonado** (API instável, deu 429 persistente). No lugar: **publicação direto pela API oficial do LinkedIn, dentro do CMS.**
+- **Publicar no LinkedIn: FUNCIONANDO** — testado com post real no seu perfil. Botão "▶ Publicar agora" na peça de LinkedIn. (Token `LINKEDIN_ACCESS_TOKEN` no Vercel, dura 2 meses; quando expirar, a tela avisa e você regera no Token Generator.)
+- **Agendar no LinkedIn: construído e verificado**, falta você **ativar o gatilho**: (1) criar `CRON_SECRET` no Vercel; (2) um cron externo grátis (cron-job.org) batendo em `https://www.brunomassa.online/api/cron/linkedin-agendados?key=SEU_CRON_SECRET` a cada ~10 min. Sem isso, o "Publicar agora" funciona, mas o agendado não dispara sozinho.
+- **Instagram:** API da Meta **em revisão** (permissão de publicar conteúdo). Quando aprovar, eu construo o publicar no IG. Precisa: IG Business/Creator + Página do Facebook.
+- **Também no ar:** blog→social; performance (manual xlsx/print); calendário reorganizado; IA não cita o livro; "⚙ Instruções da IA"; pautas acentuadas; bug do gancho corrigido.
 
 ## O que é
 
