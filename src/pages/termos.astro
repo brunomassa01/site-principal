@@ -1,0 +1,51 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { getIdentidade } from '../lib/content/collections';
+
+export const prerender = false;
+
+const id = (await getIdentidade()).data;
+const email = id.email || 'contato@brunomassa.online';
+const atualizado = 'junho de 2026';
+---
+<BaseLayout title="Termos de Serviço" descricao="Termos de uso do site brunomassa.online e das suas integrações com redes sociais.">
+  <Header />
+  <main class="max-w-[760px] mx-auto px-5 py-12">
+    <h1 class="text-[28px] font-bold text-apple-label tracking-tight mb-1">Termos de Serviço</h1>
+    <p class="text-[13px] text-apple-tertiary mb-8">Última atualização: {atualizado}</p>
+
+    <div class="space-y-6 text-[15px] leading-relaxed text-apple-secondary [&_h2]:text-[18px] [&_h2]:font-semibold [&_h2]:text-apple-label [&_h2]:mt-8 [&_h2]:mb-2 [&_a]:text-apple-accent [&_a]:underline [&_strong]:text-apple-label">
+      <p>Estes Termos regem o uso do site <strong>brunomassa.online</strong> e das funcionalidades de gestão e publicação de conteúdo nele oferecidas. Ao acessar ou usar o site, você concorda com estes Termos.</p>
+
+      <h2>1. O que é o serviço</h2>
+      <p>O brunomassa.online é o site pessoal de Bruno Massa, que inclui conteúdo público (textos, blog, páginas) e uma área administrativa privada, usada pelo próprio titular para criar, organizar e publicar conteúdo, inclusive nas suas redes sociais.</p>
+
+      <h2>2. Uso permitido</h2>
+      <p>O conteúdo público pode ser lido livremente. A área administrativa é de uso exclusivo do titular, protegida por login. É proibido tentar acessar áreas restritas, interferir no funcionamento do site ou usá-lo para fins ilícitos.</p>
+
+      <h2>3. Integrações com redes sociais</h2>
+      <p>O site integra-se a plataformas como LinkedIn e Instagram (Meta) por meio de suas APIs oficiais, exclusivamente para publicar conteúdo do próprio titular em suas próprias contas, mediante autorização concedida por ele. O uso dessas integrações segue também os termos de cada plataforma. O titular é o único responsável pelo conteúdo que publica.</p>
+
+      <h2>4. Propriedade intelectual</h2>
+      <p>Os textos, marca, identidade visual e demais conteúdos do site pertencem a Bruno Massa, salvo indicação em contrário. O uso não autorizado é vedado.</p>
+
+      <h2>5. Isenção de garantias</h2>
+      <p>O site é fornecido "como está". Empregamos esforços para mantê-lo disponível e correto, mas não garantimos funcionamento ininterrupto ou livre de erros. Serviços de terceiros (redes sociais, hospedagem) podem afetar a disponibilidade de certas funções.</p>
+
+      <h2>6. Limitação de responsabilidade</h2>
+      <p>Na máxima extensão permitida em lei, o titular não se responsabiliza por danos indiretos decorrentes do uso ou da indisponibilidade do site ou de integrações de terceiros.</p>
+
+      <h2>7. Alterações</h2>
+      <p>Estes Termos podem ser atualizados a qualquer momento; a data da última revisão fica indicada no topo. O uso continuado após mudanças implica concordância.</p>
+
+      <h2>8. Lei aplicável</h2>
+      <p>Estes Termos são regidos pelas leis do Brasil, eleito o foro do domicílio do titular para dirimir questões, salvo disposição legal em contrário.</p>
+
+      <h2>9. Contato</h2>
+      <p>Dúvidas sobre estes Termos: <a href={`mailto:${email}`}>{email}</a>.</p>
+    </div>
+  </main>
+  <Footer />
+</BaseLayout>

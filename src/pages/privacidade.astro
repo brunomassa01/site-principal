@@ -1,0 +1,64 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { getIdentidade } from '../lib/content/collections';
+
+export const prerender = false;
+
+const id = (await getIdentidade()).data;
+const email = id.email || 'contato@brunomassa.online';
+const atualizado = 'junho de 2026';
+---
+<BaseLayout title="Política de Privacidade" descricao="Como o site brunomassa.online coleta, usa e protege dados, e como funcionam as integrações com LinkedIn e Instagram.">
+  <Header />
+  <main class="max-w-[760px] mx-auto px-5 py-12">
+    <h1 class="text-[28px] font-bold text-apple-label tracking-tight mb-1">Política de Privacidade</h1>
+    <p class="text-[13px] text-apple-tertiary mb-8">Última atualização: {atualizado}</p>
+
+    <div class="space-y-6 text-[15px] leading-relaxed text-apple-secondary [&_h2]:text-[18px] [&_h2]:font-semibold [&_h2]:text-apple-label [&_h2]:mt-8 [&_h2]:mb-2 [&_a]:text-apple-accent [&_a]:underline [&_strong]:text-apple-label">
+      <p>Esta política descreve como o site <strong>brunomassa.online</strong> trata dados, em conformidade com a Lei Geral de Proteção de Dados (LGPD, Lei 13.709/2018). Ao usar o site, você concorda com as práticas aqui descritas.</p>
+
+      <h2>1. Quem é o responsável</h2>
+      <p>O responsável pelo tratamento dos dados é Bruno Massa, titular do site brunomassa.online. Contato: <a href={`mailto:${email}`}>{email}</a>.</p>
+
+      <h2>2. Quais dados coletamos</h2>
+      <p><strong>Visitantes do site:</strong> dados de navegação básicos (páginas acessadas, tipo de dispositivo, dados agregados de acesso) para entender o uso e melhorar o conteúdo.</p>
+      <p><strong>Área administrativa (painel):</strong> acessível apenas ao próprio titular, mediante login. Armazena o conteúdo que ele mesmo cria (textos, imagens, agenda de publicações).</p>
+      <p><strong>Integrações com redes sociais:</strong> com a autorização explícita do titular, o site armazena tokens de acesso (concedidos por ele via OAuth) usados unicamente para <strong>publicar, no perfil do próprio titular, conteúdo criado por ele</strong>. Não coletamos, lemos nem armazenamos dados de terceiros, de seguidores ou de outras contas.</p>
+
+      <h2>3. Como usamos os dados</h2>
+      <p>Os dados são usados para: operar e melhorar o site; permitir que o titular gerencie e publique o próprio conteúdo nas redes sociais autorizadas (LinkedIn, Instagram); e cumprir obrigações legais. Não usamos os dados para publicidade direcionada a terceiros e não vendemos dados a ninguém.</p>
+
+      <h2>4. Integrações de terceiros</h2>
+      <p>O site se integra a plataformas externas, sempre sob autorização do titular e conforme os termos de cada uma:</p>
+      <ul class="list-disc pl-5 space-y-1">
+        <li><strong>LinkedIn:</strong> para publicar posts no perfil pessoal do titular, via API oficial do LinkedIn.</li>
+        <li><strong>Instagram (Meta):</strong> para publicar conteúdo nas contas do próprio titular, via API oficial do Instagram/Meta.</li>
+      </ul>
+      <p>O uso dessas APIs se limita a publicar o conteúdo do próprio titular. Os tokens de acesso são guardados de forma segura e usados apenas para esse fim.</p>
+
+      <h2>5. Cookies</h2>
+      <p>Usamos cookies estritamente necessários para a sessão de login da área administrativa. Não usamos cookies de rastreamento publicitário de terceiros.</p>
+
+      <h2>6. Compartilhamento</h2>
+      <p>Não compartilhamos, vendemos ou alugamos dados pessoais. Dados podem ser processados por provedores de infraestrutura (hospedagem e banco de dados) estritamente para operar o site, e pelas APIs das redes sociais quando o titular publica o próprio conteúdo.</p>
+
+      <h2>7. Retenção</h2>
+      <p>Os dados são mantidos pelo tempo necessário às finalidades descritas ou enquanto durar a relação com o site, e podem ser excluídos a qualquer momento a pedido do titular.</p>
+
+      <h2>8. Seus direitos (LGPD)</h2>
+      <p>Você pode solicitar acesso, correção, portabilidade ou exclusão dos seus dados, bem como revogar consentimentos. Para exercer qualquer direito, escreva para <a href={`mailto:${email}`}>{email}</a>.</p>
+
+      <h2>9. Exclusão de dados</h2>
+      <p>Para solicitar a exclusão dos seus dados e a revogação de quaisquer autorizações de integração, envie um e-mail para <a href={`mailto:${email}`}>{email}</a> com o assunto "Exclusão de dados". A solicitação é atendida em até 15 dias.</p>
+
+      <h2>10. Alterações</h2>
+      <p>Esta política pode ser atualizada. A data da última revisão fica sempre indicada no topo desta página.</p>
+
+      <h2>11. Contato</h2>
+      <p>Dúvidas sobre privacidade: <a href={`mailto:${email}`}>{email}</a>.</p>
+    </div>
+  </main>
+  <Footer />
+</BaseLayout>
