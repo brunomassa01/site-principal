@@ -22,7 +22,13 @@ const ano = new Date().getFullYear();
       </nav>
     </div>
     <div class="mt-8 pt-6 border-t border-apple-separator-light flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
-      <p class="text-[12px] text-apple-tertiary">© {ano} {id.nome}. Currículo vivo, sempre em construção.</p>
+      <p class="text-[12px] text-apple-tertiary">
+        © {ano} {id.nome}. Currículo vivo, sempre em construção.
+        <span class="mx-1 text-apple-separator">·</span>
+        <a href="/privacidade" class="hover:text-apple-secondary hover:underline transition-colors">Privacidade</a>
+        <span class="mx-1 text-apple-separator">·</span>
+        <a href="/termos" class="hover:text-apple-secondary hover:underline transition-colors">Termos</a>
+      </p>
       <div class="flex items-center gap-5">
         <a
           href="https://selo7.com.br"
