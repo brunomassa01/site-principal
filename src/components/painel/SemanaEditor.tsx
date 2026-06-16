@@ -307,7 +307,27 @@ function PecaCard({ peca, fundos, onPatch, onPatchConteudo, onRemove, podeRemove
   const [agendarEm, setAgendarEm] = useState('');
   const [agendandoBuffer, setAgendandoBuffer] = useState(false);
   const [msgBuffer, setMsgBuffer] = useState<{ texto: string; erro: boolean } | null>(null);
+  const [publicandoLi, setPublicandoLi] = useState(false);
+  const [msgLi, setMsgLi] = useState<{ texto: string; erro: boolean; url?: string } | null>(null);
   const meta = FMT[peca.formato] ?? { label: peca.formato, icon: '•' };
+
+  async function publicarLinkedIn() {
+    const corpo = (peca.conteudo?.texto || peca.legenda || peca.gancho || '').trim();
+    if (!corpo) { setMsgLi({ texto: 'Sem texto pra publicar.', erro: true }); return; }
+    if (!confirm('Publicar este post AGORA no seu LinkedIn pessoal? Vai pro ar público.')) return;
+    setPublicandoLi(true); setMsgLi(null);
+    const r = await fetch('/api/painel/social/linkedin-publicar', {
+      method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ pecaId: peca.id }),
+    });
+    const j = await r.json().catch(() => ({}));
+    setPublicandoLi(false);
+    if (r.ok && j.ok) {
+      setMsgLi({ texto: 'Publicado no LinkedIn ✓', erro: false, url: j.url });
+      onPatch(peca.id, { status: 'publicado' });
+    } else {
+      setMsgLi({ texto: `${j.error || 'Falha ao publicar.'}${j.detail ? ' — ' + j.detail : ''}`, erro: true });
+    }
+  }
 
   async function lerPerformance(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -624,17 +644,18 @@ function PecaCard({ peca, fundos, onPatch, onPatchConteudo, onRemove, podeRemove
           )}
         </div>
 
-        {/* Agendar no Buffer (por dentro do painel; o Buffer publica na data marcada) */}
-        {peca.formato !== 'post' && (
+        {/* Publicar no LinkedIn (perfil pessoal, via API oficial, direto do CMS) */}
+        {peca.formato === 'linkedin' && (
           <div className="pt-1 flex flex-wrap items-center gap-2">
-            <span className="text-[12px] text-apple-tertiary">📅 Agendar no Buffer:</span>
-            <input type="datetime-local" value={agendarEm} onChange={(e) => setAgendarEm(e.target.value)}
-              className="px-2.5 py-1.5 rounded-lg border border-apple-separator text-[13px] focus:outline-none focus:ring-2 focus:ring-apple-accent/40" />
-            <button onClick={agendarBuffer} disabled={agendandoBuffer || !agendarEm}
-              className="px-4 py-2 rounded-full bg-[#1d2433] text-white text-[13px] font-medium hover:bg-black disabled:opacity-50">
-              {agendandoBuffer ? 'Agendando…' : '📤 Agendar'}
+            <button onClick={publicarLinkedIn} disabled={publicandoLi}
+              className="px-4 py-2 rounded-full bg-[#0A66C2] text-white text-[13px] font-medium hover:bg-[#004182] disabled:opacity-60">
+              {publicandoLi ? 'Publicando…' : '▶ Publicar no LinkedIn agora'}
             </button>
-            {msgBuffer && <span className={`text-[12px] ${msgBuffer.erro ? 'text-red-600' : 'text-green-700'}`}>{msgBuffer.texto}</span>}
+            {msgLi && (
+              <span className={`text-[12px] ${msgLi.erro ? 'text-red-600' : 'text-green-700'}`}>
+                {msgLi.texto}{msgLi.url && <> · <a href={msgLi.url} target="_blank" rel="noopener" className="underline">ver no LinkedIn ↗</a></>}
+              </span>
+            )}
           </div>
         )}
 
