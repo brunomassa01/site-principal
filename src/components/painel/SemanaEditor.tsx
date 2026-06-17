@@ -60,7 +60,7 @@ const FMT: Record<string, { label: string; icon: string }> = {
   reel: { label: 'Reel', icon: '►' },
   post: { label: 'Post único Instagram', icon: '◻' },
 };
-const STATUS = ['planejado', 'escrito', 'aprovado', 'publicado'];
+const STATUS = ['planejado', 'escrito', 'aprovado', 'agendado', 'publicado'];
 const STATUS_LABEL: Record<string, string> = { planejado: 'Planejado', escrito: 'Escrito', aprovado: 'Aprovado', agendado: 'Agendado', publicado: 'Publicado' };
 const STATUS_CLS: Record<string, string> = {
   planejado: 'bg-gray-100 text-gray-500 border-gray-200',
