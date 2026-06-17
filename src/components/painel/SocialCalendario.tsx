@@ -8,7 +8,7 @@ type Semana = {
 };
 
 const STATUS_DOT: Record<string, string> = {
-  planejado: 'bg-gray-300', escrito: 'bg-amber-400', aprovado: 'bg-blue-500', publicado: 'bg-green-500',
+  planejado: 'bg-gray-300', escrito: 'bg-amber-400', aprovado: 'bg-blue-500', agendado: 'bg-violet-500', publicado: 'bg-green-500',
 };
 const FMT_LABEL: Record<string, string> = { linkedin: 'in', carrossel: '▦', reel: '►' };
 const fmtData = (s: string | null) => (s ? new Date(s).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }) : '—');

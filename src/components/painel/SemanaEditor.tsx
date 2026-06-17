@@ -46,7 +46,7 @@ type Peca = {
   id: string; formato: string; gancho: string | null; lente: string | null;
   conteudo: Conteudo | null; legenda: string | null; manychat: string | null;
   diaPublicacao: string | null; status: string; midiaUrls: string[] | null;
-  opcional?: boolean; metricas?: Metricas | null;
+  opcional?: boolean; metricas?: Metricas | null; agendadoPara?: string | null;
 };
 type Semana = {
   numero: number; inicio: string | null; cluster: string | null;
@@ -61,14 +61,19 @@ const FMT: Record<string, { label: string; icon: string }> = {
   post: { label: 'Post único Instagram', icon: '◻' },
 };
 const STATUS = ['planejado', 'escrito', 'aprovado', 'publicado'];
-const STATUS_LABEL: Record<string, string> = { planejado: 'Planejado', escrito: 'Escrito', aprovado: 'Aprovado', publicado: 'Publicado' };
+const STATUS_LABEL: Record<string, string> = { planejado: 'Planejado', escrito: 'Escrito', aprovado: 'Aprovado', agendado: 'Agendado', publicado: 'Publicado' };
 const STATUS_CLS: Record<string, string> = {
   planejado: 'bg-gray-100 text-gray-500 border-gray-200',
   escrito: 'bg-amber-50 text-amber-700 border-amber-200',
   aprovado: 'bg-blue-50 text-blue-700 border-blue-200',
+  agendado: 'bg-violet-50 text-violet-700 border-violet-200',
   publicado: 'bg-green-50 text-green-700 border-green-200',
 };
 const fmtData = (s: string | null) => (s ? new Date(s).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }) : '');
+// formata um ISO (UTC) no horário de São Paulo, ex.: "22/06/2026 08:00"
+const fmtAgendado = (iso: string) => new Date(iso).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+// ISO (UTC) -> string do datetime-local em horário de SP (UTC-3): "YYYY-MM-DDTHH:MM"
+const isoParaSpLocal = (iso: string) => new Date(new Date(iso).getTime() - 3 * 3600 * 1000).toISOString().slice(0, 16);
 
 // monta o texto para copiar, por formato
 function textoParaCopiar(p: Peca): string {
@@ -304,7 +309,7 @@ function PecaCard({ peca, fundos, onPatch, onPatchConteudo, onRemove, podeRemove
   const [metricas, setMetricas] = useState<Metricas | null>(peca.metricas ?? null);
   const [lendoPerf, setLendoPerf] = useState(false);
   const [erroPerf, setErroPerf] = useState('');
-  const [agendarEm, setAgendarEm] = useState('');
+  const [agendarEm, setAgendarEm] = useState(peca.agendadoPara ? isoParaSpLocal(peca.agendadoPara) : '');
   const [agendandoBuffer, setAgendandoBuffer] = useState(false);
   const [msgBuffer, setMsgBuffer] = useState<{ texto: string; erro: boolean } | null>(null);
   const [publicandoLi, setPublicandoLi] = useState(false);
@@ -338,12 +343,25 @@ function PecaCard({ peca, fundos, onPatch, onPatchConteudo, onRemove, podeRemove
     const j = await r.json().catch(() => ({}));
     setAgendandoBuffer(false);
     if (r.ok && j.ok) {
-      const q = new Date(agendarEm).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
-      setMsgLi({ texto: `Agendado no LinkedIn para ${q} ✓`, erro: false });
-      onPatch(peca.id, { status: 'agendado' });
+      setMsgLi({ texto: `Agendado ✓`, erro: false });
+      onPatch(peca.id, { status: 'agendado', agendadoPara: j.agendadoPara });
     } else {
       setMsgLi({ texto: `${j.error || 'Falha ao agendar.'}${j.detail ? ' — ' + j.detail : ''}`, erro: true });
     }
+  }
+
+  async function cancelarAgendamento() {
+    if (!confirm('Cancelar o agendamento deste post? Ele volta pra "aprovado" e não publica sozinho.')) return;
+    setAgendandoBuffer(true); setMsgLi(null);
+    const r = await fetch('/api/painel/social/linkedin-agendar', {
+      method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ pecaId: peca.id, cancelar: true }),
+    });
+    setAgendandoBuffer(false);
+    if (r.ok) {
+      setAgendarEm('');
+      onPatch(peca.id, { status: 'aprovado', agendadoPara: null });
+      setMsgLi({ texto: 'Agendamento cancelado.', erro: false });
+    } else setMsgLi({ texto: 'Não consegui cancelar.', erro: true });
   }
 
   async function lerPerformance(e: React.ChangeEvent<HTMLInputElement>) {
@@ -664,6 +682,12 @@ function PecaCard({ peca, fundos, onPatch, onPatchConteudo, onRemove, podeRemove
         {/* Publicar no LinkedIn (perfil pessoal, via API oficial, direto do CMS) */}
         {peca.formato === 'linkedin' && (
           <div className="pt-1 flex flex-wrap items-center gap-2">
+            {peca.status === 'agendado' && peca.agendadoPara && (
+              <div className="w-full flex items-center gap-2 text-[13px] text-violet-800 bg-violet-50 border border-violet-200 rounded-lg px-3 py-2">
+                <span>📅 <strong>Agendado</strong> para {fmtAgendado(peca.agendadoPara)} (horário de SP)</span>
+                <button onClick={cancelarAgendamento} disabled={agendandoBuffer} className="ml-auto text-red-600 hover:underline">✕ cancelar</button>
+              </div>
+            )}
             <button onClick={publicarLinkedIn} disabled={publicandoLi || agendandoBuffer}
               className="px-4 py-2 rounded-full bg-[#0A66C2] text-white text-[13px] font-medium hover:bg-[#004182] disabled:opacity-60">
               {publicandoLi ? 'Publicando…' : '▶ Publicar agora'}

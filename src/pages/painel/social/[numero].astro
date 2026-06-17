@@ -20,6 +20,7 @@ const semanaJson = {
     conteudo: p.conteudo, legenda: p.legenda, manychat: p.manychat,
     diaPublicacao: p.diaPublicacao, status: p.status, midiaUrls: p.midiaUrls ?? [],
     opcional: p.opcional ?? false, metricas: p.metricas ?? null,
+    agendadoPara: p.agendadoPara ? new Date(p.agendadoPara).toISOString() : null,
   })),
 };
 ---
