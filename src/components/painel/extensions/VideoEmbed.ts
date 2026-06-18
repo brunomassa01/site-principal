@@ -39,11 +39,26 @@ export const VideoEmbed = Node.create({
       const dom = document.createElement('div');
       dom.contentEditable = 'false';
       dom.style.cssText = 'margin:1em 0;';
-      const v = document.createElement('video');
-      v.src = (node.attrs.src as string) || '';
-      v.controls = true;
-      v.style.cssText = 'max-width:100%;border-radius:12px;background:#000;';
-      dom.appendChild(v);
+      const src = (node.attrs.src as string) || '';
+      const yt = src.match(/(?:youtube\.com\/(?:watch\?v=|shorts\/|embed\/|live\/)|youtu\.be\/)([\w-]{6,})/i);
+      const vm = src.match(/(?:vimeo\.com\/(?:video\/)?|player\.vimeo\.com\/video\/)(\d+)/i);
+      const embed = yt ? `https://www.youtube.com/embed/${yt[1]}` : vm ? `https://player.vimeo.com/video/${vm[1]}` : '';
+      if (embed) {
+        const wrap = document.createElement('div');
+        wrap.style.cssText = 'position:relative;padding-bottom:56.25%;height:0;border-radius:12px;overflow:hidden;background:#000;';
+        const ifr = document.createElement('iframe');
+        ifr.src = embed;
+        ifr.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;border:0;';
+        ifr.setAttribute('allowfullscreen', 'true');
+        wrap.appendChild(ifr);
+        dom.appendChild(wrap);
+      } else {
+        const v = document.createElement('video');
+        v.src = src;
+        v.controls = true;
+        v.style.cssText = 'max-width:100%;border-radius:12px;background:#000;';
+        dom.appendChild(v);
+      }
       if (node.attrs.legenda) {
         const cap = document.createElement('div');
         cap.textContent = node.attrs.legenda as string;

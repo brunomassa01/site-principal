@@ -42,7 +42,7 @@ function Btn({
   );
 }
 
-function Toolbar({ editor, onPickImage, enviando }: { editor: Editor; onPickImage: () => void; enviando: boolean }) {
+function Toolbar({ editor, onPickImage, onAddVideo, enviando }: { editor: Editor; onPickImage: () => void; onAddVideo: () => void; enviando: boolean }) {
   const setLink = () => {
     const prev = editor.getAttributes('link').href as string | undefined;
     const url = window.prompt('Endereço do link (URL):', prev ?? 'https://');
@@ -69,6 +69,7 @@ function Toolbar({ editor, onPickImage, enviando }: { editor: Editor; onPickImag
       <span className="w-px h-5 bg-apple-separator mx-1" />
       <Btn title="Link" onClick={setLink} active={editor.isActive('link')}>🔗</Btn>
       <Btn title="Inserir imagem" onClick={onPickImage} disabled={enviando}>{enviando ? '…' : '🖼'}</Btn>
+      <Btn title="Inserir vídeo (link do YouTube/Vimeo/.mp4 ou arquivo)" onClick={onAddVideo} disabled={enviando}>🎬</Btn>
       <span className="flex-1" />
       <Btn title="Desfazer" onClick={() => editor.chain().focus().undo().run()} disabled={!editor.can().undo()}>↶</Btn>
       <Btn title="Refazer" onClick={() => editor.chain().focus().redo().run()} disabled={!editor.can().redo()}>↷</Btn>
@@ -78,6 +79,7 @@ function Toolbar({ editor, onPickImage, enviando }: { editor: Editor; onPickImag
 
 export default function RichTextEditor({ value, onChange, onImageUpload }: Props) {
   const fileRef = useRef<HTMLInputElement>(null);
+  const videoFileRef = useRef<HTMLInputElement>(null);
   const [enviando, setEnviando] = useState(false);
 
   const editor = useEditor({
@@ -107,12 +109,35 @@ export default function RichTextEditor({ value, onChange, onImageUpload }: Props
     }
   }
 
+  function addVideo() {
+    if (!editor) return;
+    const url = window.prompt('Cole o link do vídeo (YouTube, Vimeo ou .mp4 direto).\n\nPara ENVIAR UM ARQUIVO de vídeo, deixe em branco e clique OK (máx ~4MB).');
+    if (url === null) return;
+    const u = url.trim();
+    if (u) { editor.chain().focus().setVideoEmbed({ src: u }).run(); return; }
+    videoFileRef.current?.click();
+  }
+  async function handleVideoFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file || !editor || !onImageUpload) return;
+    setEnviando(true);
+    try {
+      const url = await onImageUpload(file);
+      if (url) editor.chain().focus().setVideoEmbed({ src: url }).run();
+      else alert('Não consegui enviar o vídeo (talvez grande demais — máx ~4MB; pra vídeo maior, use um link do YouTube/Vimeo).');
+    } finally {
+      setEnviando(false);
+    }
+  }
+
   if (!editor) return <div className="text-apple-secondary text-[14px] p-3">Carregando editor…</div>;
 
   return (
     <div className="painel-editor bg-white rounded-lg border border-apple-separator">
-      <Toolbar editor={editor} onPickImage={() => fileRef.current?.click()} enviando={enviando} />
+      <Toolbar editor={editor} onPickImage={() => fileRef.current?.click()} onAddVideo={addVideo} enviando={enviando} />
       <input ref={fileRef} type="file" accept="image/*" hidden onChange={handleFile} />
+      <input ref={videoFileRef} type="file" accept="video/*" hidden onChange={handleVideoFile} />
       <EditorContent editor={editor} />
       <style>{`
         .painel-editor .ProseMirror { min-height: 380px; padding: 16px 18px; outline: none; font-size: 16px; line-height: 1.7; color: #1d1d1f; }
