@@ -1,0 +1,44 @@
+---
+import PainelLayout from '../../layouts/PainelLayout.astro';
+export const prerender = false;
+
+const cards = [
+  { href: '/painel/conhecimento-fases', titulo: 'Fases', desc: 'As 5 fases do MBA — status, progresso (%) e ordem. Alimenta a timeline e o anel.', icone: '◈' },
+  { href: '/painel/conhecimento-videos', titulo: 'Vídeos', desc: 'Galeria pública: gravados na FIAP + curadoria. Link, origem, duração e fase.', icone: '▶' },
+  { href: '/painel/conhecimento-referencias', titulo: 'Referências', desc: 'Livros, artigos, filmes e TEDs que te ajudaram a entender — com filtro por tipo.', icone: '📚' },
+];
+---
+<PainelLayout titulo="Conhecimento Compartilhado">
+  <div class="flex items-center justify-between gap-3 mb-1">
+    <h1 class="text-[24px] font-bold text-apple-label tracking-tight">Conhecimento Compartilhado</h1>
+    <a href="/conhecimento" target="_blank" class="text-[13px] text-apple-accent hover:underline shrink-0">Ver no site ↗</a>
+  </div>
+  <p class="text-[14px] text-apple-secondary mb-6 max-w-2xl">O hub público do seu MBA. Aqui você gerencia o que aparece em <span class="font-medium">/conhecimento</span>. Os <span class="font-medium">artigos</span> são posts de blog comuns — marque a Fase/Disciplina direto no editor do Blog.</p>
+
+  <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+    {cards.map((c) => (
+      <a href={c.href} class="group bg-white rounded-2xl shadow-card p-5 transition-all duration-200 hover:shadow-card-hover hover:-translate-y-0.5">
+        <div class="flex items-center gap-3 mb-2">
+          <span class="w-9 h-9 rounded-xl bg-apple-fill grid place-items-center text-[16px]">{c.icone}</span>
+          <span class="text-[16px] font-semibold text-apple-label group-hover:text-apple-accent transition-colors">{c.titulo}</span>
+        </div>
+        <p class="text-[13.5px] text-apple-secondary leading-relaxed">{c.desc}</p>
+      </a>
+    ))}
+
+    <!-- Acervo privado (F3) -->
+    <div class="bg-white/60 rounded-2xl border border-dashed border-apple-separator p-5">
+      <div class="flex items-center gap-3 mb-2">
+        <span class="w-9 h-9 rounded-xl bg-apple-fill grid place-items-center text-[16px]">🔒</span>
+        <span class="text-[16px] font-semibold text-apple-tertiary">Acervo da FIAP</span>
+      </div>
+      <p class="text-[13.5px] text-apple-tertiary leading-relaxed">Materiais privados (PDFs, transcrições, aulas) — só no CMS, nunca no site. <span class="font-medium">Em breve (F3): upload e biblioteca.</span></p>
+    </div>
+  </div>
+
+  <div class="mt-6 bg-apple-fill rounded-2xl p-5">
+    <p class="text-[13.5px] text-apple-secondary leading-relaxed">
+      <span class="font-medium text-apple-label">Como publicar um artigo do MBA:</span> escreva no <a href="/painel/posts" class="text-apple-accent hover:underline">Blog</a> normalmente, e no editor escolha a <span class="font-medium">Fase</span> e a <span class="font-medium">Disciplina</span>. Ele aparece automaticamente na fase certa aqui no hub — e continua sendo um post de blog (com a ponte pro carrossel/LinkedIn).
+    </p>
+  </div>
+</PainelLayout>

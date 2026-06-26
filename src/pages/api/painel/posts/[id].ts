@@ -35,6 +35,8 @@ export const PUT: APIRoute = async ({ params, request }) => {
     fonteExternaUrl: (b.fonte_externa_url as string) || null,
     fonteExternaNome: (b.fonte_externa_nome as string) || null,
     idioma: (b.idioma as string) || 'pt',
+    mbaFase: b.mba_fase === '' || b.mba_fase == null ? null : Number(b.mba_fase),
+    mbaDisciplina: b.mba_disciplina ? String(b.mba_disciplina).trim() || null : null,
     bodyHtml: sanitizeBody(String(b.body_html ?? '')),
     bodyJson: (b.body_json ?? null) as unknown,
     situacao: (b.situacao as string) || 'rascunho',

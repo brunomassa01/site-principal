@@ -15,6 +15,8 @@ type Form = {
   idioma: string;
   fonte_externa_url: string;
   fonte_externa_nome: string;
+  mba_fase: string;
+  mba_disciplina: string;
   situacao: string;
   bodyHtml: string;
   bodyJson: unknown;
@@ -24,7 +26,7 @@ const vazio: Form = {
   titulo: '', slug: '', resumo: '',
   data: new Date().toISOString().slice(0, 10),
   publicar_em: '', capa_url: '', tags: '', idioma: 'pt',
-  fonte_externa_url: '', fonte_externa_nome: '', situacao: 'rascunho',
+  fonte_externa_url: '', fonte_externa_nome: '', mba_fase: '', mba_disciplina: '', situacao: 'rascunho',
   bodyHtml: '', bodyJson: null,
 };
 
@@ -110,6 +112,8 @@ export default function PostEditor({ id }: Props) {
         idioma: p.idioma ?? 'pt',
         fonte_externa_url: p.fonteExternaUrl ?? '',
         fonte_externa_nome: p.fonteExternaNome ?? '',
+        mba_fase: p.mbaFase != null ? String(p.mbaFase) : '',
+        mba_disciplina: p.mbaDisciplina ?? '',
         situacao: p.situacao ?? 'rascunho',
         bodyHtml: p.bodyHtml ?? '',
         bodyJson: p.bodyJson ?? null,
@@ -155,6 +159,8 @@ export default function PostEditor({ id }: Props) {
       idioma: f.idioma,
       fonte_externa_url: f.fonte_externa_url,
       fonte_externa_nome: f.fonte_externa_nome,
+      mba_fase: f.mba_fase,
+      mba_disciplina: f.mba_disciplina,
       situacao: situacao ?? f.situacao,
       body_html: f.bodyHtml,
       body_json: f.bodyJson,
@@ -303,6 +309,28 @@ export default function PostEditor({ id }: Props) {
               <option value="en">English</option>
             </select>
           </div>
+        </div>
+
+        <div className="bg-white rounded-2xl shadow-card p-5 space-y-3">
+          <label className={labelCls}>Conhecimento Compartilhado (MBA)</label>
+          <p className="text-[12px] text-apple-tertiary -mt-1">Escolha a fase para este post aparecer no hub <a href="/conhecimento" target="_blank" className="text-apple-accent hover:underline">/conhecimento</a>. Em branco = post normal de blog.</p>
+          <div>
+            <label className={labelCls}>Fase do MBA</label>
+            <select className={inputCls} value={f.mba_fase} onChange={(e) => upd('mba_fase', e.target.value)}>
+              <option value="">— não é do MBA —</option>
+              <option value="1">Fase 1</option>
+              <option value="2">Fase 2</option>
+              <option value="3">Fase 3</option>
+              <option value="4">Fase 4</option>
+              <option value="5">Fase 5</option>
+            </select>
+          </div>
+          {f.mba_fase && (
+            <div>
+              <label className={labelCls}>Disciplina (opcional)</label>
+              <input className={inputCls} value={f.mba_disciplina} onChange={(e) => upd('mba_disciplina', e.target.value)} placeholder="Ex.: Planejamento & Gestão Estratégica" />
+            </div>
+          )}
         </div>
 
         {editando && f.slug && (

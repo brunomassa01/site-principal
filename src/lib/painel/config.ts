@@ -136,6 +136,67 @@ export const collections: Record<string, Collection> = {
       { name: 'ogImage', label: 'Imagem de compartilhamento', type: 'image' },
     ],
   },
+  'conhecimento-fases': {
+    name: 'conhecimento-fases', label: 'MBA · Fases', singular: 'Fase',
+    titleField: 'titulo', subField: 'status', situacao: true,
+    fields: [
+      { name: 'numero', label: 'Número (1–5)', type: 'number', required: true },
+      { name: 'titulo', label: 'Título', type: 'text', required: true },
+      { name: 'subtitulo', label: 'Subtítulo', type: 'textarea', help: '1-2 frases — aparece sob o título da fase' },
+      { name: 'status', label: 'Status', type: 'select', options: [
+        { value: 'bloqueada', label: 'Bloqueada (em breve)' },
+        { value: 'em-curso', label: 'Em curso' },
+        { value: 'concluida', label: 'Concluída' },
+        { value: 'planejada', label: 'Planejada' },
+      ] },
+      { name: 'progresso', label: 'Progresso (%)', type: 'number', help: '0 a 100 — alimenta o anel' },
+      { name: 'inicio', label: 'Início', type: 'date' },
+      { name: 'fim', label: 'Fim', type: 'date' },
+      { name: 'ordem', label: 'Ordem', type: 'number' },
+    ],
+  },
+  'conhecimento-videos': {
+    name: 'conhecimento-videos', label: 'MBA · Vídeos', singular: 'Vídeo',
+    titleField: 'titulo', subField: 'fonte', situacao: true,
+    fields: [
+      { name: 'titulo', label: 'Título', type: 'text', required: true },
+      { name: 'url', label: 'URL (YouTube, Vimeo, etc.)', type: 'text', required: true },
+      { name: 'fonte', label: 'Origem', type: 'select', options: [
+        { value: 'fiap', label: 'Gravado na FIAP' },
+        { value: 'curadoria', label: 'Curadoria' },
+        { value: 'podcast', label: 'Podcast' },
+        { value: 'youtube', label: 'YouTube' },
+      ] },
+      { name: 'autor', label: 'Autor / fonte', type: 'text' },
+      { name: 'duracao', label: 'Duração', type: 'text', placeholder: '4:12' },
+      { name: 'thumbnailUrl', label: 'Thumbnail (URL, opcional)', type: 'text' },
+      { name: 'fase', label: 'Fase do MBA', type: 'number', help: '1 a 5' },
+      { name: 'ordem', label: 'Ordem', type: 'number' },
+    ],
+  },
+  'conhecimento-referencias': {
+    name: 'conhecimento-referencias', label: 'MBA · Referências', singular: 'Referência',
+    titleField: 'titulo', subField: 'fonte', situacao: true,
+    fields: [
+      { name: 'titulo', label: 'Título', type: 'text', required: true },
+      { name: 'fonte', label: 'Autor / veículo', type: 'text' },
+      { name: 'tipo', label: 'Tipo', type: 'select', options: [
+        { value: 'livro', label: 'Livro' },
+        { value: 'artigo', label: 'Artigo' },
+        { value: 'filme', label: 'Filme' },
+        { value: 'doc', label: 'Documentário' },
+        { value: 'ted', label: 'TED / palestra' },
+        { value: 'video', label: 'Vídeo' },
+      ] },
+      { name: 'url', label: 'Link', type: 'text' },
+      { name: 'idioma', label: 'Idioma', type: 'select', options: [
+        { value: 'pt', label: 'Português' },
+        { value: 'en', label: 'Inglês (🇬🇧)' },
+      ] },
+      { name: 'fase', label: 'Fase do MBA', type: 'number', help: '1 a 5' },
+      { name: 'ordem', label: 'Ordem', type: 'number' },
+    ],
+  },
 };
 
 export function getCollection(name: string): Collection | undefined {
