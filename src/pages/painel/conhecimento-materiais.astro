@@ -1,0 +1,18 @@
+---
+import PainelLayout from '../../layouts/PainelLayout.astro';
+import ConhecimentoMateriais from '../../components/painel/ConhecimentoMateriais.tsx';
+export const prerender = false;
+---
+<PainelLayout titulo="Acervo da FIAP">
+  <div class="flex items-center justify-between gap-3 mb-1">
+    <h1 class="text-[24px] font-bold text-apple-label tracking-tight">
+      Acervo da FIAP
+      <span class="ml-1 align-middle text-[11px] font-mono uppercase tracking-wide bg-amber-50 text-amber-700 px-2 py-0.5 rounded-md">🔒 privado</span>
+    </h1>
+    <a href="/painel/conhecimento" class="text-[13px] text-apple-accent hover:underline shrink-0">← Conhecimento</a>
+  </div>
+  <p class="text-[14px] text-apple-secondary mb-6 max-w-2xl">
+    Materiais oficiais da FIAP (PDFs, transcrições, aulas, vídeos). Ficam <span class="font-medium">só aqui no CMS — nunca aparecem no site público</span>. É o seu acervo de estudo; o que vira público é o que você produz a partir deles.
+  </p>
+  <ConhecimentoMateriais client:load />
+</PainelLayout>
