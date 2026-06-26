@@ -10,21 +10,44 @@ const path = Astro.url.pathname;
 const ativo = (href: string) =>
   href === '/painel' ? path === '/painel' : path.startsWith(href);
 
-const nav = [
-  { href: '/painel', label: 'Início' },
-  { href: '/painel/posts', label: 'Blog' },
-  { href: '/painel/social', label: 'Redes Sociais' },
-  { href: '/painel/conhecimento', label: 'Conhecimento' },
-  { href: '/painel/midia', label: 'Mídia' },
-  { href: '/painel/menus', label: 'Menu' },
-  { href: '/painel/timeline', label: 'Trajetória' },
-  { href: '/painel/projetos', label: 'Projetos' },
-  { href: '/painel/skills', label: 'Skills' },
-  { href: '/painel/agora', label: 'Agora' },
-  { href: '/painel/identidade', label: 'Identidade' },
-  { href: '/painel/design', label: 'Design' },
-  { href: '/painel/conta', label: 'Conta' },
+const grupos = [
+  {
+    titulo: 'Conteúdo',
+    itens: [
+      { href: '/painel', label: 'Início' },
+      { href: '/painel/posts', label: 'Blog' },
+      { href: '/painel/social', label: 'Redes Sociais' },
+      { href: '/painel/conhecimento', label: 'Conhecimento' },
+    ],
+  },
+  {
+    titulo: 'Site',
+    itens: [
+      { href: '/painel/midia', label: 'Mídia' },
+      { href: '/painel/menus', label: 'Menu' },
+      { href: '/painel/timeline', label: 'Trajetória' },
+      { href: '/painel/projetos', label: 'Projetos' },
+      { href: '/painel/skills', label: 'Skills' },
+      { href: '/painel/agora', label: 'Agora' },
+      { href: '/painel/identidade', label: 'Identidade' },
+    ],
+  },
+  {
+    titulo: 'Sistema',
+    itens: [
+      { href: '/painel/design', label: 'Design' },
+      { href: '/painel/conta', label: 'Conta' },
+    ],
+  },
 ];
+
+const linkCls = (href: string) =>
+  `block px-3 py-2 rounded-lg text-[13.5px] transition-colors ${
+    ativo(href)
+      ? 'bg-apple-fill text-apple-accent font-medium'
+      : 'text-apple-secondary hover:bg-apple-fill hover:text-apple-label'
+  }`;
+const grupoCls = 'px-3 pt-4 pb-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-apple-tertiary';
 ---
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -41,57 +64,69 @@ const nav = [
     <meta name="theme-color" content="#ffffff" />
   </head>
   <body class="bg-apple-fill min-h-screen">
-    <header class="bg-white border-b border-apple-separator/40 sticky top-0 z-20">
-      <div class="max-w-5xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-2">
-        <div class="flex items-center gap-3 sm:gap-4 min-w-0">
-          <a href="/painel" class="text-[15px] font-semibold text-apple-label shrink-0">Painel</a>
-          <!-- nav desktop -->
-          <nav class="hidden md:flex items-center gap-0.5">
-            {nav.map((l) => (
-              <a
-                href={l.href}
-                class={`px-2.5 py-1.5 rounded-md text-[13px] whitespace-nowrap transition-colors ${
-                  ativo(l.href) ? 'text-apple-accent font-medium' : 'text-apple-secondary hover:text-apple-label'
-                }`}
-              >
-                {l.label}
-              </a>
-            ))}
-          </nav>
+    <div class="flex min-h-screen">
+
+      <!-- SIDEBAR (desktop) -->
+      <aside class="hidden md:flex md:flex-col w-56 shrink-0 bg-white border-r border-apple-separator/40 sticky top-0 h-screen">
+        <div class="h-14 px-5 flex items-center border-b border-apple-separator/40">
+          <a href="/painel" class="text-[15px] font-semibold text-apple-label">Painel</a>
         </div>
-        <div class="flex items-center gap-2 sm:gap-3 shrink-0">
-          <a href="/" target="_blank" class="hidden sm:inline text-[13px] text-apple-secondary hover:text-apple-label">Ver site ↗</a>
-          {user && <span class="hidden lg:inline text-[13px] text-apple-tertiary">{user.nome.split(' ')[0]}</span>}
-          <button id="logout-btn" class="hidden md:inline text-[13px] text-apple-secondary hover:text-red-600">Sair</button>
-          <!-- botao hamburguer (mobile) -->
-          <button id="menu-btn" class="md:hidden inline-flex items-center justify-center w-9 h-9 -mr-1 rounded-md text-apple-label hover:bg-apple-fill" aria-label="Abrir menu" aria-expanded="false">
+        <nav class="flex-1 overflow-y-auto px-2 py-2">
+          {grupos.map((g) => (
+            <div>
+              <p class={grupoCls}>{g.titulo}</p>
+              {g.itens.map((l) => (<a href={l.href} class={linkCls(l.href)}>{l.label}</a>))}
+            </div>
+          ))}
+        </nav>
+        <div class="border-t border-apple-separator/40 px-3 py-3 space-y-1">
+          <a href="/" target="_blank" class="block px-3 py-1.5 rounded-lg text-[13px] text-apple-secondary hover:bg-apple-fill">Ver site ↗</a>
+          <div class="flex items-center justify-between px-3 pt-1">
+            {user && <span class="text-[12px] text-apple-tertiary truncate">{user.nome.split(' ')[0]}</span>}
+            <button id="logout-btn" class="text-[13px] text-apple-secondary hover:text-red-600">Sair</button>
+          </div>
+        </div>
+      </aside>
+
+      <!-- COLUNA PRINCIPAL -->
+      <div class="flex-1 min-w-0 flex flex-col">
+        <!-- topbar (mobile) -->
+        <header class="md:hidden sticky top-0 z-20 bg-white border-b border-apple-separator/40 h-14 flex items-center justify-between px-4">
+          <a href="/painel" class="text-[15px] font-semibold text-apple-label">Painel</a>
+          <button id="menu-btn" class="inline-flex items-center justify-center w-9 h-9 -mr-1 rounded-md text-apple-label hover:bg-apple-fill" aria-label="Abrir menu" aria-expanded="false">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>
           </button>
-        </div>
-      </div>
-      <!-- menu mobile (dropdown) -->
-      <nav id="mobile-menu" class="md:hidden hidden border-t border-apple-separator/40 bg-white px-2 py-2">
-        {nav.map((l) => (
-          <a
-            href={l.href}
-            class={`block px-3 py-2.5 rounded-lg text-[15px] ${
-              ativo(l.href) ? 'text-apple-accent font-medium bg-apple-fill' : 'text-apple-secondary'
-            }`}
-          >
-            {l.label}
-          </a>
-        ))}
-        <div class="border-t border-apple-separator/40 mt-2 pt-3 flex items-center justify-between px-3 pb-1">
-          <a href="/" target="_blank" class="text-[14px] text-apple-secondary">Ver site ↗</a>
-          {user && <span class="text-[13px] text-apple-tertiary">{user.nome.split(' ')[0]}</span>}
-          <button id="logout-btn-m" class="text-[14px] text-red-600 font-medium">Sair</button>
-        </div>
-      </nav>
-    </header>
+        </header>
 
-    <main class="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
-      <slot />
-    </main>
+        <main class="flex-1 w-full max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+          <slot />
+        </main>
+      </div>
+    </div>
+
+    <!-- DRAWER (mobile) -->
+    <div id="mobile-drawer" class="md:hidden hidden fixed inset-0 z-40">
+      <div id="drawer-overlay" class="absolute inset-0 bg-black/30"></div>
+      <aside class="absolute left-0 top-0 bottom-0 w-64 bg-white shadow-xl flex flex-col overflow-y-auto">
+        <div class="h-14 px-5 flex items-center justify-between border-b border-apple-separator/40">
+          <span class="text-[15px] font-semibold text-apple-label">Painel</span>
+          <button id="drawer-close" class="w-8 h-8 grid place-items-center rounded-md text-apple-secondary hover:bg-apple-fill" aria-label="Fechar">✕</button>
+        </div>
+        <nav class="flex-1 px-2 py-2">
+          {grupos.map((g) => (
+            <div>
+              <p class={grupoCls}>{g.titulo}</p>
+              {g.itens.map((l) => (<a href={l.href} class={linkCls(l.href)}>{l.label}</a>))}
+            </div>
+          ))}
+        </nav>
+        <div class="border-t border-apple-separator/40 px-3 py-3 flex items-center justify-between">
+          <a href="/" target="_blank" class="text-[13px] text-apple-secondary">Ver site ↗</a>
+          {user && <span class="text-[12px] text-apple-tertiary">{user.nome.split(' ')[0]}</span>}
+          <button id="logout-btn-m" class="text-[13px] text-red-600 font-medium">Sair</button>
+        </div>
+      </aside>
+    </div>
 
     <script>
       const logout = async () => {
@@ -101,12 +136,12 @@ const nav = [
       document.getElementById('logout-btn')?.addEventListener('click', logout);
       document.getElementById('logout-btn-m')?.addEventListener('click', logout);
 
-      const menuBtn = document.getElementById('menu-btn');
-      const mobileMenu = document.getElementById('mobile-menu');
-      menuBtn?.addEventListener('click', () => {
-        const aberto = mobileMenu?.classList.toggle('hidden') === false;
-        menuBtn.setAttribute('aria-expanded', String(aberto));
-      });
+      const drawer = document.getElementById('mobile-drawer');
+      const abrir = () => drawer?.classList.remove('hidden');
+      const fechar = () => drawer?.classList.add('hidden');
+      document.getElementById('menu-btn')?.addEventListener('click', abrir);
+      document.getElementById('drawer-close')?.addEventListener('click', fechar);
+      document.getElementById('drawer-overlay')?.addEventListener('click', fechar);
     </script>
   </body>
 </html>
