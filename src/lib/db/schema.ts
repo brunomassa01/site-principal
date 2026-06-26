@@ -131,6 +131,8 @@ export const posts = pgTable('posts', {
   fonteExternaUrl: text('fonte_externa_url'),
   fonteExternaNome: text('fonte_externa_nome'),
   idioma: text('idioma').notNull().default('pt'), // pt | en
+  mbaFase: integer('mba_fase'),          // Conhecimento Compartilhado: fase do MBA (1..5); null = post normal de blog
+  mbaDisciplina: text('mba_disciplina'), // disciplina dentro da fase (rótulo); só usado quando mbaFase != null
   views: integer('views').notNull().default(0),
   reactions: jsonb('reactions').$type<Record<string, number>>().default({}),
   bodyHtml: text('body_html'),
@@ -234,6 +236,72 @@ export const socialPecas = pgTable('social_pecas', {
   updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' }).defaultNow().notNull(),
 });
 
+// ───────────────────────── Conhecimento Compartilhado (MBA) ─────────────────────────
+// Hub público da jornada do MBA. Os ARTIGOS são posts de blog comuns marcados com
+// `posts.mbaFase`/`mbaDisciplina` — aqui ficam só os catálogos leves (fases, vídeos,
+// referências) e o acervo PRIVADO de materiais da FIAP (nunca renderizado no site).
+
+export const conhecimentoFases = pgTable('conhecimento_fases', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  numero: integer('numero').notNull().unique(), // 1..5
+  titulo: text('titulo').notNull(),
+  subtitulo: text('subtitulo'),
+  status: text('status').notNull().default('bloqueada'), // em-curso | concluida | bloqueada | planejada
+  progresso: integer('progresso').notNull().default(0),   // 0..100 (%)
+  disciplinas: jsonb('disciplinas').$type<{ nome: string; sub?: string }[]>().default([]),
+  inicio: date('inicio', { mode: 'date' }),
+  fim: date('fim', { mode: 'date' }),
+  situacao: text('situacao').notNull().default('publicado'),
+  ordem: integer('ordem'),
+  createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' }).defaultNow().notNull(),
+});
+
+export const conhecimentoVideos = pgTable('conhecimento_videos', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  titulo: text('titulo').notNull(),
+  url: text('url').notNull(),
+  fonte: text('fonte').notNull().default('curadoria'), // fiap | curadoria | podcast | youtube
+  autor: text('autor'),
+  duracao: text('duracao'),       // "4:12"
+  thumbnailUrl: text('thumbnail_url'),
+  fase: integer('fase'),          // fase do MBA (1..5)
+  situacao: text('situacao').notNull().default('publicado'),
+  ordem: integer('ordem'),
+  createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' }).defaultNow().notNull(),
+});
+
+export const conhecimentoReferencias = pgTable('conhecimento_referencias', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  titulo: text('titulo').notNull(),
+  fonte: text('fonte'),           // autor / veículo
+  tipo: text('tipo').notNull().default('livro'), // livro | artigo | filme | doc | ted | video
+  url: text('url'),
+  idioma: text('idioma').notNull().default('pt'), // pt | en
+  fase: integer('fase'),
+  situacao: text('situacao').notNull().default('publicado'),
+  ordem: integer('ordem'),
+  createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' }).defaultNow().notNull(),
+});
+
+// Acervo PRIVADO de materiais da FIAP — só aparece no CMS, NUNCA no site público.
+export const conhecimentoMateriais = pgTable('conhecimento_materiais', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  nome: text('nome').notNull(),
+  url: text('url').notNull(),     // Vercel Blob
+  ext: text('ext'),               // pdf | docx | mp4 | png ...
+  tamanho: integer('tamanho'),    // bytes
+  fase: integer('fase'),
+  disciplina: text('disciplina'),
+  privado: boolean('privado').notNull().default(true),
+  situacao: text('situacao').notNull().default('publicado'),
+  ordem: integer('ordem'),
+  createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' }).defaultNow().notNull(),
+});
+
 // ───────────────────────── Tipos inferidos ─────────────────────────
 
 export type User = typeof users.$inferSelect;
@@ -243,3 +311,7 @@ export type NewPost = typeof posts.$inferInsert;
 export type SocialCluster = typeof socialClusters.$inferSelect;
 export type SocialSemana = typeof socialSemanas.$inferSelect;
 export type SocialPeca = typeof socialPecas.$inferSelect;
+export type ConhecimentoFase = typeof conhecimentoFases.$inferSelect;
+export type ConhecimentoVideo = typeof conhecimentoVideos.$inferSelect;
+export type ConhecimentoReferencia = typeof conhecimentoReferencias.$inferSelect;
+export type ConhecimentoMaterial = typeof conhecimentoMateriais.$inferSelect;
