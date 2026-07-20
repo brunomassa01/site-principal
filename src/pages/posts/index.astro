@@ -3,25 +3,31 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import Header from '../../components/Header.astro';
 import Footer from '../../components/Footer.astro';
 import { getPostsPublicados } from '../../lib/content/posts';
+import { usarT, localizar, LOCALE, type Lang } from '../../i18n';
 
 export const prerender = false;
 
-const posts = await getPostsPublicados();
+const lang: Lang = Astro.locals.lang ?? 'pt';
+const t = usarT(lang);
+const lz = (href: string) => localizar(href, lang);
 
-const fmtData = (d: Date) => d.toLocaleDateString('pt-BR', { day: 'numeric', month: 'short', year: 'numeric' });
+const posts = await getPostsPublicados(lang);
+
+const fmtData = (d: Date) =>
+  new Intl.DateTimeFormat(LOCALE[lang], { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' }).format(d);
 ---
-<BaseLayout title="Conteúdo autoral" descricao="Artigos e reflexões de Bruno Massa sobre marketing, produto e negócios.">
+<BaseLayout title={t('blogLista.titulo')} descricao={t('blogLista.metaDesc')}>
   <Header />
   <main>
     <!-- Page header -->
     <section class="bg-white py-16 md:py-20">
       <div class="max-w-3xl mx-auto px-6">
-        <p class="text-[12px] font-semibold uppercase tracking-[0.08em] text-apple-accent mb-4">Publicações</p>
+        <p class="text-[12px] font-semibold uppercase tracking-[0.08em] text-apple-accent mb-4">{t('blogLista.eyebrow')}</p>
         <h1 class="text-4xl md:text-5xl font-bold text-apple-label tracking-tight leading-tight mb-4 text-balance">
-          Conteúdo autoral
+          {t('blogLista.titulo')}
         </h1>
         <p class="text-[17px] text-apple-secondary max-w-2xl">
-          Artigos, reflexões e anotações sobre marketing, produto, gestão e carreira.
+          {t('blogLista.subtitulo')}
         </p>
       </div>
     </section>
@@ -31,14 +37,14 @@ const fmtData = (d: Date) => d.toLocaleDateString('pt-BR', { day: 'numeric', mon
       <div class="max-w-3xl mx-auto px-6">
         {posts.length === 0 ? (
           <div class="bg-apple-surface rounded-2xl shadow-card p-8 text-center">
-            <p class="text-[17px] font-semibold text-apple-label mb-2">Em breve</p>
-            <p class="text-[15px] text-apple-secondary">Os artigos serão publicados em breve.</p>
+            <p class="text-[17px] font-semibold text-apple-label mb-2">{t('blogLista.vazioTitulo')}</p>
+            <p class="text-[15px] text-apple-secondary">{t('blogLista.vazioTexto')}</p>
           </div>
         ) : (
           <div class="space-y-4">
             {posts.map((p) => (
               <a
-                href={`/posts/${p.slug}`}
+                href={lz(`/posts/${p.slug}`)}
                 class="group block bg-apple-surface rounded-2xl shadow-card p-6 transition-all duration-300 hover:shadow-card-hover hover:-translate-y-0.5"
               >
                 {p.data.capa_url && (
@@ -48,14 +54,15 @@ const fmtData = (d: Date) => d.toLocaleDateString('pt-BR', { day: 'numeric', mon
                   <time class="text-[12px] font-medium text-apple-tertiary uppercase tracking-wide">
                     {fmtData(p.data.data)}
                   </time>
-                  {p.data.idioma === 'en' && (
+                  {/* marca só quando o texto original é de outro idioma que o da página */}
+                  {p.data.idioma_original === 'en' && lang === 'pt' && (
                     <span class="px-2 py-0.5 rounded-full text-[11px] font-medium bg-apple-fill text-apple-tertiary">
                       EN
                     </span>
                   )}
                   {p.data.fonte_externa_url && (
                     <span class="px-2 py-0.5 rounded-full text-[11px] font-medium bg-apple-fill text-apple-tertiary">
-                      {p.data.fonte_externa_nome ?? 'Republicação'}
+                      {p.data.fonte_externa_nome ?? t('blogLista.republicacao')}
                     </span>
                   )}
                 </div>

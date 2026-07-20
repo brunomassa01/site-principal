@@ -136,6 +136,24 @@ export const ui = {
     'home.contatoTitulo': 'Vamos conversar',
     'home.contatoDesc': 'E-mail, LinkedIn ou uma conversa sobre projetos e oportunidades.',
     'home.contatoCta': 'Entrar em contato →',
+
+    // blog: lista
+    'blogLista.eyebrow': 'Publicações',
+    'blogLista.titulo': 'Conteúdo autoral',
+    'blogLista.subtitulo': 'Artigos, reflexões e anotações sobre marketing, produto, gestão e carreira.',
+    'blogLista.metaDesc': 'Artigos e reflexões de Bruno Massa sobre marketing, produto e negócios.',
+    'blogLista.vazioTitulo': 'Em breve',
+    'blogLista.vazioTexto': 'Os artigos serão publicados em breve.',
+    'blogLista.republicacao': 'Republicação',
+
+    // blog: artigo
+    'post.voltar': '← Conteúdo',
+    'post.voltarRodape': '← Voltar para conteúdo',
+    'post.originalmente': 'Originalmente publicado em',
+    'post.fonteExterna': 'fonte externa',
+    'post.compartilhar': 'Compartilhar no LinkedIn',
+    'post.badgeIngles': 'English',
+    'post.semTraducao': '',
   },
 
   en: {
@@ -267,6 +285,24 @@ export const ui = {
     'home.contatoTitulo': "Let's talk",
     'home.contatoDesc': 'Email, LinkedIn, or a conversation about projects and opportunities.',
     'home.contatoCta': 'Get in touch →',
+
+    // blog: lista
+    'blogLista.eyebrow': 'Publications',
+    'blogLista.titulo': 'Original writing',
+    'blogLista.subtitulo': 'Articles, essays and notes on marketing, product, management and career.',
+    'blogLista.metaDesc': 'Articles and essays by Bruno Massa on marketing, product and business.',
+    'blogLista.vazioTitulo': 'Coming soon',
+    'blogLista.vazioTexto': 'Articles will be published shortly.',
+    'blogLista.republicacao': 'Republished',
+
+    // blog: artigo
+    'post.voltar': '← Writing',
+    'post.voltarRodape': '← Back to writing',
+    'post.originalmente': 'Originally published at',
+    'post.fonteExterna': 'external source',
+    'post.compartilhar': 'Share on LinkedIn',
+    'post.badgeIngles': 'English',
+    'post.semTraducao': 'This article has not been translated yet. You are reading the Portuguese original.',
   },
 } as const;
 
