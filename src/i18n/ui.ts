@@ -203,6 +203,24 @@ export const ui = {
     'projetoDet.acessar': 'Acessar projeto ↗',
     'projetoDet.repo': 'Repositório ↗',
     'projetoDet.tags': 'Tags',
+
+    // página: livro
+    'livroPg.metaDesc': 'O livro de Bruno Massa sobre como a inteligência artificial está redesenhando o marketing corporativo. Disponível na Amazon.',
+    'livroPg.capaAlt': 'Capa do livro Marketing na Era da Inteligência Artificial',
+    'livroPg.subtitulo': 'Os movimentos práticos que estão redesenhando o marketing corporativo — liderança, estratégia e execução em um ambiente onde a IA mudou as regras.',
+    'livroPg.comprar': 'Comprar na Amazon',
+    'livroPg.formato': 'Disponível em formato digital e físico.',
+    'livroPg.sobre': 'Sobre o livro',
+    'livroPg.p1': 'A maioria das empresas não tem um problema de marketing. Tem um problema de arquitetura. Produzem campanhas, contratam ferramentas, montam times — e continuam sem crescimento consistente porque nunca definiram o papel real do marketing dentro do negócio.',
+    'livroPg.p2': 'Com a chegada da inteligência artificial, esse problema ficou mais urgente e a janela de vantagem ficou mais curta. Quem aprender a operar marketing com IA de forma responsável — não como truque, mas como método — vai ter uma distância crescente de quem ainda trata a tecnologia como enfeite de apresentação.',
+    'livroPg.p3': 'Este livro é sobre os movimentos práticos que estão redesenhando o marketing corporativo: liderança de times, gestão de orçamento com ROI mensurável, uso real de IA nas rotinas de produção e o modelo que transforma marketing em função estratégica de negócio.',
+    'livroPg.paraQuem': 'Para quem é',
+    'livroPg.publico1': 'Gestores e diretores de marketing que precisam justificar investimento com resultado',
+    'livroPg.publico2': 'Profissionais de marketing que querem entender como a IA muda o trabalho no dia a dia',
+    'livroPg.publico3': 'Líderes de negócio que querem transformar marketing em vantagem competitiva real',
+    'livroPg.publico4': 'Quem quer sair da retórica de IA e entrar na operação prática',
+    'livroPg.disponivel': 'Disponível agora',
+    'livroPg.disponivelSub': 'Amazon.com.br — e-book e impresso.',
   },
 
   en: {
@@ -401,6 +419,24 @@ export const ui = {
     'projetoDet.acessar': 'Visit project ↗',
     'projetoDet.repo': 'Repository ↗',
     'projetoDet.tags': 'Tags',
+
+    // página: livro (a obra é em português — o texto diz isso ao leitor de inglês)
+    'livroPg.metaDesc': "Bruno Massa's book on how artificial intelligence is redrawing corporate marketing. Available on Amazon, in Portuguese.",
+    'livroPg.capaAlt': 'Cover of the book Marketing na Era da Inteligência Artificial',
+    'livroPg.subtitulo': 'The practical moves redrawing corporate marketing — leadership, strategy and execution in an environment where AI changed the rules.',
+    'livroPg.comprar': 'Buy on Amazon',
+    'livroPg.formato': 'Available as e-book and print. The book is written in Portuguese.',
+    'livroPg.sobre': 'About the book',
+    'livroPg.p1': "Most companies don't have a marketing problem. They have an architecture problem. They run campaigns, buy tools, build teams, and still see no consistent growth, because they never defined what marketing is actually for inside the business.",
+    'livroPg.p2': 'With artificial intelligence, that problem became more urgent and the window of advantage got shorter. Whoever learns to run marketing with AI responsibly, as a method rather than a trick, will pull further and further ahead of everyone still treating the technology as decoration on a slide.',
+    'livroPg.p3': 'This book is about the practical moves redrawing corporate marketing: leading teams, managing budget with measurable ROI, real use of AI in production routines, and the model that turns marketing into a strategic business function.',
+    'livroPg.paraQuem': 'Who it is for',
+    'livroPg.publico1': 'Marketing managers and directors who need to justify investment with results',
+    'livroPg.publico2': 'Marketing professionals who want to understand how AI changes the day-to-day work',
+    'livroPg.publico3': 'Business leaders who want to turn marketing into real competitive advantage',
+    'livroPg.publico4': 'Anyone ready to drop the AI rhetoric and get into practical operation',
+    'livroPg.disponivel': 'Available now',
+    'livroPg.disponivelSub': 'Amazon.com.br — e-book and print.',
   },
 } as const;
 
