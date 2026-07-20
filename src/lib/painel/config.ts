@@ -13,6 +13,8 @@ export type Field = {
   placeholder?: string;
   help?: string;
   required?: boolean;
+  /** Tem versão em inglês (coluna `<name>_en`) e aparece na aba English. */
+  traduzivel?: boolean;
 };
 
 export type Collection = {
@@ -25,6 +27,8 @@ export type Collection = {
   slug?: boolean;      // tem slug
   situacao?: boolean;  // tem rascunho/publicado/arquivado
   body?: boolean;      // tem texto rico (body_html/body_json)
+  /** Coleção bilíngue: ganha aba "English" e, se tiver body, corpo traduzido. */
+  traduzivel?: boolean;
   fields: Field[];
 };
 
@@ -41,27 +45,27 @@ const TIPO_CONTRATO = [
 export const collections: Record<string, Collection> = {
   timeline: {
     name: 'timeline', label: 'Trajetória', singular: 'Experiência',
-    titleField: 'cargo', subField: 'empresa', slug: true, situacao: true, body: true,
+    titleField: 'cargo', subField: 'empresa', slug: true, situacao: true, body: true, traduzivel: true,
     fields: [
-      { name: 'cargo', label: 'Cargo', type: 'text', required: true },
+      { name: 'cargo', label: 'Cargo', type: 'text', required: true, traduzivel: true },
       { name: 'empresa', label: 'Empresa', type: 'text', required: true },
       { name: 'empresaUrl', label: 'URL da empresa', type: 'text' },
       { name: 'inicio', label: 'Início', type: 'date', required: true },
       { name: 'fim', label: 'Fim (vazio = atual)', type: 'date' },
-      { name: 'local', label: 'Local', type: 'text', placeholder: 'São Paulo / Remoto' },
+      { name: 'local', label: 'Local', type: 'text', placeholder: 'São Paulo / Remoto', traduzivel: true },
       { name: 'tipo', label: 'Tipo de contrato', type: 'select', options: TIPO_CONTRATO },
-      { name: 'resumo', label: 'Resumo', type: 'textarea', help: '1-2 frases — aparece no card' },
-      { name: 'destaques', label: 'Destaques (um por linha)', type: 'list' },
+      { name: 'resumo', label: 'Resumo', type: 'textarea', help: '1-2 frases — aparece no card', traduzivel: true },
+      { name: 'destaques', label: 'Destaques (um por linha)', type: 'list', traduzivel: true },
       { name: 'tags', label: 'Tags', type: 'tags' },
       { name: 'destaque', label: 'Destaque na home', type: 'boolean' },
     ],
   },
   projetos: {
     name: 'projetos', label: 'Projetos', singular: 'Projeto',
-    titleField: 'titulo', subField: 'cliente', slug: true, situacao: true, body: true,
+    titleField: 'titulo', subField: 'cliente', slug: true, situacao: true, body: true, traduzivel: true,
     fields: [
-      { name: 'titulo', label: 'Título', type: 'text', required: true },
-      { name: 'subtitulo', label: 'Subtítulo', type: 'text' },
+      { name: 'titulo', label: 'Título', type: 'text', required: true, traduzivel: true },
+      { name: 'subtitulo', label: 'Subtítulo', type: 'text', traduzivel: true },
       {
         name: 'status', label: 'Status do projeto', type: 'select', required: true, options: [
           { value: 'em-andamento', label: 'Em andamento' },
@@ -73,11 +77,11 @@ export const collections: Record<string, Collection> = {
       { name: 'inicio', label: 'Início', type: 'date', required: true },
       { name: 'fim', label: 'Fim', type: 'date' },
       { name: 'cliente', label: 'Cliente / Empresa', type: 'text' },
-      { name: 'papel', label: 'Papel', type: 'text', placeholder: 'Líder, Consultor…' },
-      { name: 'resumo', label: 'Resumo', type: 'textarea', required: true, help: '1-3 frases — aparece no card' },
-      { name: 'problema', label: 'Problema', type: 'textarea' },
-      { name: 'abordagem', label: 'Abordagem', type: 'textarea' },
-      { name: 'resultado', label: 'Resultado', type: 'textarea', help: 'Resultados concretos com números' },
+      { name: 'papel', label: 'Papel', type: 'text', placeholder: 'Líder, Consultor…', traduzivel: true },
+      { name: 'resumo', label: 'Resumo', type: 'textarea', required: true, help: '1-3 frases — aparece no card', traduzivel: true },
+      { name: 'problema', label: 'Problema', type: 'textarea', traduzivel: true },
+      { name: 'abordagem', label: 'Abordagem', type: 'textarea', traduzivel: true },
+      { name: 'resultado', label: 'Resultado', type: 'textarea', help: 'Resultados concretos com números', traduzivel: true },
       { name: 'link', label: 'Link externo', type: 'text' },
       { name: 'repo', label: 'Repositório', type: 'text' },
       { name: 'tags', label: 'Tags', type: 'tags' },
@@ -86,9 +90,9 @@ export const collections: Record<string, Collection> = {
   },
   skills: {
     name: 'skills', label: 'Skills', singular: 'Skill',
-    titleField: 'nome', subField: 'area', slug: true, situacao: true, body: true,
+    titleField: 'nome', subField: 'area', slug: true, situacao: true, body: true, traduzivel: true,
     fields: [
-      { name: 'nome', label: 'Nome', type: 'text', required: true },
+      { name: 'nome', label: 'Nome', type: 'text', required: true, traduzivel: true },
       {
         name: 'categoria', label: 'Categoria', type: 'select', required: true, options: [
           { value: 'habilidade', label: 'Habilidade' },
@@ -97,7 +101,7 @@ export const collections: Record<string, Collection> = {
           { value: 'idioma', label: 'Idioma' },
         ],
       },
-      { name: 'area', label: 'Área', type: 'text', required: true, placeholder: 'Gestão, Dados…' },
+      { name: 'area', label: 'Área', type: 'text', required: true, placeholder: 'Gestão, Dados…', traduzivel: true },
       {
         name: 'nivel', label: 'Nível', type: 'select', options: [
           { value: '', label: '—' },
@@ -111,26 +115,26 @@ export const collections: Record<string, Collection> = {
       { name: 'instituicaoUrl', label: 'URL da instituição', type: 'text' },
       { name: 'ano', label: 'Ano', type: 'number' },
       { name: 'credencialUrl', label: 'URL da credencial', type: 'text' },
-      { name: 'descricao', label: 'Descrição', type: 'textarea' },
+      { name: 'descricao', label: 'Descrição', type: 'textarea', traduzivel: true },
       { name: 'destaque', label: 'Destaque', type: 'boolean' },
     ],
   },
   agora: {
     name: 'agora', label: 'Agora', singular: 'Página Agora', singleton: true,
-    titleField: 'id', body: true,
+    titleField: 'id', body: true, traduzivel: true,
     fields: [
       { name: 'atualizadoEm', label: 'Atualizado em', type: 'date', required: true },
     ],
   },
   identidade: {
     name: 'identidade', label: 'Identidade', singular: 'Identidade', singleton: true,
-    titleField: 'nome',
+    titleField: 'nome', traduzivel: true,
     fields: [
       { name: 'nome', label: 'Nome', type: 'text', required: true },
-      { name: 'tagline', label: 'Tagline', type: 'text', placeholder: 'Marketing · Produto · Negócios' },
-      { name: 'slogan', label: 'Frase de efeito', type: 'textarea' },
-      { name: 'bioCurta', label: 'Bio curta', type: 'textarea', help: 'Subtítulo no hero da home' },
-      { name: 'descricaoMeta', label: 'Descrição (SEO)', type: 'textarea' },
+      { name: 'tagline', label: 'Tagline', type: 'text', placeholder: 'Marketing · Produto · Negócios', traduzivel: true },
+      { name: 'slogan', label: 'Frase de efeito', type: 'textarea', traduzivel: true },
+      { name: 'bioCurta', label: 'Bio curta', type: 'textarea', help: 'Subtítulo no hero da home', traduzivel: true },
+      { name: 'descricaoMeta', label: 'Descrição (SEO)', type: 'textarea', traduzivel: true },
       { name: 'email', label: 'E-mail', type: 'text' },
       { name: 'linkedinUrl', label: 'URL do LinkedIn', type: 'text' },
       { name: 'ogImage', label: 'Imagem de compartilhamento', type: 'image' },
@@ -138,11 +142,11 @@ export const collections: Record<string, Collection> = {
   },
   'conhecimento-fases': {
     name: 'conhecimento-fases', label: 'MBA · Fases', singular: 'Fase',
-    titleField: 'titulo', subField: 'status', situacao: true,
+    titleField: 'titulo', subField: 'status', situacao: true, traduzivel: true,
     fields: [
       { name: 'numero', label: 'Número (1–5)', type: 'number', required: true },
-      { name: 'titulo', label: 'Título', type: 'text', required: true },
-      { name: 'subtitulo', label: 'Subtítulo', type: 'textarea', help: '1-2 frases — aparece sob o título da fase' },
+      { name: 'titulo', label: 'Título', type: 'text', required: true, traduzivel: true },
+      { name: 'subtitulo', label: 'Subtítulo', type: 'textarea', help: '1-2 frases — aparece sob o título da fase', traduzivel: true },
       { name: 'status', label: 'Status', type: 'select', options: [
         { value: 'bloqueada', label: 'Bloqueada (em breve)' },
         { value: 'em-curso', label: 'Em curso' },
@@ -157,9 +161,9 @@ export const collections: Record<string, Collection> = {
   },
   'conhecimento-videos': {
     name: 'conhecimento-videos', label: 'MBA · Vídeos', singular: 'Vídeo',
-    titleField: 'titulo', subField: 'fonte', situacao: true,
+    titleField: 'titulo', subField: 'fonte', situacao: true, traduzivel: true,
     fields: [
-      { name: 'titulo', label: 'Título', type: 'text', required: true },
+      { name: 'titulo', label: 'Título', type: 'text', required: true, traduzivel: true },
       { name: 'url', label: 'URL (YouTube, Vimeo, etc.)', type: 'text', required: true },
       { name: 'fonte', label: 'Origem', type: 'select', options: [
         { value: 'fiap', label: 'Gravado na FIAP' },
@@ -176,9 +180,9 @@ export const collections: Record<string, Collection> = {
   },
   'conhecimento-referencias': {
     name: 'conhecimento-referencias', label: 'MBA · Referências', singular: 'Referência',
-    titleField: 'titulo', subField: 'fonte', situacao: true,
+    titleField: 'titulo', subField: 'fonte', situacao: true, traduzivel: true,
     fields: [
-      { name: 'titulo', label: 'Título', type: 'text', required: true },
+      { name: 'titulo', label: 'Título', type: 'text', required: true, traduzivel: true },
       { name: 'fonte', label: 'Autor / veículo', type: 'text' },
       { name: 'tipo', label: 'Tipo', type: 'select', options: [
         { value: 'livro', label: 'Livro' },

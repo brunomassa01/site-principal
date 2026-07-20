@@ -32,13 +32,22 @@ const labelCls = 'block text-[13px] font-medium text-apple-label mb-1';
 
 export default function GenericForm({ colecao, cfg, id }: Props) {
   const carregar = Boolean(id) || Boolean(cfg.singleton);
+  const traduziveis = cfg.fields.filter((f) => f.traduzivel);
+  const temTraducao = Boolean(cfg.traduzivel) && (traduziveis.length > 0 || Boolean(cfg.body));
+
+  const [aba, setAba] = useState<'pt' | 'en'>('pt');
   const [vals, setVals] = useState<Record<string, string | boolean>>(() => {
     const o: Record<string, string | boolean> = {};
-    for (const f of cfg.fields) o[f.name] = initField(f, null);
+    for (const f of cfg.fields) {
+      o[f.name] = initField(f, null);
+      if (f.traduzivel) o[`${f.name}En`] = initField(f, null);
+    }
     return o;
   });
   const [bodyHtml, setBodyHtml] = useState('');
   const [bodyJson, setBodyJson] = useState<unknown>(null);
+  const [bodyHtmlEn, setBodyHtmlEn] = useState('');
+  const [bodyJsonEn, setBodyJsonEn] = useState<unknown>(null);
   const [situacao, setSituacao] = useState('rascunho');
   const [slug, setSlug] = useState('');
   const [carregando, setCarregando] = useState(carregar);
@@ -54,10 +63,15 @@ export default function GenericForm({ colecao, cfg, id }: Props) {
       if (!r.ok) { setErro('Não foi possível carregar.'); setCarregando(false); return; }
       const item = await r.json();
       const o: Record<string, string | boolean> = {};
-      for (const f of cfg.fields) o[f.name] = initField(f, item);
+      for (const f of cfg.fields) {
+        o[f.name] = initField(f, item);
+        if (f.traduzivel) o[`${f.name}En`] = initField({ ...f, name: `${f.name}En` }, item);
+      }
       setVals(o);
       setBodyHtml(item.bodyHtml ?? '');
       setBodyJson(item.bodyJson ?? null);
+      setBodyHtmlEn(item.bodyHtmlEn ?? '');
+      setBodyJsonEn(item.bodyJsonEn ?? null);
       setSituacao(item.situacao ?? 'rascunho');
       setSlug(item.slug ?? '');
       setCarregando(false);
@@ -71,7 +85,10 @@ export default function GenericForm({ colecao, cfg, id }: Props) {
   async function salvar(novaSituacao?: string) {
     setErro(''); setOk(''); setSalvando(true);
     const payload: Record<string, unknown> = { ...vals };
-    if (cfg.body) { payload.body_html = bodyHtml; payload.body_json = bodyJson; }
+    if (cfg.body) {
+      payload.body_html = bodyHtml; payload.body_json = bodyJson;
+      if (cfg.traduzivel) { payload.body_html_en = bodyHtmlEn; payload.body_json_en = bodyJsonEn; }
+    }
     if (cfg.situacao) payload.situacao = novaSituacao ?? situacao;
     if (cfg.slug) payload.slug = slug;
 
@@ -109,28 +126,78 @@ export default function GenericForm({ colecao, cfg, id }: Props) {
         {erro && <span className="text-[13px] text-red-700">{erro}</span>}
       </div>
 
-      <div className="bg-white rounded-2xl shadow-card p-6">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {cfg.fields.map((f) => (
-            <div key={f.name} className={FULL.has(f.type) ? 'sm:col-span-2' : ''}>
-              {f.type !== 'boolean' && <label className={labelCls}>{f.label}{f.required ? ' *' : ''}</label>}
-              {renderField(f, vals[f.name], set)}
-              {f.help && <p className="text-[12px] text-apple-tertiary mt-1">{f.help}</p>}
-            </div>
+      {temTraducao && (
+        <div className="flex items-center gap-1 border-b border-apple-separator">
+          {(['pt', 'en'] as const).map((l) => (
+            <button
+              key={l}
+              onClick={() => setAba(l)}
+              className={`px-4 py-2 text-[14px] font-medium border-b-2 -mb-px transition-colors ${
+                aba === l
+                  ? 'border-apple-accent text-apple-label'
+                  : 'border-transparent text-apple-secondary hover:text-apple-label'
+              }`}
+            >
+              {l === 'pt' ? '🇧🇷 Português' : '🇬🇧 English'}
+            </button>
           ))}
-          {cfg.slug && (
-            <div className="sm:col-span-2">
-              <label className={labelCls}>Endereço (URL)</label>
-              <input className={inputCls} value={slug} onChange={(e) => setSlug(e.target.value)} placeholder="gerado automaticamente" />
-            </div>
-          )}
+          <span className="ml-auto text-[12px] text-apple-tertiary pr-1">
+            {aba === 'en' ? 'Campo em branco = o site mostra o português' : 'Idioma original'}
+          </span>
         </div>
+      )}
+
+      <div className="bg-white rounded-2xl shadow-card p-6">
+        {aba === 'pt' ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {cfg.fields.map((f) => (
+              <div key={f.name} className={FULL.has(f.type) ? 'sm:col-span-2' : ''}>
+                {f.type !== 'boolean' && <label className={labelCls}>{f.label}{f.required ? ' *' : ''}</label>}
+                {renderField(f, vals[f.name], set)}
+                {f.help && <p className="text-[12px] text-apple-tertiary mt-1">{f.help}</p>}
+              </div>
+            ))}
+            {cfg.slug && (
+              <div className="sm:col-span-2">
+                <label className={labelCls}>Endereço (URL)</label>
+                <input className={inputCls} value={slug} onChange={(e) => setSlug(e.target.value)} placeholder="gerado automaticamente" />
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {traduziveis.length === 0 && (
+              <p className="sm:col-span-2 text-[14px] text-apple-secondary">Só o conteúdo desta ficha tem versão em inglês.</p>
+            )}
+            {traduziveis.map((f) => {
+              const original = String(vals[f.name] ?? '');
+              return (
+                <div key={f.name} className={FULL.has(f.type) ? 'sm:col-span-2' : ''}>
+                  <label className={labelCls}>{f.label}</label>
+                  {renderField({ ...f, name: `${f.name}En`, required: false }, vals[`${f.name}En`], set)}
+                  {original && (
+                    <p className="text-[12px] text-apple-tertiary mt-1 line-clamp-2">
+                      <span className="font-medium">PT:</span> {original}
+                    </p>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
 
-      {cfg.body && (
+      {cfg.body && aba === 'pt' && (
         <div>
           <label className={labelCls}>Conteúdo (opcional)</label>
           <RichTextEditor value={bodyHtml} onChange={(h, j) => { setBodyHtml(h); setBodyJson(j); }} onImageUpload={enviarImagem} />
+        </div>
+      )}
+
+      {cfg.body && cfg.traduzivel && aba === 'en' && (
+        <div>
+          <label className={labelCls}>Content in English (optional)</label>
+          <RichTextEditor value={bodyHtmlEn} onChange={(h, j) => { setBodyHtmlEn(h); setBodyJsonEn(j); }} onImageUpload={enviarImagem} />
         </div>
       )}
     </div>

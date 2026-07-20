@@ -20,10 +20,19 @@ function coerce(type: FieldType, raw: unknown): unknown {
 
 function buildValues(cfg: Collection, b: Record<string, unknown>): Record<string, unknown> {
   const v: Record<string, unknown> = {};
-  for (const f of cfg.fields) v[f.name] = coerce(f.type, b[f.name]);
+  for (const f of cfg.fields) {
+    v[f.name] = coerce(f.type, b[f.name]);
+    // Tradução: campo marcado como traduzível grava também a coluna `<campo>En`.
+    // Vazio continua vazio de propósito — é assim que o site cai no português.
+    if (f.traduzivel) v[`${f.name}En`] = coerce(f.type, b[`${f.name}En`]);
+  }
   if (cfg.body) {
     v.bodyHtml = sanitizeBody(String(b.body_html ?? ''));
     v.bodyJson = b.body_json ?? null;
+    if (cfg.traduzivel) {
+      v.bodyHtmlEn = sanitizeBody(String(b.body_html_en ?? ''));
+      v.bodyJsonEn = b.body_json_en ?? null;
+    }
   }
   if (cfg.situacao) v.situacao = (b.situacao as string) || 'rascunho';
   if (cfg.slug) v.slug = String(b.slug ?? '').trim() || slugify(String(b[cfg.titleField] ?? cfg.singular));
@@ -31,7 +40,7 @@ function buildValues(cfg: Collection, b: Record<string, unknown>): Record<string
 }
 
 function strip(row: Record<string, unknown>) {
-  const { bodyHtml, bodyJson, ...rest } = row;
+  const { bodyHtml, bodyJson, bodyHtmlEn, bodyJsonEn, ...rest } = row;
   return rest;
 }
 

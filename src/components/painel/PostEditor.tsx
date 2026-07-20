@@ -20,6 +20,11 @@ type Form = {
   situacao: string;
   bodyHtml: string;
   bodyJson: unknown;
+  // versão em inglês (vazio = o site em inglês mostra o português)
+  tituloEn: string;
+  resumoEn: string;
+  bodyHtmlEn: string;
+  bodyJsonEn: unknown;
 };
 
 const vazio: Form = {
@@ -28,6 +33,7 @@ const vazio: Form = {
   publicar_em: '', capa_url: '', tags: '', idioma: 'pt',
   fonte_externa_url: '', fonte_externa_nome: '', mba_fase: '', mba_disciplina: '', situacao: 'rascunho',
   bodyHtml: '', bodyJson: null,
+  tituloEn: '', resumoEn: '', bodyHtmlEn: '', bodyJsonEn: null,
 };
 
 function paraInputDate(v: string | null): string {
@@ -90,6 +96,8 @@ export default function PostEditor({ id }: Props) {
   const [mostrarBiblioteca, setMostrarBiblioteca] = useState(false);
   const [transformando, setTransformando] = useState<string | null>(null);
   const [avancado, setAvancado] = useState(false);
+  const [aba, setAba] = useState<'pt' | 'en'>('pt');
+  const [traduzindo, setTraduzindo] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -117,6 +125,10 @@ export default function PostEditor({ id }: Props) {
         situacao: p.situacao ?? 'rascunho',
         bodyHtml: p.bodyHtml ?? '',
         bodyJson: p.bodyJson ?? null,
+        tituloEn: p.tituloEn ?? '',
+        resumoEn: p.resumoEn ?? '',
+        bodyHtmlEn: p.bodyHtmlEn ?? '',
+        bodyJsonEn: p.bodyJsonEn ?? null,
       });
       setCarregando(false);
     })();
@@ -145,6 +157,34 @@ export default function PostEditor({ id }: Props) {
     else alert(j.error || 'Não foi possível gerar a capa.');
   }
 
+  // Gera um RASCUNHO de tradução na voz dele. Nada é publicado por isso — o
+  // texto cai nos campos em inglês para você revisar antes de salvar.
+  async function traduzirComIA() {
+    if (!f.titulo.trim()) { alert('Escreva o título em português primeiro.'); return; }
+    if (f.tituloEn.trim() && !confirm('Já existe uma tradução aqui. Substituir pelo que a IA gerar?')) return;
+    setTraduzindo(true);
+    try {
+      const r = await fetch('/api/painel/posts/traduzir', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ titulo: f.titulo, resumo: f.resumo, body_html: f.bodyHtml }),
+      });
+      const d = await r.json();
+      if (!r.ok) { alert(d.error || 'Não foi possível traduzir.'); return; }
+      setF((p) => ({
+        ...p,
+        tituloEn: d.titulo_en ?? '',
+        resumoEn: d.resumo_en ?? '',
+        bodyHtmlEn: d.body_html_en ?? '',
+        bodyJsonEn: null,
+      }));
+    } catch {
+      alert('Não foi possível traduzir.');
+    } finally {
+      setTraduzindo(false);
+    }
+  }
+
   async function salvar(situacao?: string, publicarEmOverride?: string) {
     setErro('');
     setSalvando(true);
@@ -164,6 +204,10 @@ export default function PostEditor({ id }: Props) {
       situacao: situacao ?? f.situacao,
       body_html: f.bodyHtml,
       body_json: f.bodyJson,
+      titulo_en: f.tituloEn,
+      resumo_en: f.resumoEn,
+      body_html_en: f.bodyHtmlEn,
+      body_json_en: f.bodyJsonEn,
     };
     const url = editando ? `/api/painel/posts/${id}` : '/api/painel/posts';
     const r = await fetch(url, {
@@ -213,24 +257,83 @@ export default function PostEditor({ id }: Props) {
       <div className="lg:col-span-2 space-y-4">
         {erro && <div className="rounded-lg bg-red-50 text-red-700 text-[13px] px-3 py-2">{erro}</div>}
 
-        <div>
-          <label className={labelCls}>Título *</label>
-          <input className={inputCls} value={f.titulo} onChange={(e) => upd('titulo', e.target.value)} />
+        {/* Abas de idioma: o site em inglês cai no português quando a tradução está vazia */}
+        <div className="flex items-center gap-1 border-b border-apple-separator">
+          {(['pt', 'en'] as const).map((l) => (
+            <button
+              key={l}
+              onClick={() => setAba(l)}
+              className={`px-4 py-2 text-[14px] font-medium border-b-2 -mb-px transition-colors ${
+                aba === l ? 'border-apple-accent text-apple-label' : 'border-transparent text-apple-secondary hover:text-apple-label'
+              }`}
+            >
+              {l === 'pt' ? '🇧🇷 Português' : '🇬🇧 English'}
+              {l === 'en' && f.tituloEn.trim() && <span className="ml-1.5 text-green-600">•</span>}
+            </button>
+          ))}
+          <span className="ml-auto text-[12px] text-apple-tertiary pr-1">
+            {aba === 'en' ? 'Em branco = o site mostra o português' : 'Idioma original'}
+          </span>
         </div>
 
-        <div>
-          <label className={labelCls}>Resumo *</label>
-          <textarea className={`${inputCls} min-h-[64px]`} value={f.resumo} onChange={(e) => upd('resumo', e.target.value)} placeholder="1-2 frases — aparece no card e no Google." />
-        </div>
+        {aba === 'pt' ? (
+          <>
+            <div>
+              <label className={labelCls}>Título *</label>
+              <input className={inputCls} value={f.titulo} onChange={(e) => upd('titulo', e.target.value)} />
+            </div>
 
-        <div>
-          <label className={labelCls}>Conteúdo</label>
-          <RichTextEditor
-            value={f.bodyHtml}
-            onChange={(html, json) => setF((p) => ({ ...p, bodyHtml: html, bodyJson: json }))}
-            onImageUpload={enviarImagem}
-          />
-        </div>
+            <div>
+              <label className={labelCls}>Resumo *</label>
+              <textarea className={`${inputCls} min-h-[64px]`} value={f.resumo} onChange={(e) => upd('resumo', e.target.value)} placeholder="1-2 frases — aparece no card e no Google." />
+            </div>
+
+            <div>
+              <label className={labelCls}>Conteúdo</label>
+              <RichTextEditor
+                value={f.bodyHtml}
+                onChange={(html, json) => setF((p) => ({ ...p, bodyHtml: html, bodyJson: json }))}
+                onImageUpload={enviarImagem}
+              />
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-[13px] text-apple-secondary">
+                Tradução do artigo. O endereço (URL) é o mesmo — muda só o idioma do texto.
+              </p>
+              <button
+                onClick={traduzirComIA}
+                disabled={traduzindo || !f.titulo.trim()}
+                className="flex-none px-4 py-2 rounded-full bg-apple-accent text-white text-[13px] font-medium hover:opacity-90 disabled:opacity-50"
+              >
+                {traduzindo ? 'Traduzindo…' : '✨ Traduzir com IA'}
+              </button>
+            </div>
+
+            <div>
+              <label className={labelCls}>Title (English)</label>
+              <input className={inputCls} value={f.tituloEn} onChange={(e) => upd('tituloEn', e.target.value)} />
+              {f.titulo && <p className="text-[12px] text-apple-tertiary mt-1"><span className="font-medium">PT:</span> {f.titulo}</p>}
+            </div>
+
+            <div>
+              <label className={labelCls}>Summary (English)</label>
+              <textarea className={`${inputCls} min-h-[64px]`} value={f.resumoEn} onChange={(e) => upd('resumoEn', e.target.value)} />
+              {f.resumo && <p className="text-[12px] text-apple-tertiary mt-1 line-clamp-2"><span className="font-medium">PT:</span> {f.resumo}</p>}
+            </div>
+
+            <div>
+              <label className={labelCls}>Content (English)</label>
+              <RichTextEditor
+                value={f.bodyHtmlEn}
+                onChange={(html, json) => setF((p) => ({ ...p, bodyHtmlEn: html, bodyJsonEn: json }))}
+                onImageUpload={enviarImagem}
+              />
+            </div>
+          </>
+        )}
       </div>
 
       {/* Coluna lateral */}

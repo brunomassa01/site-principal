@@ -50,6 +50,11 @@ export const POST: APIRoute = async ({ request }) => {
     mbaDisciplina: b.mba_disciplina ? String(b.mba_disciplina).trim() || null : null,
     bodyHtml: sanitizeBody(String(b.body_html ?? '')),
     bodyJson: (b.body_json ?? null) as unknown,
+    // tradução (vazio = o site em inglês cai no português)
+    tituloEn: b.titulo_en ? String(b.titulo_en).trim() || null : null,
+    resumoEn: b.resumo_en ? String(b.resumo_en).trim() || null : null,
+    bodyHtmlEn: b.body_html_en ? sanitizeBody(String(b.body_html_en)) : null,
+    bodyJsonEn: (b.body_json_en ?? null) as unknown,
     situacao: (b.situacao as string) || 'rascunho',
   };
 
