@@ -3,10 +3,15 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import { getIdentidade } from '../lib/content/collections';
+import { usarT, type Lang } from '../i18n';
+
 export const prerender = false;
-const id = (await getIdentidade()).data;
+
+const lang: Lang = Astro.locals.lang ?? 'pt';
+const t = usarT(lang);
+const id = (await getIdentidade(lang)).data;
 ---
-<BaseLayout title="Contato" descricao="Entre em contato com Bruno Massa.">
+<BaseLayout title={t('contato.titulo')} descricao={t('contatoPg.metaDesc')}>
   <Header />
   <main>
     <!-- Page header -->
@@ -15,16 +20,16 @@ const id = (await getIdentidade()).data;
         <div class="flex flex-col sm:flex-row sm:items-center sm:gap-8 mb-2">
           <div class="flex-none mb-6 sm:mb-0">
             <div class="w-20 h-20 rounded-2xl overflow-hidden shadow-card">
-              <img src="/images/bruno.jpg" alt="Bruno Massa" class="w-full h-full object-cover object-top" />
+              <img src="/images/bruno.jpg" alt={id.nome} class="w-full h-full object-cover object-top" />
             </div>
           </div>
           <div>
-            <p class="text-[12px] font-semibold uppercase tracking-[0.08em] text-apple-accent mb-3">Contato</p>
+            <p class="text-[12px] font-semibold uppercase tracking-[0.08em] text-apple-accent mb-3">{t('contato.titulo')}</p>
             <h1 class="text-4xl md:text-5xl font-bold text-apple-label tracking-tight leading-tight mb-3">
-              Vamos conversar
+              {t('contatoPg.titulo')}
             </h1>
             <p class="text-[17px] text-apple-secondary max-w-xl leading-relaxed">
-              Aberto a oportunidades remotas, parcerias e boas conversas sobre marketing, narrativa e IA.
+              {t('contatoPg.subtitulo')}
             </p>
           </div>
         </div>
@@ -40,11 +45,11 @@ const id = (await getIdentidade()).data;
               href={`mailto:${id.email}`}
               class="group bg-apple-surface rounded-2xl shadow-card p-6 transition-all duration-300 hover:shadow-card-hover hover:-translate-y-0.5"
             >
-              <p class="text-[12px] font-semibold uppercase tracking-[0.08em] text-apple-tertiary mb-3">E-mail</p>
+              <p class="text-[12px] font-semibold uppercase tracking-[0.08em] text-apple-tertiary mb-3">{t('contato.email')}</p>
               <p class="text-[20px] font-semibold text-apple-label tracking-tight mb-2 group-hover:text-apple-accent transition-colors">
                 {id.email}
               </p>
-              <p class="text-[14px] text-apple-secondary">Respondo em até 24h em dias úteis.</p>
+              <p class="text-[14px] text-apple-secondary">{t('contatoPg.emailNota')}</p>
             </a>
           )}
 
@@ -55,19 +60,18 @@ const id = (await getIdentidade()).data;
               rel="noopener"
               class="group bg-apple-surface rounded-2xl shadow-card p-6 transition-all duration-300 hover:shadow-card-hover hover:-translate-y-0.5"
             >
-              <p class="text-[12px] font-semibold uppercase tracking-[0.08em] text-apple-tertiary mb-3">LinkedIn</p>
+              <p class="text-[12px] font-semibold uppercase tracking-[0.08em] text-apple-tertiary mb-3">{t('contato.linkedin')}</p>
               <p class="text-[20px] font-semibold text-apple-label tracking-tight mb-2 group-hover:text-apple-accent transition-colors">
                 {id.linkedin_url.replace('https://', '').replace('http://', '')} ↗
               </p>
-              <p class="text-[14px] text-apple-secondary">Conecte-se ou envie uma mensagem direta.</p>
+              <p class="text-[14px] text-apple-secondary">{t('contatoPg.linkedinNota')}</p>
             </a>
           )}
         </div>
 
         <div class="mt-8 bg-apple-fill rounded-2xl p-6">
           <p class="text-[15px] text-apple-secondary leading-relaxed">
-            Prefiro uma conversa direta sobre o que você tem em mente — seja uma oportunidade de trabalho,
-            uma parceria em projeto ou uma troca de ideias. Sem formulários, sem burocracia.
+            {t('contatoPg.texto')}
           </p>
         </div>
       </div>

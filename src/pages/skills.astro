@@ -3,10 +3,14 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import { getSkills } from '../lib/content/collections';
+import { usarT, type Lang } from '../i18n';
 
 export const prerender = false;
 
-const todas = (await getSkills())
+const lang: Lang = Astro.locals.lang ?? 'pt';
+const t = usarT(lang);
+
+const todas = (await getSkills(lang))
   .sort((a, b) => (b.data.ano ?? 0) - (a.data.ano ?? 0));
 
 type Cat = 'habilidade' | 'certificacao' | 'formacao' | 'idioma';
@@ -19,33 +23,33 @@ const porCategoria: Record<Cat, typeof todas> = {
 };
 
 const titulos: Record<Cat, string> = {
-  habilidade: 'Habilidades',
-  certificacao: 'Certificações',
-  formacao: 'Formação',
-  idioma: 'Idiomas',
+  habilidade: t('skills.categoria.habilidade'),
+  certificacao: t('skills.categoria.certificacao'),
+  formacao: t('skills.categoria.formacao'),
+  idioma: t('skills.categoria.idioma'),
 };
 
 const nivelLabel: Record<string, string> = {
-  basico: 'Básico', intermediario: 'Intermediário',
-  avancado: 'Avançado', especialista: 'Especialista',
+  basico: t('skills.nivel.basico'), intermediario: t('skills.nivel.intermediario'),
+  avancado: t('skills.nivel.avancado'), especialista: t('skills.nivel.especialista'),
 };
 
 const nivelWidth: Record<string, string> = {
   basico: 'w-1/4', intermediario: 'w-2/4', avancado: 'w-3/4', especialista: 'w-full',
 };
 ---
-<BaseLayout title="Skills, certificações e formação" descricao="Habilidades, certificações, formação e idiomas de Bruno Massa.">
+<BaseLayout title={t('skillsPg.titulo')} descricao={t('skillsPg.metaDesc')}>
   <Header />
   <main>
     <!-- Page header -->
     <section class="bg-white py-16 md:py-20">
       <div class="max-w-5xl mx-auto px-6">
-        <p class="text-[12px] font-semibold uppercase tracking-[0.08em] text-apple-accent mb-4">Competências</p>
+        <p class="text-[12px] font-semibold uppercase tracking-[0.08em] text-apple-accent mb-4">{t('home.competencias')}</p>
         <h1 class="text-4xl md:text-5xl font-bold text-apple-label tracking-tight leading-tight mb-4 text-balance">
-          Skills &amp; Formação
+          {t('skillsPg.titulo')}
         </h1>
         <p class="text-[17px] text-apple-secondary max-w-2xl">
-          Habilidades, certificações, formação acadêmica e idiomas.
+          {t('skillsPg.subtitulo')}
         </p>
       </div>
     </section>
@@ -160,7 +164,7 @@ const nivelWidth: Record<string, string> = {
                         rel="noopener"
                         class="flex-none inline-flex items-center px-3 py-1 rounded-full text-[12px] font-medium bg-apple-accent/10 text-apple-accent hover:bg-apple-accent hover:text-white transition-colors"
                       >
-                        Credencial ↗
+                        {t('skillsPg.credencial')}
                       </a>
                     )}
                   </div>
@@ -208,7 +212,7 @@ const nivelWidth: Record<string, string> = {
                         rel="noopener"
                         class="flex-none inline-flex items-center px-3 py-1 rounded-full text-[12px] font-medium bg-apple-fill text-apple-secondary hover:bg-apple-separator-light transition-colors"
                       >
-                        Ver diploma ↗
+                        {t('skillsPg.diploma')}
                       </a>
                     )}
                   </div>

@@ -3,10 +3,15 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import Header from '../../components/Header.astro';
 import Footer from '../../components/Footer.astro';
 import { getProjetos } from '../../lib/content/collections';
+import { usarT, localizar, type Lang } from '../../i18n';
 
 export const prerender = false;
 
-const todos = (await getProjetos())
+const lang: Lang = Astro.locals.lang ?? 'pt';
+const t = usarT(lang);
+const lz = (href: string) => localizar(href, lang);
+
+const todos = (await getProjetos(lang))
   .sort((a, b) => b.data.inicio.valueOf() - a.data.inicio.valueOf());
 
 type Status = 'em-andamento' | 'concluido' | 'em-pausa' | 'arquivado';
@@ -19,10 +24,10 @@ const grupos: Record<Status, typeof todos> = {
 };
 
 const titulos: Record<Status, string> = {
-  'em-andamento': 'Em andamento',
-  'concluido': 'Concluídos',
-  'em-pausa': 'Em pausa',
-  'arquivado': 'Arquivados',
+  'em-andamento': t('projetosPg.grupo.em-andamento'),
+  'concluido': t('projetosPg.grupo.concluido'),
+  'em-pausa': t('projetosPg.grupo.em-pausa'),
+  'arquivado': t('projetosPg.grupo.arquivado'),
 };
 
 const badgeClass: Record<Status, string> = {
@@ -36,18 +41,18 @@ const ordem: Status[] = ['em-andamento', 'concluido', 'em-pausa', 'arquivado'];
 
 const fmtAno = (d: Date) => d.getFullYear();
 ---
-<BaseLayout title="Projetos" descricao="Projetos e trabalhos de Bruno Massa — cases, campanhas e iniciativas.">
+<BaseLayout title={t('projetos.titulo')} descricao={t('projetosPg.metaDesc')}>
   <Header />
   <main>
     <!-- Page header -->
     <section class="bg-white py-16 md:py-20">
       <div class="max-w-5xl mx-auto px-6">
-        <p class="text-[12px] font-semibold uppercase tracking-[0.08em] text-apple-accent mb-4">Portfolio</p>
+        <p class="text-[12px] font-semibold uppercase tracking-[0.08em] text-apple-accent mb-4">{t('projetosPg.eyebrow')}</p>
         <h1 class="text-4xl md:text-5xl font-bold text-apple-label tracking-tight leading-tight mb-4 text-balance">
-          Projetos
+          {t('projetos.titulo')}
         </h1>
         <p class="text-[17px] text-apple-secondary max-w-2xl">
-          Produtos que construí, programas que desenhei e campanhas que liderei. Prova, não promessa.
+          {t('projetosPg.subtitulo')}
         </p>
       </div>
     </section>
@@ -56,7 +61,7 @@ const fmtAno = (d: Date) => d.getFullYear();
     <section class="py-16">
       <div class="max-w-5xl mx-auto px-6">
         {todos.length === 0 ? (
-          <p class="text-apple-secondary">Em construção.</p>
+          <p class="text-apple-secondary">{t('timelinePg.vazio')}</p>
         ) : (
           <div class="space-y-16">
             {ordem.map((status) => grupos[status].length > 0 && (
@@ -70,7 +75,7 @@ const fmtAno = (d: Date) => d.getFullYear();
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {grupos[status].map((p) => (
                     <a
-                      href={`/projetos/${p.slug}`}
+                      href={lz(`/projetos/${p.slug}`)}
                       class="group bg-apple-surface rounded-2xl shadow-card p-6 flex flex-col transition-all duration-300 hover:shadow-card-hover hover:-translate-y-0.5"
                     >
                       <div class="flex items-start justify-between gap-2 mb-3">
@@ -78,7 +83,7 @@ const fmtAno = (d: Date) => d.getFullYear();
                           {p.data.titulo}
                         </h3>
                         {p.data.destaque && (
-                          <span class="flex-none text-apple-accent text-[18px] leading-none" title="Destaque">★</span>
+                          <span class="flex-none text-apple-accent text-[18px] leading-none" title={t('projetosPg.destaque')}>★</span>
                         )}
                       </div>
 

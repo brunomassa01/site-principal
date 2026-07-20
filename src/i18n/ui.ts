@@ -154,6 +154,55 @@ export const ui = {
     'post.compartilhar': 'Compartilhar no LinkedIn',
     'post.badgeIngles': 'English',
     'post.semTraducao': '',
+
+    // página: trajetória
+    'timelinePg.eyebrow': 'Carreira',
+    'timelinePg.titulo': 'Trajetória profissional',
+    'timelinePg.subtitulo': 'Vinte anos traduzindo marketing para quem decide — da pesquisa de mercado à liderança de áreas inteiras. Em ordem cronológica inversa.',
+    'timelinePg.metaDesc': 'Trajetória profissional de Bruno Massa — cargos, empresas e conquistas ao longo da carreira.',
+    'timelinePg.vazio': 'Em construção.',
+
+    // página: skills
+    'skillsPg.titulo': 'Skills & Formação',
+    'skillsPg.subtitulo': 'Habilidades, certificações, formação acadêmica e idiomas.',
+    'skillsPg.metaDesc': 'Habilidades, certificações, formação e idiomas de Bruno Massa.',
+    'skillsPg.credencial': 'Credencial ↗',
+    'skillsPg.diploma': 'Ver diploma ↗',
+
+    // página: agora
+    'agoraPg.titulo': 'O que estou fazendo',
+    'agoraPg.subtitulo': 'Foco atual, publicações e anotações.',
+    'agoraPg.metaDesc': 'O que Bruno Massa está focando neste momento — e o que escreve sobre marketing, produto e negócios.',
+    'agoraPg.publicacoes': 'Publicações',
+    'agoraPg.momento': 'Momento atual',
+    'agoraPg.atualizado': 'Atualizado em',
+
+    // página: contato
+    'contatoPg.titulo': 'Vamos conversar',
+    'contatoPg.subtitulo': 'Aberto a oportunidades remotas, parcerias e boas conversas sobre marketing, narrativa e IA.',
+    'contatoPg.metaDesc': 'Entre em contato com Bruno Massa.',
+    'contatoPg.emailNota': 'Respondo em até 24h em dias úteis.',
+    'contatoPg.linkedinNota': 'Conecte-se ou envie uma mensagem direta.',
+    'contatoPg.texto': 'Prefiro uma conversa direta sobre o que você tem em mente — seja uma oportunidade de trabalho, uma parceria em projeto ou uma troca de ideias. Sem formulários, sem burocracia.',
+
+    // página: projetos (lista)
+    'projetosPg.eyebrow': 'Portfolio',
+    'projetosPg.subtitulo': 'Produtos que construí, programas que desenhei e campanhas que liderei. Prova, não promessa.',
+    'projetosPg.metaDesc': 'Projetos e trabalhos de Bruno Massa — cases, campanhas e iniciativas.',
+    'projetosPg.destaque': 'Destaque',
+    'projetosPg.grupo.em-andamento': 'Em andamento',
+    'projetosPg.grupo.concluido': 'Concluídos',
+    'projetosPg.grupo.em-pausa': 'Em pausa',
+    'projetosPg.grupo.arquivado': 'Arquivados',
+
+    // página: projeto (detalhe)
+    'projetoDet.voltar': '← Projetos',
+    'projetoDet.periodo': 'Período',
+    'projetoDet.emAndamento': 'Em andamento',
+    'projetoDet.resumo': 'Resumo',
+    'projetoDet.acessar': 'Acessar projeto ↗',
+    'projetoDet.repo': 'Repositório ↗',
+    'projetoDet.tags': 'Tags',
   },
 
   en: {
@@ -303,6 +352,55 @@ export const ui = {
     'post.compartilhar': 'Share on LinkedIn',
     'post.badgeIngles': 'English',
     'post.semTraducao': 'This article has not been translated yet. You are reading the Portuguese original.',
+
+    // página: trajetória
+    'timelinePg.eyebrow': 'Career',
+    'timelinePg.titulo': 'Professional career',
+    'timelinePg.subtitulo': 'Twenty years translating marketing for the people who decide — from market research to running entire departments. In reverse chronological order.',
+    'timelinePg.metaDesc': 'The professional career of Bruno Massa — roles, companies and what he built along the way.',
+    'timelinePg.vazio': 'Under construction.',
+
+    // página: skills
+    'skillsPg.titulo': 'Skills & Education',
+    'skillsPg.subtitulo': 'Skills, certifications, academic background and languages.',
+    'skillsPg.metaDesc': 'Skills, certifications, education and languages of Bruno Massa.',
+    'skillsPg.credencial': 'Credential ↗',
+    'skillsPg.diploma': 'View diploma ↗',
+
+    // página: agora
+    'agoraPg.titulo': 'What I am working on',
+    'agoraPg.subtitulo': 'Current focus, publications and notes.',
+    'agoraPg.metaDesc': 'What Bruno Massa is focused on right now — and what he writes about marketing, product and business.',
+    'agoraPg.publicacoes': 'Publications',
+    'agoraPg.momento': 'Right now',
+    'agoraPg.atualizado': 'Updated on',
+
+    // página: contato
+    'contatoPg.titulo': "Let's talk",
+    'contatoPg.subtitulo': 'Open to remote opportunities, partnerships and good conversations about marketing, narrative and AI.',
+    'contatoPg.metaDesc': 'Get in touch with Bruno Massa.',
+    'contatoPg.emailNota': 'I reply within 24h on business days.',
+    'contatoPg.linkedinNota': 'Connect or send a direct message.',
+    'contatoPg.texto': 'I prefer a direct conversation about what you have in mind — a role, a partnership on a project, or just an exchange of ideas. No forms, no bureaucracy.',
+
+    // página: projetos (lista)
+    'projetosPg.eyebrow': 'Portfolio',
+    'projetosPg.subtitulo': 'Products I built, programmes I designed and campaigns I led. Proof, not promises.',
+    'projetosPg.metaDesc': 'Projects and work by Bruno Massa — cases, campaigns and initiatives.',
+    'projetosPg.destaque': 'Featured',
+    'projetosPg.grupo.em-andamento': 'In progress',
+    'projetosPg.grupo.concluido': 'Completed',
+    'projetosPg.grupo.em-pausa': 'On hold',
+    'projetosPg.grupo.arquivado': 'Archived',
+
+    // página: projeto (detalhe)
+    'projetoDet.voltar': '← Projects',
+    'projetoDet.periodo': 'Period',
+    'projetoDet.emAndamento': 'Ongoing',
+    'projetoDet.resumo': 'Summary',
+    'projetoDet.acessar': 'Visit project ↗',
+    'projetoDet.repo': 'Repository ↗',
+    'projetoDet.tags': 'Tags',
   },
 } as const;
 

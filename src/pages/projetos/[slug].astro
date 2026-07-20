@@ -4,19 +4,24 @@ import Header from '../../components/Header.astro';
 import Footer from '../../components/Footer.astro';
 import { getProjetoBySlug } from '../../lib/content/collections';
 import { renderBody } from '../../lib/content/render';
+import { usarT, localizar, formatarMesAno, type Lang } from '../../i18n';
 
 export const prerender = false;
 
+const lang: Lang = Astro.locals.lang ?? 'pt';
+const t = usarT(lang);
+const lz = (href: string) => localizar(href, lang);
+
 const { slug } = Astro.params;
-const projeto = slug ? await getProjetoBySlug(slug) : null;
-if (!projeto) return Astro.redirect('/projetos');
+const projeto = slug ? await getProjetoBySlug(slug, lang) : null;
+if (!projeto) return Astro.redirect(lz('/projetos'));
 const d = projeto.data;
 
 const statusLabel: Record<string, string> = {
-  'em-andamento': 'Em andamento',
-  'concluido': 'Concluído',
-  'em-pausa': 'Em pausa',
-  'arquivado': 'Arquivado',
+  'em-andamento': t('projetos.status.em-andamento'),
+  'concluido': t('projetos.status.concluido'),
+  'em-pausa': t('projetos.status.em-pausa'),
+  'arquivado': t('projetos.status.arquivado'),
 };
 
 const badgeClass: Record<string, string> = {
@@ -26,7 +31,7 @@ const badgeClass: Record<string, string> = {
   'arquivado': 'bg-gray-50 text-gray-500 border-gray-200',
 };
 
-const fmt = (date: Date) => date.toLocaleDateString('pt-BR', { month: 'short', year: 'numeric' });
+const fmt = (date: Date) => formatarMesAno(date, lang);
 ---
 <BaseLayout title={d.titulo} descricao={d.resumo}>
   <Header />
@@ -34,8 +39,8 @@ const fmt = (date: Date) => date.toLocaleDateString('pt-BR', { month: 'short', y
     <!-- Header -->
     <section class="bg-white py-16 md:py-20">
       <div class="max-w-3xl mx-auto px-6">
-        <a href="/projetos" class="inline-flex items-center gap-1.5 text-[13px] text-apple-secondary hover:text-apple-label transition-colors mb-8">
-          ← Projetos
+        <a href={lz('/projetos')} class="inline-flex items-center gap-1.5 text-[13px] text-apple-secondary hover:text-apple-label transition-colors mb-8">
+          {t('projetoDet.voltar')}
         </a>
 
         <div class="flex flex-wrap items-center gap-2 mb-4">
@@ -44,7 +49,7 @@ const fmt = (date: Date) => date.toLocaleDateString('pt-BR', { month: 'short', y
           </span>
           {d.destaque && (
             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-apple-accent/10 text-apple-accent border border-apple-accent/20">
-              Destaque
+              {t('projetosPg.destaque')}
             </span>
           )}
         </div>
@@ -60,22 +65,22 @@ const fmt = (date: Date) => date.toLocaleDateString('pt-BR', { month: 'short', y
         <div class="flex flex-wrap gap-x-6 gap-y-2 mt-6 pt-6 border-t border-apple-separator-light text-[14px] text-apple-secondary">
           {d.papel && (
             <div>
-              <span class="text-[11px] font-semibold uppercase tracking-wider text-apple-tertiary block mb-0.5">Papel</span>
+              <span class="text-[11px] font-semibold uppercase tracking-wider text-apple-tertiary block mb-0.5">{t('projetos.papel')}</span>
               <span>{d.papel}</span>
             </div>
           )}
           {d.cliente && (
             <div>
-              <span class="text-[11px] font-semibold uppercase tracking-wider text-apple-tertiary block mb-0.5">Cliente</span>
+              <span class="text-[11px] font-semibold uppercase tracking-wider text-apple-tertiary block mb-0.5">{t('projetos.cliente')}</span>
               <span>{d.cliente}</span>
             </div>
           )}
           <div>
-            <span class="text-[11px] font-semibold uppercase tracking-wider text-apple-tertiary block mb-0.5">Período</span>
+            <span class="text-[11px] font-semibold uppercase tracking-wider text-apple-tertiary block mb-0.5">{t('projetoDet.periodo')}</span>
             <span>
               <time>{fmt(d.inicio)}</time>
               {' – '}
-              <time>{d.fim ? fmt(d.fim) : 'Em andamento'}</time>
+              <time>{d.fim ? fmt(d.fim) : t('projetoDet.emAndamento')}</time>
             </span>
           </div>
         </div>
@@ -87,7 +92,7 @@ const fmt = (date: Date) => date.toLocaleDateString('pt-BR', { month: 'short', y
       <div class="max-w-3xl mx-auto px-6">
         <!-- Resumo -->
         <div class="bg-apple-surface rounded-2xl shadow-card p-6 mb-8">
-          <p class="text-[12px] font-semibold uppercase tracking-[0.08em] text-apple-accent mb-2">Resumo</p>
+          <p class="text-[12px] font-semibold uppercase tracking-[0.08em] text-apple-accent mb-2">{t('projetoDet.resumo')}</p>
           <p class="text-[17px] text-apple-label leading-relaxed">{d.resumo}</p>
         </div>
 
@@ -96,19 +101,19 @@ const fmt = (date: Date) => date.toLocaleDateString('pt-BR', { month: 'short', y
           <div class="grid grid-cols-1 gap-4 mb-8">
             {d.problema && (
               <div class="bg-apple-fill rounded-2xl p-6">
-                <p class="text-[12px] font-semibold uppercase tracking-[0.08em] text-apple-tertiary mb-2">Problema</p>
+                <p class="text-[12px] font-semibold uppercase tracking-[0.08em] text-apple-tertiary mb-2">{t('projetos.problema')}</p>
                 <p class="text-[15px] text-apple-secondary leading-relaxed">{d.problema}</p>
               </div>
             )}
             {d.abordagem && (
               <div class="bg-apple-fill rounded-2xl p-6">
-                <p class="text-[12px] font-semibold uppercase tracking-[0.08em] text-apple-tertiary mb-2">Abordagem</p>
+                <p class="text-[12px] font-semibold uppercase tracking-[0.08em] text-apple-tertiary mb-2">{t('projetos.abordagem')}</p>
                 <p class="text-[15px] text-apple-secondary leading-relaxed">{d.abordagem}</p>
               </div>
             )}
             {d.resultado && (
               <div class="bg-apple-surface rounded-2xl shadow-card p-6 border border-apple-accent/10">
-                <p class="text-[12px] font-semibold uppercase tracking-[0.08em] text-apple-accent mb-2">Resultado</p>
+                <p class="text-[12px] font-semibold uppercase tracking-[0.08em] text-apple-accent mb-2">{t('projetos.resultado')}</p>
                 <p class="text-[15px] text-apple-secondary leading-relaxed">{d.resultado}</p>
               </div>
             )}
@@ -130,7 +135,7 @@ const fmt = (date: Date) => date.toLocaleDateString('pt-BR', { month: 'short', y
                 rel="noopener"
                 class="inline-flex items-center gap-2 px-5 py-2.5 bg-apple-accent text-white rounded-full text-[14px] font-medium hover:bg-apple-accent-dark transition-colors"
               >
-                Acessar projeto ↗
+                {t('projetoDet.acessar')}
               </a>
             )}
             {d.repo && (
@@ -140,7 +145,7 @@ const fmt = (date: Date) => date.toLocaleDateString('pt-BR', { month: 'short', y
                 rel="noopener"
                 class="inline-flex items-center gap-2 px-5 py-2.5 bg-apple-fill text-apple-label rounded-full text-[14px] font-medium hover:bg-apple-separator-light transition-colors"
               >
-                Repositório ↗
+                {t('projetoDet.repo')}
               </a>
             )}
           </div>
@@ -149,7 +154,7 @@ const fmt = (date: Date) => date.toLocaleDateString('pt-BR', { month: 'short', y
         <!-- Tags -->
         {d.tags && d.tags.length > 0 && (
           <div class="pt-6 border-t border-apple-separator-light">
-            <p class="text-[12px] font-semibold uppercase tracking-[0.06em] text-apple-tertiary mb-3">Tags</p>
+            <p class="text-[12px] font-semibold uppercase tracking-[0.06em] text-apple-tertiary mb-3">{t('projetoDet.tags')}</p>
             <div class="flex flex-wrap gap-2">
               {d.tags.map((tag) => (
                 <span class="px-3 py-1 rounded-full text-[12px] font-medium bg-apple-fill text-apple-secondary border border-apple-separator-light">
