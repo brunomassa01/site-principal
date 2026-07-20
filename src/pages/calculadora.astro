@@ -3,14 +3,20 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import CalculadoraINK from '../components/CalculadoraINK.tsx';
+import { calc } from '../i18n/calculadora';
+import type { Lang } from '../i18n';
+
 export const prerender = false;
+
+const lang: Lang = Astro.locals.lang ?? 'pt';
+const tx = calc[lang];
+const descricao = lang === 'en'
+  ? 'An original instrument from the book Narrativa em KPI, by Bruno Massa. Measure your brand INK across three components: recognition, coherence and permanence.'
+  : 'Instrumento autoral do livro Narrativa em KPI, de Bruno Massa. Avalie o INK da sua marca em três componentes: reconhecimento, coerência e permanência.';
 ---
-<BaseLayout
-  title="Calculadora INK — Índice de Narrativa em KPI"
-  descricao="Instrumento autoral do livro Narrativa em KPI, de Bruno Massa. Avalie o INK da sua marca em três componentes: reconhecimento, coerência e permanência."
->
+<BaseLayout title={`${tx.titulo} — ${tx.subtitulo}`} descricao={descricao}>
   <Header />
-  <CalculadoraINK client:load />
+  <CalculadoraINK client:load lang={lang} />
   <Footer />
 </BaseLayout>
 
