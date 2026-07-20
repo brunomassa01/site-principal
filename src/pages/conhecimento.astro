@@ -3,10 +3,16 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import { getConhecimento } from '../lib/content/conhecimento';
+import { hub } from '../i18n/conhecimento';
+import { localizar, type Lang } from '../i18n';
 
 export const prerender = false;
 
-const { fases, videos, referencias, artigos } = await getConhecimento();
+const lang: Lang = Astro.locals.lang ?? 'pt';
+const kc = hub[lang];
+const lz = (href: string) => localizar(href, lang);
+
+const { fases, videos, referencias, artigos } = await getConhecimento(lang);
 
 const faseAtiva = fases.find((f) => f.status === 'em-curso') ?? fases[0] ?? null;
 const progresso = faseAtiva?.progresso ?? 0;
@@ -27,10 +33,10 @@ const hubEdges = nodes.map((n) => ({ x1: center.x, y1: center.y, x2: n.x, y2: n.
 const perimEdges = nodes.length > 1 ? nodes.map((n, i) => { const m = nodes[(i + 1) % nodes.length]; return { x1: n.x, y1: n.y, x2: m.x, y2: m.y }; }) : [];
 const ringOff = Math.round(289 - (289 * progresso) / 100);
 
-const tipoLabel: Record<string, string> = { livro: 'livro', artigo: 'artigo', filme: 'filme', doc: 'doc', ted: 'ted', video: 'vídeo' };
-const fonteLabel: Record<string, string> = { fiap: 'gravado na FIAP', curadoria: 'curadoria', podcast: 'podcast', youtube: 'youtube' };
+const tipoLabel = kc.tipo;
+const fonteLabel = kc.fonte;
 ---
-<BaseLayout title="Conhecimento Compartilhado" descricao="A jornada do MBA de Bruno Massa em IA para Negócios — aprender em voz alta: disciplinas, vídeos, referências e os artigos que escrevo a partir do que estudo.">
+<BaseLayout title={`${kc.h1Linha1} ${kc.h1Linha2}`} descricao={kc.metaDesc}>
   <Header />
   <main class="kc">
     <div class="kc-wrap">
@@ -38,18 +44,18 @@ const fonteLabel: Record<string, string> = { fiap: 'gravado na FIAP', curadoria:
       <!-- HERO -->
       <section class="hero">
         <div class="txt">
-          <div class="tag reveal">MBA 7IGETT · FIAP · IA para Negócios</div>
-          <h1 class="reveal">Conhecimento<br><span class="c">Compartilhado</span></h1>
-          <p class="reveal">Meu aprendizado tratado como um sistema: cada disciplina é um nó, cada conexão é um tema, cada conteúdo é uma saída. O que entendo de verdade, eu escrevo — e publico.</p>
+          <div class="tag reveal">{kc.heroTag}</div>
+          <h1 class="reveal">{kc.h1Linha1}<br><span class="c">{kc.h1Linha2}</span></h1>
+          <p class="reveal">{kc.intro}</p>
           <div class="stats reveal">
-            <span class="chip"><b>{discAtiva.length}</b> disciplinas</span>
-            <span class="chip"><b>{videos.length}</b> vídeos</span>
-            <span class="chip"><b>{referencias.length}</b> referências</span>
-            <span class="chip">embarque <b>jun/2026</b></span>
+            <span class="chip"><b>{discAtiva.length}</b> {kc.chipDisciplinas}</span>
+            <span class="chip"><b>{videos.length}</b> {kc.chipVideos}</span>
+            <span class="chip"><b>{referencias.length}</b> {kc.chipReferencias}</span>
+            <span class="chip">{kc.chipEmbarque} <b>{kc.embarqueData}</b></span>
           </div>
         </div>
         <div class="grafo-box reveal">
-          <svg viewBox="0 0 400 400" role="img" aria-label={`Constelação de disciplinas com progresso de ${progresso}%`}>
+          <svg viewBox="0 0 400 400" role="img" aria-label={kc.ariaGrafo(progresso)}>
             {hubEdges.map((e, i) => (<line class="edge hub" x1={e.x1} y1={e.y1} x2={e.x2} y2={e.y2} style={`animation-delay:${0.1 + i * 0.1}s`} />))}
             {perimEdges.map((e, i) => (<line class="edge" x1={e.x1} y1={e.y1} x2={e.x2} y2={e.y2} style={`animation-delay:${0.6 + i * 0.1}s`} />))}
             {nodes.map((n) => (
@@ -61,20 +67,20 @@ const fonteLabel: Record<string, string> = { fiap: 'gravado na FIAP', curadoria:
             <circle class="ring-bg" cx="200" cy="200" r="46" />
             <circle class="ring-fg" cx="200" cy="200" r="46" style={`--off:${ringOff}`} />
             <text class="hub-pct" x="200" y="202" text-anchor="middle">{progresso}%</text>
-            <text class="hub-lab" x="200" y="218" text-anchor="middle">{faseAtiva ? `FASE 0${faseAtiva.numero}` : 'MBA'}</text>
+            <text class="hub-lab" x="200" y="218" text-anchor="middle">{faseAtiva ? `${lang === 'en' ? 'PHASE' : 'FASE'} 0${faseAtiva.numero}` : 'MBA'}</text>
           </svg>
         </div>
       </section>
 
       <!-- TRAJETORIA -->
       <section class="sec" id="trajetoria">
-        <div class="sec-cab"><div class="tit"><span class="tag">Trajetória</span><h2>{fases.length} fases · 10 meses</h2></div><span class="nota">// {faseAtiva ? `fase 0${faseAtiva.numero} em curso` : ''}</span></div>
+        <div class="sec-cab"><div class="tit"><span class="tag">{kc.trajetoriaTag}</span><h2>{kc.trajetoriaTitulo(fases.length)}</h2></div><span class="nota">// {faseAtiva ? kc.trajetoriaNota(faseAtiva.numero) : ''}</span></div>
         <div class="tiles">
           {fases.map((f) => (
             <div class={`tile ${f.status === 'em-curso' ? 'ativa' : f.status === 'concluida' ? 'feita' : 'lock'}`}>
               <div class="fn">F0{f.numero}</div>
               <div class="fs">{f.titulo}</div>
-              <div class="est">{f.status === 'em-curso' ? 'em curso' : f.status === 'concluida' ? 'concluída' : 'bloqueada'}</div>
+              <div class="est">{kc.status[f.status] ?? f.status}</div>
             </div>
           ))}
         </div>
@@ -82,17 +88,17 @@ const fonteLabel: Record<string, string> = { fiap: 'gravado na FIAP', curadoria:
         {faseAtiva && (
           <div class="grid2" style="margin-top:18px">
             <div class="painel">
-              <h3>Fase 0{faseAtiva.numero} · Disciplinas (nós do sistema)</h3>
-              {discAtiva.length === 0 ? (<p class="vazio">Disciplinas em breve.</p>) : discAtiva.map((d, i) => (
+              <h3>{kc.painelDisciplinas(faseAtiva.numero)}</h3>
+              {discAtiva.length === 0 ? (<p class="vazio">{kc.disciplinasVazio}</p>) : discAtiva.map((d, i) => (
                 <div class="row"><span class="ix">0{i + 1}</span><span class="nm">{d.nome}{d.sub && <small>{d.sub}</small>}</span></div>
               ))}
             </div>
             <div class="painel">
-              <h3>Saídas · Conteúdos</h3>
+              <h3>{kc.painelSaidas}</h3>
               {artigosDaFase(faseAtiva.numero).length === 0
-                ? (<p class="vazio">Nenhum artigo publicado ainda — em produção.</p>)
+                ? (<p class="vazio">{kc.artigosVazio}</p>)
                 : artigosDaFase(faseAtiva.numero).map((a) => (
-                    <a href={`/posts/${a.slug}`} class="row"><span class="nm">{a.titulo}</span><span class="badge">ler ↗</span></a>
+                    <a href={lz(`/posts/${a.slug}`)} class="row"><span class="nm">{a.titulo}</span><span class="badge">{kc.ler}</span></a>
                   ))}
             </div>
           </div>
@@ -101,9 +107,9 @@ const fonteLabel: Record<string, string> = { fiap: 'gravado na FIAP', curadoria:
 
       <!-- VIDEOS -->
       <section class="sec" id="videos">
-        <div class="sec-cab"><div class="tit"><span class="tag">Vídeos</span><h2>Gravados na FIAP + curadoria</h2></div><span class="nota">// {videos.length} {videos.length === 1 ? 'item' : 'itens'}</span></div>
+        <div class="sec-cab"><div class="tit"><span class="tag">{kc.videosTag}</span><h2>{kc.videosTitulo}</h2></div><span class="nota">// {videos.length} {kc.itens(videos.length)}</span></div>
         {videos.length === 0 ? (
-          <div class="placeholder">Os primeiros vídeos chegam em breve — gravo na FIAP e curo por aqui.</div>
+          <div class="placeholder">{kc.videosVazio}</div>
         ) : (
           <div class="galeria">
             {videos.map((v) => (
@@ -122,25 +128,23 @@ const fonteLabel: Record<string, string> = { fiap: 'gravado na FIAP', curadoria:
 
       <!-- REFERENCIAS -->
       <section class="sec" id="referencias">
-        <div class="sec-cab"><div class="tit"><span class="tag">Referências</span><h2>O que me ajudou a entender</h2></div><span class="nota">// 🇬🇧 = leitura em inglês</span></div>
+        <div class="sec-cab"><div class="tit"><span class="tag">{kc.refTag}</span><h2>{kc.refTitulo}</h2></div><span class="nota">// {kc.refNota}</span></div>
         {referencias.length === 0 ? (
-          <div class="placeholder">As referências (livros, artigos, filmes, vídeos) aparecem aqui conforme eu avanço.</div>
+          <div class="placeholder">{kc.refVazio}</div>
         ) : (
           <>
             <div class="filtros" id="filtros">
-              <span class="fchip on" data-f="todos">todos</span>
-              <span class="fchip" data-f="livro">livros</span>
-              <span class="fchip" data-f="artigo">artigos</span>
-              <span class="fchip" data-f="filme">filmes</span>
-              <span class="fchip" data-f="video">vídeos / ted</span>
+              {kc.filtros.map((fl, i) => (
+                <span class={`fchip ${i === 0 ? 'on' : ''}`} data-f={fl.f}>{fl.label}</span>
+              ))}
             </div>
             <div class="refs" id="refs">
               {referencias.map((r) => (
                 <div class="ref" data-tipo={['filme', 'doc'].includes(r.tipo) ? 'filme' : ['ted', 'video'].includes(r.tipo) ? 'video' : r.tipo}>
-                  <div class="rt"><span class="rtipo">{tipoLabel[r.tipo] ?? r.tipo}</span>{r.idioma === 'en' && <span class="flag">🇬🇧</span>}</div>
+                  <div class="rt"><span class="rtipo">{tipoLabel[r.tipo] ?? r.tipo}</span>{r.idioma !== lang && <span class="flag">{r.idioma === 'en' ? '🇬🇧' : '🇧🇷'}</span>}</div>
                   <div class="rnome">{r.titulo}</div>
                   {r.fonte && <div class="rfonte">{r.fonte}</div>}
-                  {r.url && <a class="rlink" href={r.url} target="_blank" rel="noopener">abrir ↗</a>}
+                  {r.url && <a class="rlink" href={r.url} target="_blank" rel="noopener">{kc.abrir}</a>}
                 </div>
               ))}
             </div>
@@ -149,7 +153,7 @@ const fonteLabel: Record<string, string> = { fiap: 'gravado na FIAP', curadoria:
       </section>
 
       <footer class="kc-foot">
-        <div class="mono">CURRÍCULO_VIVO · <b>BRUNO MASSA</b> · o tradutor do marketing<br>material oficial FIAP = privado · este painel = o que tornei público</div>
+        <div class="mono"><span set:html={kc.rodape1} /><br>{kc.rodape2}</div>
       </footer>
     </div>
   </main>
