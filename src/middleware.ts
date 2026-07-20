@@ -8,11 +8,23 @@ export const onRequest = defineMiddleware(async (context, next) => {
   const { url, cookies, locals, redirect } = context;
   const path = url.pathname;
 
+  // ───── Idioma ─────
+  // O site é bilíngue sem duplicar páginas: '/en/algo' serve exatamente a mesma
+  // rota '/algo', só que com locals.lang = 'en'. As páginas leem esse idioma e
+  // escolhem o texto. Português continua na raiz (nenhuma URL antiga muda).
+  const isEn = path === '/en' || path.startsWith('/en/');
+  locals.lang = isEn ? 'en' : 'pt';
+
   const isPainel = path === '/painel' || path.startsWith('/painel/');
   const isPainelApi = path.startsWith('/api/painel/');
 
   if (!isPainel && !isPainelApi) {
     locals.user = null;
+    if (isEn) {
+      // next(caminho) reescreve SEM re-executar o middleware (não gera loop).
+      const destino = path.slice(3) || '/';
+      return next(destino + url.search);
+    }
     return next();
   }
 

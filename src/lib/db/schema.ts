@@ -18,6 +18,8 @@ import {
  * - `body_html`: conteúdo rico renderizado direto no site (set:html).
  * - `body_json`: documento do editor (Tiptap) para reedição fiel e leitura pela IA.
  * - arrays (tags, destaques) ficam em colunas jsonb.
+ * - sufixo `*_en`: tradução do campo para inglês (site bilíngue). Vazio = cai no
+ *   português automaticamente. Nome próprio, URL, data e slug NÃO têm versão _en.
  */
 
 // ───────────────────────── Auth / Usuários ─────────────────────────
@@ -60,6 +62,13 @@ export const timeline = pgTable('timeline', {
   destaque: boolean('destaque').notNull().default(false),
   bodyHtml: text('body_html'),
   bodyJson: jsonb('body_json'),
+  // tradução (empresa é nome próprio: não traduz)
+  cargoEn: text('cargo_en'),
+  localEn: text('local_en'),
+  resumoEn: text('resumo_en'),
+  destaquesEn: jsonb('destaques_en').$type<string[]>(),
+  bodyHtmlEn: text('body_html_en'),
+  bodyJsonEn: jsonb('body_json_en'),
   situacao: text('situacao').notNull().default('publicado'),
   ordem: integer('ordem'),
   createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).defaultNow().notNull(),
@@ -88,6 +97,16 @@ export const projetos = pgTable('projetos', {
   destaque: boolean('destaque').notNull().default(false),
   bodyHtml: text('body_html'),
   bodyJson: jsonb('body_json'),
+  // tradução (cliente é nome próprio: não traduz)
+  tituloEn: text('titulo_en'),
+  subtituloEn: text('subtitulo_en'),
+  papelEn: text('papel_en'),
+  resumoEn: text('resumo_en'),
+  problemaEn: text('problema_en'),
+  abordagemEn: text('abordagem_en'),
+  resultadoEn: text('resultado_en'),
+  bodyHtmlEn: text('body_html_en'),
+  bodyJsonEn: jsonb('body_json_en'),
   situacao: text('situacao').notNull().default('publicado'),
   ordem: integer('ordem'),
   createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).defaultNow().notNull(),
@@ -111,6 +130,12 @@ export const skills = pgTable('skills', {
   destaque: boolean('destaque').notNull().default(false),
   bodyHtml: text('body_html'),
   bodyJson: jsonb('body_json'),
+  // tradução (instituição é nome próprio; categoria/nível são rótulos do dicionário de UI)
+  nomeEn: text('nome_en'),
+  areaEn: text('area_en'),
+  descricaoEn: text('descricao_en'),
+  bodyHtmlEn: text('body_html_en'),
+  bodyJsonEn: jsonb('body_json_en'),
   situacao: text('situacao').notNull().default('publicado'),
   ordem: integer('ordem'),
   createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).defaultNow().notNull(),
@@ -130,13 +155,18 @@ export const posts = pgTable('posts', {
   tags: jsonb('tags').$type<string[]>().default([]),
   fonteExternaUrl: text('fonte_externa_url'),
   fonteExternaNome: text('fonte_externa_nome'),
-  idioma: text('idioma').notNull().default('pt'), // pt | en
+  idioma: text('idioma').notNull().default('pt'), // idioma ORIGINAL em que o post foi escrito
   mbaFase: integer('mba_fase'),          // Conhecimento Compartilhado: fase do MBA (1..5); null = post normal de blog
   mbaDisciplina: text('mba_disciplina'), // disciplina dentro da fase (rótulo); só usado quando mbaFase != null
   views: integer('views').notNull().default(0),
   reactions: jsonb('reactions').$type<Record<string, number>>().default({}),
   bodyHtml: text('body_html'),
   bodyJson: jsonb('body_json'),
+  // tradução: o mesmo post em inglês (mesmo slug, servido em /en/posts/<slug>)
+  tituloEn: text('titulo_en'),
+  resumoEn: text('resumo_en'),
+  bodyHtmlEn: text('body_html_en'),
+  bodyJsonEn: jsonb('body_json_en'),
   situacao: text('situacao').notNull().default('publicado'), // rascunho = não aparece no site
   ordem: integer('ordem'),
   createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).defaultNow().notNull(),
@@ -150,6 +180,7 @@ export const atualizacoes = pgTable('atualizacoes', {
   data: date('data', { mode: 'date' }).notNull(),
   tipo: text('tipo').notNull(), // projeto | certificacao | cargo | post | marco | outro
   titulo: text('titulo').notNull(),
+  tituloEn: text('titulo_en'),
   referenciaSlug: text('referencia_slug'),
   situacao: text('situacao').notNull().default('publicado'),
   createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).defaultNow().notNull(),
@@ -165,6 +196,11 @@ export const identidade = pgTable('identidade', {
   slogan: text('slogan'),
   bioCurta: text('bio_curta'),
   descricaoMeta: text('descricao_meta'),
+  // tradução (nome é nome próprio: não traduz)
+  taglineEn: text('tagline_en'),
+  sloganEn: text('slogan_en'),
+  bioCurtaEn: text('bio_curta_en'),
+  descricaoMetaEn: text('descricao_meta_en'),
   email: text('email'),
   linkedinUrl: text('linkedin_url'),
   ogImage: text('og_image'),
@@ -178,6 +214,22 @@ export const agora = pgTable('agora', {
   atualizadoEm: date('atualizado_em', { mode: 'date' }),
   bodyHtml: text('body_html'),
   bodyJson: jsonb('body_json'),
+  bodyHtmlEn: text('body_html_en'),
+  bodyJsonEn: jsonb('body_json_en'),
+  updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' }).defaultNow().notNull(),
+});
+
+// ───────────────────────── Menus ─────────────────────────
+
+export const menuItems = pgTable('menu_items', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  local: text('local').notNull(), // topo | rodape
+  label: text('label').notNull(),
+  labelEn: text('label_en'),
+  url: text('url').notNull(),
+  ordem: integer('ordem'),
+  situacao: text('situacao').notNull().default('publicado'),
+  createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).defaultNow().notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' }).defaultNow().notNull(),
 });
 
@@ -246,9 +298,12 @@ export const conhecimentoFases = pgTable('conhecimento_fases', {
   numero: integer('numero').notNull().unique(), // 1..5
   titulo: text('titulo').notNull(),
   subtitulo: text('subtitulo'),
+  tituloEn: text('titulo_en'),
+  subtituloEn: text('subtitulo_en'),
   status: text('status').notNull().default('bloqueada'), // em-curso | concluida | bloqueada | planejada
   progresso: integer('progresso').notNull().default(0),   // 0..100 (%)
   disciplinas: jsonb('disciplinas').$type<{ nome: string; sub?: string }[]>().default([]),
+  disciplinasEn: jsonb('disciplinas_en').$type<{ nome: string; sub?: string }[]>(),
   inicio: date('inicio', { mode: 'date' }),
   fim: date('fim', { mode: 'date' }),
   situacao: text('situacao').notNull().default('publicado'),
@@ -260,6 +315,7 @@ export const conhecimentoFases = pgTable('conhecimento_fases', {
 export const conhecimentoVideos = pgTable('conhecimento_videos', {
   id: uuid('id').defaultRandom().primaryKey(),
   titulo: text('titulo').notNull(),
+  tituloEn: text('titulo_en'),
   url: text('url').notNull(),
   fonte: text('fonte').notNull().default('curadoria'), // fiap | curadoria | podcast | youtube
   autor: text('autor'),
@@ -275,10 +331,11 @@ export const conhecimentoVideos = pgTable('conhecimento_videos', {
 export const conhecimentoReferencias = pgTable('conhecimento_referencias', {
   id: uuid('id').defaultRandom().primaryKey(),
   titulo: text('titulo').notNull(),
+  tituloEn: text('titulo_en'),
   fonte: text('fonte'),           // autor / veículo
   tipo: text('tipo').notNull().default('livro'), // livro | artigo | filme | doc | ted | video
   url: text('url'),
-  idioma: text('idioma').notNull().default('pt'), // pt | en
+  idioma: text('idioma').notNull().default('pt'), // idioma da OBRA referenciada
   fase: integer('fase'),
   situacao: text('situacao').notNull().default('publicado'),
   ordem: integer('ordem'),
@@ -308,6 +365,7 @@ export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
 export type Post = typeof posts.$inferSelect;
 export type NewPost = typeof posts.$inferInsert;
+export type MenuItem = typeof menuItems.$inferSelect;
 export type SocialCluster = typeof socialClusters.$inferSelect;
 export type SocialSemana = typeof socialSemanas.$inferSelect;
 export type SocialPeca = typeof socialPecas.$inferSelect;
