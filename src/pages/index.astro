@@ -4,36 +4,38 @@ import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import { getIdentidade, getTimeline, getProjetos } from '../lib/content/collections';
 import { getPostsPublicados } from '../lib/content/posts';
+import { usarT, localizar, formatarMesAno, LOCALE, type Lang } from '../i18n';
 
 export const prerender = false;
 
-const id = (await getIdentidade()).data;
+const lang: Lang = Astro.locals.lang ?? 'pt';
+const t = usarT(lang);
+const lz = (href: string) => localizar(href, lang);
 
-const timeline = (await getTimeline())
+const id = (await getIdentidade(lang)).data;
+
+const timeline = (await getTimeline(lang))
   .sort((a, b) => b.data.inicio.valueOf() - a.data.inicio.valueOf());
 
-const projetos = (await getProjetos())
+const projetos = (await getProjetos(lang))
   .sort((a, b) => b.data.inicio.valueOf() - a.data.inicio.valueOf());
 
-const cargoAtual = timeline.find((t) => !t.data.fim);
-const carreiraDestaque = timeline.filter((t) => t.data.destaque || !t.data.fim).slice(0, 3);
+const cargoAtual = timeline.find((exp) => !exp.data.fim);
+const carreiraDestaque = timeline.filter((exp) => exp.data.destaque || !exp.data.fim).slice(0, 3);
 const projetosDestaque = projetos.filter((p) => p.data.destaque).length > 0
   ? projetos.filter((p) => p.data.destaque).slice(0, 4)
   : projetos.slice(0, 4);
 
-const statusLabel: Record<string, string> = {
-  'em-andamento': 'Em andamento',
-  'concluido': 'Concluído',
-  'em-pausa': 'Em pausa',
-  'arquivado': 'Arquivado',
-};
+const rotuloStatus = (status: string) =>
+  t(`projetos.status.${status}` as any) ?? status;
 
-const fmtMesAno = (d: Date) => d.toLocaleDateString('pt-BR', { month: 'short', year: 'numeric' });
+const fmtMesAno = (d: Date) => formatarMesAno(d, lang);
 
-const postsPublicados = await getPostsPublicados();
+const postsPublicados = await getPostsPublicados(lang);
 const postDestaque = postsPublicados[0];
 const postsSecundarios = postsPublicados.slice(1, 4);
-const fmtPostData = (d: Date) => d.toLocaleDateString('pt-BR', { day: 'numeric', month: 'short', year: 'numeric' });
+const fmtPostData = (d: Date) =>
+  new Intl.DateTimeFormat(LOCALE[lang], { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' }).format(d);
 ---
 <BaseLayout title={id.nome} descricao={id.descricao_meta}>
   <Header />
@@ -95,16 +97,16 @@ const fmtPostData = (d: Date) => d.toLocaleDateString('pt-BR', { day: 'numeric',
               )}
               <div class="flex flex-wrap gap-3">
                 <a
-                  href="/timeline"
+                  href={lz('/timeline')}
                   class="inline-flex items-center gap-2 px-6 py-3 bg-white text-gray-900 rounded-full text-[15px] font-medium transition-colors duration-200 hover:bg-white/90"
                 >
-                  Ver trajetória
+                  {t('home.heroTrajetoria')}
                 </a>
                 <a
-                  href="/projetos"
+                  href={lz('/projetos')}
                   class="inline-flex items-center gap-2 px-6 py-3 bg-white/15 text-white rounded-full text-[15px] font-medium border border-white/30 transition-colors duration-200 hover:bg-white/25"
                 >
-                  Ver projetos
+                  {t('home.heroProjetos')}
                 </a>
               </div>
             </div>
@@ -167,7 +169,7 @@ const fmtPostData = (d: Date) => d.toLocaleDateString('pt-BR', { day: 'numeric',
 
     <!-- Carrossel de empresas -->
     <div class="bg-white border-y border-apple-separator/30 py-10 overflow-hidden select-none" aria-hidden="true">
-      <p class="text-center text-[11px] font-semibold uppercase tracking-[0.1em] text-apple-tertiary mb-7">Empresas onde trabalhei</p>
+      <p class="text-center text-[11px] font-semibold uppercase tracking-[0.1em] text-apple-tertiary mb-7">{t('home.empresas')}</p>
       <div class="relative">
         <!-- Fade esquerda -->
         <div class="absolute inset-y-0 left-0 w-24 z-10 pointer-events-none" style="background:linear-gradient(to right,#fff,transparent);"></div>
@@ -207,11 +209,11 @@ const fmtPostData = (d: Date) => d.toLocaleDateString('pt-BR', { day: 'numeric',
         <div class="max-w-5xl mx-auto px-6">
           <div class="flex items-end justify-between mb-10">
             <div>
-              <p class="text-[12px] font-semibold uppercase tracking-[0.08em] text-apple-accent mb-2">Trajetória</p>
-              <h2 class="text-3xl md:text-4xl font-bold text-apple-label tracking-tight">Passagens em destaque</h2>
+              <p class="text-[12px] font-semibold uppercase tracking-[0.08em] text-apple-accent mb-2">{t('timeline.titulo')}</p>
+              <h2 class="text-3xl md:text-4xl font-bold text-apple-label tracking-tight">{t('home.trajetoriaTitulo')}</h2>
             </div>
-            <a href="/timeline" class="text-[15px] text-apple-accent hover:underline hidden sm:block">
-              Ver completa →
+            <a href={lz('/timeline')} class="text-[15px] text-apple-accent hover:underline hidden sm:block">
+              {t('home.trajetoriaVer')}
             </a>
           </div>
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -220,14 +222,14 @@ const fmtPostData = (d: Date) => d.toLocaleDateString('pt-BR', { day: 'numeric',
                 <div class="mb-4">
                   {!item.data.fim && (
                     <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-green-50 text-green-700 border border-green-200 mb-3">
-                      Atual
+                      {t('comum.presente')}
                     </span>
                   )}
                   <h3 class="text-[17px] font-semibold text-apple-label tracking-tight leading-snug">{item.data.cargo}</h3>
                   <p class="text-[14px] text-apple-accent font-medium mt-1">{item.data.empresa}</p>
                 </div>
                 <p class="text-[13px] text-apple-tertiary mb-3">
-                  {fmtMesAno(item.data.inicio)} – {item.data.fim ? fmtMesAno(item.data.fim) : 'Atual'}
+                  {fmtMesAno(item.data.inicio)} – {item.data.fim ? fmtMesAno(item.data.fim) : t('comum.presente')}
                   {item.data.local && <span class="ml-2">· {item.data.local}</span>}
                 </p>
                 {item.data.resumo && (
@@ -237,7 +239,7 @@ const fmtPostData = (d: Date) => d.toLocaleDateString('pt-BR', { day: 'numeric',
             ))}
           </div>
           <div class="mt-6 sm:hidden">
-            <a href="/timeline" class="text-[15px] text-apple-accent hover:underline">Ver trajetória completa →</a>
+            <a href={lz('/timeline')} class="text-[15px] text-apple-accent hover:underline">{t('home.trajetoriaVerMobile')}</a>
           </div>
         </div>
       </section>
@@ -249,17 +251,17 @@ const fmtPostData = (d: Date) => d.toLocaleDateString('pt-BR', { day: 'numeric',
         <div class="max-w-5xl mx-auto px-6">
           <div class="flex items-end justify-between mb-10">
             <div>
-              <p class="text-[12px] font-semibold uppercase tracking-[0.08em] text-apple-accent mb-2">Projetos</p>
-              <h2 class="text-3xl md:text-4xl font-bold text-apple-label tracking-tight">Trabalhos selecionados</h2>
+              <p class="text-[12px] font-semibold uppercase tracking-[0.08em] text-apple-accent mb-2">{t('projetos.titulo')}</p>
+              <h2 class="text-3xl md:text-4xl font-bold text-apple-label tracking-tight">{t('home.projetosTitulo')}</h2>
             </div>
-            <a href="/projetos" class="text-[15px] text-apple-accent hover:underline hidden sm:block">
-              Ver todos →
+            <a href={lz('/projetos')} class="text-[15px] text-apple-accent hover:underline hidden sm:block">
+              {t('home.projetosVer')}
             </a>
           </div>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {projetosDestaque.map((p) => (
               <a
-                href={`/projetos/${p.slug}`}
+                href={lz(`/projetos/${p.slug}`)}
                 class="group bg-apple-fill rounded-2xl p-6 transition-all duration-300 hover:bg-apple-surface hover:shadow-card-hover hover:-translate-y-0.5"
               >
                 <div class="flex items-start justify-between gap-4 mb-3">
@@ -273,7 +275,7 @@ const fmtPostData = (d: Date) => d.toLocaleDateString('pt-BR', { day: 'numeric',
                       ? 'bg-blue-50 text-blue-600 border-blue-200'
                       : 'bg-gray-50 text-gray-500 border-gray-200'
                   }`}>
-                    {statusLabel[p.data.status]}
+                    {rotuloStatus(p.data.status)}
                   </span>
                 </div>
                 {p.data.subtitulo && (
@@ -293,7 +295,7 @@ const fmtPostData = (d: Date) => d.toLocaleDateString('pt-BR', { day: 'numeric',
             ))}
           </div>
           <div class="mt-6 sm:hidden">
-            <a href="/projetos" class="text-[15px] text-apple-accent hover:underline">Ver todos os projetos →</a>
+            <a href={lz('/projetos')} class="text-[15px] text-apple-accent hover:underline">{t('home.projetosVerMobile')}</a>
           </div>
         </div>
       </section>
@@ -305,17 +307,17 @@ const fmtPostData = (d: Date) => d.toLocaleDateString('pt-BR', { day: 'numeric',
         <div class="max-w-5xl mx-auto px-6">
           <div class="flex items-end justify-between mb-10">
             <div>
-              <p class="text-[12px] font-semibold uppercase tracking-[0.08em] text-apple-accent mb-2">Conteúdo</p>
-              <h2 class="text-3xl md:text-4xl font-bold text-apple-label tracking-tight">Escrevo por aqui</h2>
+              <p class="text-[12px] font-semibold uppercase tracking-[0.08em] text-apple-accent mb-2">{t('home.conteudo')}</p>
+              <h2 class="text-3xl md:text-4xl font-bold text-apple-label tracking-tight">{t('home.blogTitulo')}</h2>
             </div>
-            <a href="/posts" class="text-[15px] text-apple-accent hover:underline hidden sm:block">
-              Ver tudo →
+            <a href={lz('/posts')} class="text-[15px] text-apple-accent hover:underline hidden sm:block">
+              {t('home.blogVer')}
             </a>
           </div>
 
           <!-- Post em destaque -->
           <a
-            href={`/posts/${postDestaque.slug}`}
+            href={lz(`/posts/${postDestaque.slug}`)}
             class="group block rounded-2xl overflow-hidden bg-apple-surface shadow-card transition-all duration-300 hover:shadow-card-hover mb-4"
           >
             <div class="grid md:grid-cols-2">
@@ -332,7 +334,7 @@ const fmtPostData = (d: Date) => d.toLocaleDateString('pt-BR', { day: 'numeric',
               </div>
               <div class="p-8 md:p-10 flex flex-col justify-center">
                 <div class="flex items-center gap-2 mb-3">
-                  <span class="text-[11px] font-semibold uppercase tracking-[0.08em] text-apple-accent">Mais recente</span>
+                  <span class="text-[11px] font-semibold uppercase tracking-[0.08em] text-apple-accent">{t('home.blogRecente')}</span>
                   <span class="text-apple-separator">·</span>
                   <time class="text-[12px] text-apple-tertiary">{fmtPostData(postDestaque.data.data)}</time>
                 </div>
@@ -342,7 +344,7 @@ const fmtPostData = (d: Date) => d.toLocaleDateString('pt-BR', { day: 'numeric',
                 <p class="text-[15px] text-apple-secondary leading-relaxed line-clamp-3 mb-5">
                   {postDestaque.data.resumo}
                 </p>
-                <span class="text-[15px] font-medium text-apple-accent">Ler artigo →</span>
+                <span class="text-[15px] font-medium text-apple-accent">{t('home.blogLer')}</span>
               </div>
             </div>
           </a>
@@ -352,7 +354,7 @@ const fmtPostData = (d: Date) => d.toLocaleDateString('pt-BR', { day: 'numeric',
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
               {postsSecundarios.map((p) => (
                 <a
-                  href={`/posts/${p.slug}`}
+                  href={lz(`/posts/${p.slug}`)}
                   class="group block bg-apple-surface rounded-2xl overflow-hidden shadow-card transition-all duration-300 hover:shadow-card-hover hover:-translate-y-0.5"
                 >
                   <div class="relative aspect-[16/9] overflow-hidden bg-gradient-to-br from-apple-label to-[#2d2d2f]">
@@ -378,7 +380,7 @@ const fmtPostData = (d: Date) => d.toLocaleDateString('pt-BR', { day: 'numeric',
           )}
 
           <div class="mt-6 sm:hidden">
-            <a href="/posts" class="text-[15px] text-apple-accent hover:underline">Ver todo o conteúdo →</a>
+            <a href={lz('/posts')} class="text-[15px] text-apple-accent hover:underline">{t('home.blogVerMobile')}</a>
           </div>
         </div>
       </section>
@@ -390,36 +392,36 @@ const fmtPostData = (d: Date) => d.toLocaleDateString('pt-BR', { day: 'numeric',
         <div class="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
           <div>
             <p class="text-[12px] font-semibold uppercase tracking-[0.08em] text-apple-accent mb-2">Calculadora INK</p>
-            <h2 class="text-3xl md:text-4xl font-bold text-apple-label tracking-tight mb-4 text-balance">Quanto vale a narrativa da sua marca?</h2>
+            <h2 class="text-3xl md:text-4xl font-bold text-apple-label tracking-tight mb-4 text-balance">{t('home.inkTitulo')}</h2>
             <p class="text-[16px] text-apple-secondary leading-relaxed mb-6 max-w-lg">
-              No livro Narrativa em KPI eu criei um índice pra medir o que a marca constrói antes do clique. Três dimensões viram um número, e o número vira diagnóstico: do estágio da sua narrativa ao custo invisível da incoerência.
+              {t('home.inkTexto')}
             </p>
             <div class="flex flex-wrap gap-3">
-              <a href="/calculadora" class="inline-flex items-center gap-2 px-6 py-3 bg-apple-label text-white rounded-full text-[15px] font-medium transition-colors duration-200 hover:bg-black">
-                Calcular o INK →
+              <a href={lz('/calculadora')} class="inline-flex items-center gap-2 px-6 py-3 bg-apple-label text-white rounded-full text-[15px] font-medium transition-colors duration-200 hover:bg-black">
+                {t('home.inkCta')}
               </a>
-              <a href="/palestras" class="inline-flex items-center gap-2 px-6 py-3 bg-apple-fill text-apple-label rounded-full text-[15px] font-medium border border-apple-separator transition-colors duration-200 hover:bg-apple-separator-light">
-                Levar o método pro seu evento →
+              <a href={lz('/palestras')} class="inline-flex items-center gap-2 px-6 py-3 bg-apple-fill text-apple-label rounded-full text-[15px] font-medium border border-apple-separator transition-colors duration-200 hover:bg-apple-separator-light">
+                {t('home.inkPalestra')}
               </a>
             </div>
-            <p class="text-[12px] text-apple-tertiary mt-4">Instrumento autoral, aberto e gratuito. Desenvolvido na <a href="https://selo7.com.br" target="_blank" rel="noopener" class="underline hover:text-apple-accent">Selo7</a>, minha agência.</p>
+            <p class="text-[12px] text-apple-tertiary mt-4">{t('home.inkNota')} <a href="https://selo7.com.br" target="_blank" rel="noopener" class="underline hover:text-apple-accent">Selo7</a>{t('home.inkNotaFim')}</p>
           </div>
           <div class="bg-apple-fill rounded-2xl p-8">
-            <p class="text-center text-[26px] md:text-[32px] font-bold text-apple-label tracking-tight mb-6" aria-label="Fórmula do índice INK">
+            <p class="text-center text-[26px] md:text-[32px] font-bold text-apple-label tracking-tight mb-6" aria-label={t('home.inkFormulaAria')}>
               INK = ( R + C + P ) ÷ 3
             </p>
             <div class="space-y-3">
               <div class="bg-white rounded-xl p-4 shadow-card">
-                <p class="text-[14px] font-semibold text-apple-label"><span class="text-apple-accent font-bold mr-2">R</span>Reconhecimento prévio</p>
-                <p class="text-[13px] text-apple-secondary mt-0.5">quantos chegam já sabendo quem você é</p>
+                <p class="text-[14px] font-semibold text-apple-label"><span class="text-apple-accent font-bold mr-2">R</span>{t('home.inkR')}</p>
+                <p class="text-[13px] text-apple-secondary mt-0.5">{t('home.inkRDesc')}</p>
               </div>
               <div class="bg-white rounded-xl p-4 shadow-card">
-                <p class="text-[14px] font-semibold text-apple-label"><span class="text-apple-accent font-bold mr-2">C</span>Coerência percebida</p>
-                <p class="text-[13px] text-apple-secondary mt-0.5">se a promessa e a entrega contam a mesma história</p>
+                <p class="text-[14px] font-semibold text-apple-label"><span class="text-apple-accent font-bold mr-2">C</span>{t('home.inkC')}</p>
+                <p class="text-[13px] text-apple-secondary mt-0.5">{t('home.inkCDesc')}</p>
               </div>
               <div class="bg-white rounded-xl p-4 shadow-card">
-                <p class="text-[14px] font-semibold text-apple-label"><span class="text-apple-accent font-bold mr-2">P</span>Permanência espontânea</p>
-                <p class="text-[13px] text-apple-secondary mt-0.5">o que fica na memória sem mídia empurrando</p>
+                <p class="text-[14px] font-semibold text-apple-label"><span class="text-apple-accent font-bold mr-2">P</span>{t('home.inkP')}</p>
+                <p class="text-[13px] text-apple-secondary mt-0.5">{t('home.inkPDesc')}</p>
               </div>
             </div>
           </div>
@@ -432,12 +434,12 @@ const fmtPostData = (d: Date) => d.toLocaleDateString('pt-BR', { day: 'numeric',
       <div class="max-w-5xl mx-auto px-6">
         <div class="bg-gradient-to-r from-apple-label to-[#2d2d2f] rounded-2xl p-8 md:p-10 flex flex-col sm:flex-row sm:items-center gap-6">
           <div class="flex-1">
-            <p class="text-[11px] font-semibold uppercase tracking-[0.1em] text-white/50 mb-3">Livro</p>
-            <h2 class="text-[22px] md:text-[26px] font-bold text-white tracking-tight leading-snug mb-3">
+            <p class="text-[11px] font-semibold uppercase tracking-[0.1em] text-white/50 mb-3">{t('nav.livro')}</p>
+            <h2 class="text-[22px] md:text-[26px] font-bold text-white tracking-tight leading-snug mb-3" lang="pt-BR">
               Marketing na Era da Inteligência Artificial
             </h2>
             <p class="text-[15px] text-white/70 leading-relaxed max-w-lg">
-              Os movimentos práticos que estão redesenhando o marketing corporativo. Disponível na Amazon.
+              {t('home.livroTexto')}
             </p>
           </div>
           <div class="flex-none">
@@ -447,7 +449,7 @@ const fmtPostData = (d: Date) => d.toLocaleDateString('pt-BR', { day: 'numeric',
               rel="noopener"
               class="inline-flex items-center gap-2 px-6 py-3.5 bg-[#FF9900] text-white rounded-full text-[15px] font-semibold transition-all duration-200 hover:bg-[#e68a00] hover:shadow-lg whitespace-nowrap"
             >
-              Comprar na Amazon ↗
+              {t('home.livroCta')}
             </a>
           </div>
         </div>
@@ -459,31 +461,31 @@ const fmtPostData = (d: Date) => d.toLocaleDateString('pt-BR', { day: 'numeric',
       <div class="max-w-5xl mx-auto px-6">
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <a
-            href="/skills"
+            href={lz('/skills')}
             class="group bg-apple-surface rounded-2xl shadow-card p-6 transition-all duration-300 hover:shadow-card-hover hover:-translate-y-0.5"
           >
-            <p class="text-[12px] font-semibold uppercase tracking-[0.08em] text-apple-accent mb-2">Competências</p>
-            <h3 class="text-[20px] font-bold text-apple-label tracking-tight mb-2">Skills &amp; Formação</h3>
-            <p class="text-[14px] text-apple-secondary leading-relaxed">Habilidades, certificações, idiomas e formação acadêmica.</p>
-            <p class="mt-4 text-[13px] text-apple-accent group-hover:underline">Ver skills →</p>
+            <p class="text-[12px] font-semibold uppercase tracking-[0.08em] text-apple-accent mb-2">{t('home.competencias')}</p>
+            <h3 class="text-[20px] font-bold text-apple-label tracking-tight mb-2">{t('home.skillsTitulo')}</h3>
+            <p class="text-[14px] text-apple-secondary leading-relaxed">{t('home.skillsDesc')}</p>
+            <p class="mt-4 text-[13px] text-apple-accent group-hover:underline">{t('home.skillsCta')}</p>
           </a>
           <a
-            href="/agora"
+            href={lz('/agora')}
             class="group bg-apple-surface rounded-2xl shadow-card p-6 transition-all duration-300 hover:shadow-card-hover hover:-translate-y-0.5"
           >
-            <p class="text-[12px] font-semibold uppercase tracking-[0.08em] text-apple-accent mb-2">Agora</p>
-            <h3 class="text-[20px] font-bold text-apple-label tracking-tight mb-2">Agora &amp; Publicações</h3>
-            <p class="text-[14px] text-apple-secondary leading-relaxed">Foco atual, publicações e anotações sobre marketing, narrativa e IA.</p>
-            <p class="mt-4 text-[13px] text-apple-accent group-hover:underline">Ver agora →</p>
+            <p class="text-[12px] font-semibold uppercase tracking-[0.08em] text-apple-accent mb-2">{t('agora.titulo')}</p>
+            <h3 class="text-[20px] font-bold text-apple-label tracking-tight mb-2">{t('home.agoraTitulo')}</h3>
+            <p class="text-[14px] text-apple-secondary leading-relaxed">{t('home.agoraDesc')}</p>
+            <p class="mt-4 text-[13px] text-apple-accent group-hover:underline">{t('home.agoraCta')}</p>
           </a>
           <a
-            href="/contato"
+            href={lz('/contato')}
             class="group bg-apple-surface rounded-2xl shadow-card p-6 transition-all duration-300 hover:shadow-card-hover hover:-translate-y-0.5"
           >
-            <p class="text-[12px] font-semibold uppercase tracking-[0.08em] text-apple-accent mb-2">Contato</p>
-            <h3 class="text-[20px] font-bold text-apple-label tracking-tight mb-2">Vamos conversar</h3>
-            <p class="text-[14px] text-apple-secondary leading-relaxed">E-mail, LinkedIn ou uma conversa sobre projetos e oportunidades.</p>
-            <p class="mt-4 text-[13px] text-apple-accent group-hover:underline">Entrar em contato →</p>
+            <p class="text-[12px] font-semibold uppercase tracking-[0.08em] text-apple-accent mb-2">{t('contato.titulo')}</p>
+            <h3 class="text-[20px] font-bold text-apple-label tracking-tight mb-2">{t('home.contatoTitulo')}</h3>
+            <p class="text-[14px] text-apple-secondary leading-relaxed">{t('home.contatoDesc')}</p>
+            <p class="mt-4 text-[13px] text-apple-accent group-hover:underline">{t('home.contatoCta')}</p>
           </a>
         </div>
       </div>
