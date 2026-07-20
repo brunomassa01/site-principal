@@ -3,42 +3,19 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import { getIdentidade } from '../lib/content/collections';
+import { palestras } from '../i18n/palestras';
+import { localizar, type Lang } from '../i18n';
+
 export const prerender = false;
 
-const id = (await getIdentidade()).data;
-const mailto = `mailto:${id.email}?subject=${encodeURIComponent('Convite para palestra')}`;
+const lang: Lang = Astro.locals.lang ?? 'pt';
+const pg = palestras[lang];
+const lz = (href: string) => localizar(href, lang);
 
-const temas = [
-  {
-    tag: 'IA e gestão',
-    titulo: 'Marketing na Era da IA',
-    tese: 'IA não vai substituir o gestor de marketing. Vai expor quem nunca teve método.',
-    leva: 'Como times reais estão usando IA no dia a dia, o que muda na operação e no orçamento, e por onde começar sem cair no teatro de inovação.',
-    quem: 'Lideranças, times de marketing e eventos corporativos.',
-  },
-  {
-    tag: 'Narrativa e medição',
-    titulo: 'Narrativa em KPI',
-    tese: 'Narrativa de marca é ativo de negócio. E ativo se mede.',
-    leva: 'O método INK: Reconhecimento, Coerência e Permanência num índice único, o que a marca constrói antes do clique, e quanto custa a incoerência.',
-    quem: 'Branding, comunicação, conselhos e diretoria.',
-  },
-  {
-    tag: 'Estrutura e receita',
-    titulo: 'Marketing que vira receita',
-    tese: 'Se não vira receita, não é marketing, é decoração.',
-    leva: 'Como estruturar a área pra responder por resultado: papel do marketing no organograma, indicadores que a diretoria respeita e a conversa certa com o financeiro.',
-    quem: 'CEOs, CFOs e gestores de marketing.',
-  },
-];
-
-const formatos = [
-  { nome: 'Palestra', desc: '45 a 60 minutos, presencial ou online. Abertura de evento, convenção ou encontro de lideranças.' },
-  { nome: 'Workshop', desc: 'Meio período, mão na massa. O time sai com o método aplicado ao próprio contexto.' },
-  { nome: 'Treinamento in-company', desc: 'Programa sob medida pra dentro da empresa, no ritmo e na realidade do time.' },
-];
+const id = (await getIdentidade(lang)).data;
+const mailto = `mailto:${id.email}?subject=${encodeURIComponent(pg.assuntoEmail)}`;
 ---
-<BaseLayout title="Palestras" descricao="Palestras e treinamentos de Bruno Massa sobre marketing, narrativa e IA. Método pra quem lidera, sem hype.">
+<BaseLayout title={pg.eyebrow} descricao={pg.metaDesc}>
   <Header />
   <main>
 
@@ -47,27 +24,27 @@ const formatos = [
       <div class="max-w-5xl mx-auto px-6">
         <div class="flex flex-col md:flex-row md:items-center gap-10">
           <div class="flex-1">
-            <p class="text-[12px] font-semibold uppercase tracking-[0.1em] text-apple-accent mb-4">Palestras e treinamentos</p>
+            <p class="text-[12px] font-semibold uppercase tracking-[0.1em] text-apple-accent mb-4">{pg.eyebrow}</p>
             <h1 class="text-4xl md:text-6xl font-bold text-apple-label tracking-tight leading-[1.05] mb-5 text-balance">
-              O marketing explicado por dentro
+              {pg.h1}
             </h1>
             <p class="text-[18px] md:text-[20px] text-apple-secondary leading-relaxed max-w-xl mb-8">
-              Vinte anos operando marketing, dois livros publicados e uma obsessão: traduzir a área pra quem decide. Método no palco, sem hype.
+              {pg.subtitulo}
             </p>
             <div class="flex flex-wrap gap-3">
               <a href={mailto} class="inline-flex items-center gap-2 px-7 py-3.5 bg-apple-label text-white rounded-full text-[15px] font-medium transition-colors duration-200 hover:bg-black">
-                Convidar para um evento
+                {pg.ctaConvite}
               </a>
               {id.linkedin_url && (
                 <a href={id.linkedin_url} target="_blank" rel="noopener" class="inline-flex items-center gap-2 px-7 py-3.5 bg-apple-fill text-apple-label rounded-full text-[15px] font-medium border border-apple-separator transition-colors duration-200 hover:bg-apple-separator-light">
-                  Chamar no LinkedIn ↗
+                  {pg.ctaLinkedin}
                 </a>
               )}
             </div>
           </div>
           <div class="flex-none mx-auto md:mx-0">
             <div class="w-56 md:w-64 rounded-3xl overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.18)]">
-              <img src="/images/bruno.jpg" alt="Bruno Massa" class="w-full h-full object-cover object-top" />
+              <img src="/images/bruno.jpg" alt={id.nome} class="w-full h-full object-cover object-top" />
             </div>
           </div>
         </div>
@@ -78,22 +55,12 @@ const formatos = [
     <section class="border-y border-apple-separator/30 bg-apple-fill">
       <div class="max-w-5xl mx-auto px-6 py-8">
         <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
-          <div>
-            <p class="text-[26px] font-bold text-apple-label tracking-tight">20 anos</p>
-            <p class="text-[13px] text-apple-secondary mt-0.5">liderando marketing em saúde, construção, serviços e tecnologia</p>
-          </div>
-          <div>
-            <p class="text-[26px] font-bold text-apple-label tracking-tight">2 livros</p>
-            <p class="text-[13px] text-apple-secondary mt-0.5">Narrativa em KPI e Marketing na Era da IA</p>
-          </div>
-          <div>
-            <p class="text-[26px] font-bold text-apple-label tracking-tight">1 método</p>
-            <p class="text-[13px] text-apple-secondary mt-0.5">o INK, índice autoral pra medir narrativa de marca</p>
-          </div>
-          <div>
-            <p class="text-[26px] font-bold text-apple-label tracking-tight">Selo7</p>
-            <p class="text-[13px] text-apple-secondary mt-0.5">minha agência de marketing, onde o método roda na prática</p>
-          </div>
+          {pg.cred.map((c) => (
+            <div>
+              <p class="text-[26px] font-bold text-apple-label tracking-tight">{c.valor}</p>
+              <p class="text-[13px] text-apple-secondary mt-0.5">{c.desc}</p>
+            </div>
+          ))}
         </div>
       </div>
     </section>
@@ -101,16 +68,16 @@ const formatos = [
     <!-- Temas -->
     <section class="py-20">
       <div class="max-w-5xl mx-auto px-6">
-        <p class="text-[12px] font-semibold uppercase tracking-[0.08em] text-apple-accent mb-2">Temas</p>
-        <h2 class="text-3xl md:text-4xl font-bold text-apple-label tracking-tight mb-10">Três conversas que eu levo pro palco</h2>
+        <p class="text-[12px] font-semibold uppercase tracking-[0.08em] text-apple-accent mb-2">{pg.temasEyebrow}</p>
+        <h2 class="text-3xl md:text-4xl font-bold text-apple-label tracking-tight mb-10">{pg.temasTitulo}</h2>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {temas.map((t) => (
+          {pg.temas.map((tema) => (
             <div class="bg-apple-surface rounded-2xl shadow-card p-6 flex flex-col transition-all duration-300 hover:shadow-card-hover hover:-translate-y-0.5">
-              <p class="text-[11px] font-semibold uppercase tracking-[0.08em] text-apple-tertiary mb-3">{t.tag}</p>
-              <h3 class="text-[20px] font-bold text-apple-label tracking-tight leading-snug mb-3">{t.titulo}</h3>
-              <p class="text-[15px] font-medium text-apple-label leading-snug mb-4">"{t.tese}"</p>
-              <p class="text-[14px] text-apple-secondary leading-relaxed mb-4 flex-1">{t.leva}</p>
-              <p class="text-[12px] text-apple-tertiary"><span class="font-semibold">Pra quem:</span> {t.quem}</p>
+              <p class="text-[11px] font-semibold uppercase tracking-[0.08em] text-apple-tertiary mb-3">{tema.tag}</p>
+              <h3 class="text-[20px] font-bold text-apple-label tracking-tight leading-snug mb-3">{tema.titulo}</h3>
+              <p class="text-[15px] font-medium text-apple-label leading-snug mb-4">"{tema.tese}"</p>
+              <p class="text-[14px] text-apple-secondary leading-relaxed mb-4 flex-1">{tema.leva}</p>
+              <p class="text-[12px] text-apple-tertiary"><span class="font-semibold">{pg.praQuem}</span> {tema.quem}</p>
             </div>
           ))}
         </div>
@@ -120,17 +87,17 @@ const formatos = [
     <!-- Formatos -->
     <section class="bg-white py-20">
       <div class="max-w-5xl mx-auto px-6">
-        <p class="text-[12px] font-semibold uppercase tracking-[0.08em] text-apple-accent mb-2">Formatos</p>
-        <h2 class="text-3xl md:text-4xl font-bold text-apple-label tracking-tight mb-10">Do palco à sala do time</h2>
+        <p class="text-[12px] font-semibold uppercase tracking-[0.08em] text-apple-accent mb-2">{pg.formatosEyebrow}</p>
+        <h2 class="text-3xl md:text-4xl font-bold text-apple-label tracking-tight mb-10">{pg.formatosTitulo}</h2>
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          {formatos.map((f) => (
+          {pg.formatos.map((f) => (
             <div class="bg-apple-fill rounded-2xl p-6">
               <h3 class="text-[17px] font-semibold text-apple-label tracking-tight mb-2">{f.nome}</h3>
               <p class="text-[14px] text-apple-secondary leading-relaxed">{f.desc}</p>
             </div>
           ))}
         </div>
-        <p class="text-[14px] text-apple-tertiary mt-6">Conteúdo sempre adaptado ao contexto: setor, momento do time e o que o evento precisa provocar.</p>
+        <p class="text-[14px] text-apple-tertiary mt-6">{pg.formatosNota}</p>
       </div>
     </section>
 
@@ -140,17 +107,17 @@ const formatos = [
         <div class="bg-gradient-to-r from-apple-label to-[#2d2d2f] rounded-2xl p-8 md:p-12">
           <div class="flex flex-col md:flex-row md:items-center gap-8">
             <div class="flex-1">
-              <p class="text-[11px] font-semibold uppercase tracking-[0.1em] text-white/50 mb-3">Instrumento do método</p>
+              <p class="text-[11px] font-semibold uppercase tracking-[0.1em] text-white/50 mb-3">{pg.inkEyebrow}</p>
               <h2 class="text-[24px] md:text-[28px] font-bold text-white tracking-tight leading-snug mb-3">
                 Calculadora INK
               </h2>
               <p class="text-[15px] text-white/70 leading-relaxed max-w-lg">
-                O índice do livro Narrativa em KPI, aberto pra qualquer marca usar. Três dimensões, um número, um diagnóstico. O público costuma sair da palestra direto pra ela.
+                {pg.inkTexto}
               </p>
             </div>
             <div class="flex-none">
-              <a href="/calculadora" class="inline-flex items-center gap-2 px-7 py-3.5 bg-white text-gray-900 rounded-full text-[15px] font-semibold transition-all duration-200 hover:bg-white/90 hover:shadow-lg whitespace-nowrap">
-                Calcular o INK →
+              <a href={lz('/calculadora')} class="inline-flex items-center gap-2 px-7 py-3.5 bg-white text-gray-900 rounded-full text-[15px] font-semibold transition-all duration-200 hover:bg-white/90 hover:shadow-lg whitespace-nowrap">
+                {pg.inkCta}
               </a>
             </div>
           </div>
@@ -161,9 +128,9 @@ const formatos = [
     <!-- CTA final -->
     <section class="bg-white py-20">
       <div class="max-w-3xl mx-auto px-6 text-center">
-        <h2 class="text-3xl md:text-4xl font-bold text-apple-label tracking-tight mb-4">Quer levar um desses temas pro seu evento?</h2>
+        <h2 class="text-3xl md:text-4xl font-bold text-apple-label tracking-tight mb-4">{pg.ctaFinalTitulo}</h2>
         <p class="text-[16px] text-apple-secondary leading-relaxed mb-8">
-          Me conta o formato, a data e quem estará na plateia. Eu respondo com a proposta.
+          {pg.ctaFinalTexto}
         </p>
         <div class="flex flex-wrap justify-center gap-3">
           <a href={mailto} class="inline-flex items-center gap-2 px-8 py-4 bg-apple-label text-white rounded-full text-[16px] font-semibold transition-colors duration-200 hover:bg-black">
