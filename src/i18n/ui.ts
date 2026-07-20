@@ -12,6 +12,11 @@ export const ui = {
     'nav.pular': 'Pular para o conteúdo',
     'nav.menu': 'Menu',
     'nav.fechar': 'Fechar',
+    'nav.inicio': 'Início',
+    'nav.livro': 'Livro',
+    'nav.palestras': 'Palestras',
+    'nav.blog': 'Blog',
+    'nav.conhecimento': 'Conhecimento',
     'idioma.trocar': 'Ver em inglês',
     'idioma.atual': 'Português',
     'idioma.outro': 'English',
@@ -19,6 +24,8 @@ export const ui = {
     // rodapé
     'rodape.direitos': 'Todos os direitos reservados.',
     'rodape.feito': 'Feito por mim, do zero.',
+    'rodape.assinatura': 'Currículo vivo, sempre em construção.',
+    'rodape.agencia': 'Selo7 · minha agência',
     'rodape.privacidade': 'Privacidade',
     'rodape.termos': 'Termos',
 
@@ -94,6 +101,11 @@ export const ui = {
     'nav.pular': 'Skip to content',
     'nav.menu': 'Menu',
     'nav.fechar': 'Close',
+    'nav.inicio': 'Home',
+    'nav.livro': 'Book',
+    'nav.palestras': 'Talks',
+    'nav.blog': 'Blog',
+    'nav.conhecimento': 'Learning',
     'idioma.trocar': 'View in Portuguese',
     'idioma.atual': 'English',
     'idioma.outro': 'Português',
@@ -101,6 +113,8 @@ export const ui = {
     // rodapé
     'rodape.direitos': 'All rights reserved.',
     'rodape.feito': 'Built by me, from scratch.',
+    'rodape.assinatura': 'A living résumé, always under construction.',
+    'rodape.agencia': 'Selo7 · my agency',
     'rodape.privacidade': 'Privacy',
     'rodape.termos': 'Terms',
 

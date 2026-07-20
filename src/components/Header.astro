@@ -1,66 +1,91 @@
 ---
 import { getIdentidade } from '../lib/content/collections';
 import { getMenu } from '../lib/content/menus';
-const id = (await getIdentidade()).data;
+import { usarT, localizar, semPrefixo, caminhoNoIdioma, type Lang } from '../i18n';
+
+const lang: Lang = Astro.locals.lang ?? 'pt';
+const t = usarT(lang);
+
+const id = (await getIdentidade(lang)).data;
 const nome = id.nome;
 
 const fallback = [
-  { href: '/', label: 'Início' },
-  { href: '/timeline', label: 'Trajetória' },
-  { href: '/projetos', label: 'Projetos' },
-  { href: '/skills', label: 'Skills' },
-  { href: '/livro', label: 'Livro' },
-  { href: '/agora', label: 'Agora' },
-  { href: '/contato', label: 'Contato' },
+  { href: '/', label: t('nav.inicio') },
+  { href: '/timeline', label: t('timeline.titulo') },
+  { href: '/projetos', label: t('projetos.titulo') },
+  { href: '/skills', label: t('skills.titulo') },
+  { href: '/livro', label: t('nav.livro') },
+  { href: '/agora', label: t('agora.titulo') },
+  { href: '/contato', label: t('contato.titulo') },
 ];
-const dbMenu = await getMenu('topo');
+const dbMenu = await getMenu('topo', lang);
 const links = dbMenu.length ? dbMenu.map((i) => ({ href: i.url, label: i.label })) : fallback;
 
-const pathname = Astro.url.pathname;
-const ehAtual = (href: string) => href === '/' ? pathname === '/' : pathname.startsWith(href);
+// A rota atual sem o /en, para o "página atual" funcionar nos dois idiomas.
+const atual = semPrefixo(Astro.url.pathname);
+const ehAtual = (href: string) => (href === '/' ? atual === '/' : atual.startsWith(href));
+
+// Seletor de idioma: mesma página, no outro idioma.
+const outro: Lang = lang === 'en' ? 'pt' : 'en';
+const hrefOutro = caminhoNoIdioma(Astro.url.pathname, outro);
+const rotuloOutro = outro === 'en' ? 'EN' : 'PT';
+const tituloOutro = lang === 'en' ? 'Ver em português' : 'View in English';
 ---
 <header class="sticky top-0 z-50 nav-blur bg-white/80 border-b border-apple-separator/40 shadow-nav">
   <div class="max-w-5xl mx-auto px-5 sm:px-6 h-11 flex items-center justify-between gap-3">
-    <a href="/" class="flex items-center gap-2 min-w-0 hover:opacity-80 transition-opacity duration-200">
+    <a href={localizar('/', lang)} class="flex items-center gap-2 min-w-0 hover:opacity-80 transition-opacity duration-200">
       {id.logo_url && <img src={id.logo_url} alt={nome} style={`height:${id.logo_altura ?? 28}px`} class="w-auto flex-none" />}
       {!id.logo_url && <img src="/favicon.png" alt="" class="w-7 h-7 rounded-md flex-none" aria-hidden="true" />}
       {!id.logo_url && <span class="text-[15px] font-semibold text-apple-label truncate">{nome}</span>}
     </a>
 
-    <!-- nav desktop -->
-    <nav aria-label="Menu principal" class="hidden md:block">
-      <ul class="flex items-center">
-        {links.map((l) => (
-          <li class="flex-none">
-            <a
-              href={l.href}
-              aria-current={ehAtual(l.href) ? 'page' : undefined}
-              class={`px-3 py-1.5 rounded-md text-[13px] transition-colors duration-200 whitespace-nowrap ${
-                ehAtual(l.href)
-                  ? 'text-apple-accent font-medium'
-                  : 'text-apple-secondary hover:text-apple-label'
-              }`}
-            >
-              {l.label}
-            </a>
-          </li>
-        ))}
-      </ul>
-    </nav>
+    <div class="hidden md:flex items-center gap-2">
+      <!-- nav desktop -->
+      <nav aria-label="Menu principal">
+        <ul class="flex items-center">
+          {links.map((l) => (
+            <li class="flex-none">
+              <a
+                href={localizar(l.href, lang)}
+                aria-current={ehAtual(l.href) ? 'page' : undefined}
+                class={`px-3 py-1.5 rounded-md text-[13px] transition-colors duration-200 whitespace-nowrap ${
+                  ehAtual(l.href)
+                    ? 'text-apple-accent font-medium'
+                    : 'text-apple-secondary hover:text-apple-label'
+                }`}
+              >
+                {l.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+
+      <!-- seletor de idioma -->
+      <a
+        href={hrefOutro}
+        hreflang={outro === 'en' ? 'en' : 'pt-BR'}
+        title={tituloOutro}
+        aria-label={tituloOutro}
+        class="flex-none ml-1 px-2.5 py-1 rounded-full border border-apple-separator text-[12px] font-medium text-apple-secondary hover:text-apple-label hover:border-apple-secondary transition-colors duration-200"
+      >
+        {rotuloOutro}
+      </a>
+    </div>
 
     <!-- botao hamburguer (mobile) -->
-    <button id="site-menu-btn" class="md:hidden flex-none inline-flex items-center justify-center w-9 h-9 -mr-1 rounded-md text-apple-label hover:bg-apple-fill transition-colors" aria-label="Abrir menu" aria-expanded="false">
+    <button id="site-menu-btn" class="md:hidden flex-none inline-flex items-center justify-center w-9 h-9 -mr-1 rounded-md text-apple-label hover:bg-apple-fill transition-colors" aria-label={t('nav.menu')} aria-expanded="false">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>
     </button>
   </div>
 
   <!-- menu mobile (dropdown) -->
-  <nav id="site-mobile-menu" aria-label="Menu" class="md:hidden hidden border-t border-apple-separator/40 bg-white/95 px-3 py-2">
+  <nav id="site-mobile-menu" aria-label={t('nav.menu')} class="md:hidden hidden border-t border-apple-separator/40 bg-white/95 px-3 py-2">
     <ul class="flex flex-col">
       {links.map((l) => (
         <li>
           <a
-            href={l.href}
+            href={localizar(l.href, lang)}
             aria-current={ehAtual(l.href) ? 'page' : undefined}
             class={`block px-3 py-2.5 rounded-lg text-[15px] ${
               ehAtual(l.href) ? 'text-apple-accent font-medium bg-apple-fill' : 'text-apple-secondary'
@@ -70,6 +95,11 @@ const ehAtual = (href: string) => href === '/' ? pathname === '/' : pathname.sta
           </a>
         </li>
       ))}
+      <li class="mt-1 pt-2 border-t border-apple-separator-light">
+        <a href={hrefOutro} hreflang={outro === 'en' ? 'en' : 'pt-BR'} class="block px-3 py-2.5 rounded-lg text-[15px] text-apple-secondary">
+          {tituloOutro}
+        </a>
+      </li>
     </ul>
   </nav>
 </header>
