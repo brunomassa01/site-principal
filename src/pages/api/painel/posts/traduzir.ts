@@ -4,7 +4,22 @@ import { json } from '../../../../lib/http';
 
 export const prerender = false;
 
-const MODELO = 'claude-sonnet-4-6';
+// Opus 4.8: modelo atual e um dos que suportam SAÍDA ESTRUTURADA (output_config.format).
+// O sonnet-4-6 que eu usava aqui não suporta — era ele pedindo JSON "no texto" e às vezes
+// devolvendo algo que o JSON.parse recusava. Agora quem garante o formato é a API.
+const MODELO = 'claude-opus-4-8';
+
+// A API valida a resposta contra este schema. Não é sugestão de prompt, é contrato.
+const SCHEMA = {
+  type: 'object',
+  properties: {
+    titulo_en: { type: 'string', description: 'Título em inglês.' },
+    resumo_en: { type: 'string', description: 'Resumo em inglês.' },
+    body_html_en: { type: 'string', description: 'Corpo em inglês, com o MESMO HTML do original.' },
+  },
+  required: ['titulo_en', 'resumo_en', 'body_html_en'],
+  additionalProperties: false,
+} as const;
 
 const SISTEMA = `Você traduz textos do Bruno Massa do português para o inglês.
 
@@ -27,10 +42,7 @@ FILTRO ANTI-IA — obrigatório, vale igual em inglês:
 - Sem conclusão genérica animadora.
 - Antes de devolver, releia e corte qualquer frase que soe como legenda motivacional.
 
-FORMATO HTML: o corpo vem em HTML. Preserve EXATAMENTE as tags, atributos, links, imagens e a ordem. Traduza só o texto visível. Não acrescente nem remova tags.
-
-Responda SOMENTE com um objeto JSON válido, sem cercas de código, no formato:
-{"titulo_en": "...", "resumo_en": "...", "body_html_en": "..."}`;
+FORMATO HTML: o corpo vem em HTML. Preserve EXATAMENTE as tags, atributos, links, imagens e a ordem. Traduza só o texto visível. Não acrescente nem remova tags.`;
 
 export const POST: APIRoute = async ({ request }) => {
   const chave = import.meta.env.ANTHROPIC_API_KEY ?? process.env.ANTHROPIC_API_KEY;
@@ -47,8 +59,11 @@ export const POST: APIRoute = async ({ request }) => {
     const anthropic = new Anthropic({ apiKey: chave });
     const r = await anthropic.messages.create({
       model: MODELO,
-      max_tokens: 8000,
+      // 8000 truncava post longo, e JSON truncado quebra o parse (era o erro que aparecia).
+      // 16000 é o teto seguro para requisição sem streaming, sem estourar timeout de HTTP.
+      max_tokens: 16000,
       system: SISTEMA,
+      output_config: { format: { type: 'json_schema', schema: SCHEMA } },
       messages: [
         {
           role: 'user',
@@ -66,14 +81,29 @@ ${bodyHtml}`,
       ],
     });
 
+    // Antes de ler o conteúdo: por que o modelo parou?
+    if (r.stop_reason === 'max_tokens') {
+      return json({ error: 'O artigo é longo demais para traduzir de uma vez. Traduza em partes ou me avise.' }, 502);
+    }
+    if (r.stop_reason === 'refusal') {
+      return json({ error: 'A IA recusou traduzir este conteúdo.' }, 502);
+    }
+
     const texto = r.content.map((c) => (c.type === 'text' ? c.text : '')).join('').trim();
-    const limpo = texto.replace(/^```(?:json)?/i, '').replace(/```$/, '').trim();
 
     let dados: Record<string, string>;
     try {
-      dados = JSON.parse(limpo);
+      dados = JSON.parse(texto);
     } catch {
-      return json({ error: 'A IA respondeu num formato inesperado. Tente de novo.' }, 502);
+      // Com output_config isso não deveria acontecer. Se acontecer, devolvo uma
+      // amostra do que veio — para não ficarmos cegos como da primeira vez.
+      return json(
+        {
+          error: 'A IA respondeu num formato inesperado. Tente de novo.',
+          detail: `stop_reason=${r.stop_reason} inicio=${texto.slice(0, 200)}`,
+        },
+        502,
+      );
     }
 
     // Trava de segurança do humanizer: travessão não passa nem se o modelo insistir.
