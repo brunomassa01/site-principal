@@ -171,13 +171,18 @@ export default function PostEditor({ id }: Props) {
       });
       const d = await r.json();
       if (!r.ok) { alert(d.error || 'Não foi possível traduzir.'); return; }
+      const corpoEn = d.body_html_en ?? '';
       setF((p) => ({
         ...p,
         tituloEn: d.titulo_en ?? '',
         resumoEn: d.resumo_en ?? '',
-        bodyHtmlEn: d.body_html_en ?? '',
+        bodyHtmlEn: corpoEn,
         bodyJsonEn: null,
       }));
+      // Se o português tem corpo e o inglês voltou vazio, o problema é a IA (não o editor).
+      if (f.bodyHtml.trim() && !corpoEn.trim()) {
+        alert('A IA traduziu o título e o resumo, mas devolveu o corpo vazio. Clique em traduzir de novo.');
+      }
     } catch {
       alert('Não foi possível traduzir.');
     } finally {

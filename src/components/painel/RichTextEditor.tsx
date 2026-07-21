@@ -4,7 +4,7 @@ import Underline from '@tiptap/extension-underline';
 import Link from '@tiptap/extension-link';
 import Image from '@tiptap/extension-image';
 import Placeholder from '@tiptap/extension-placeholder';
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import VideoEmbed from './extensions/VideoEmbed';
 
 type Props = {
@@ -95,6 +95,17 @@ export default function RichTextEditor({ value, onChange, onImageUpload }: Props
     content: value || '',
     onUpdate: ({ editor }) => onChange(editor.getHTML(), editor.getJSON()),
   });
+
+  // `content` acima só vale na MONTAGEM. Sem isto, texto que chega de fora depois
+  // (ex.: o botão "Traduzir com IA" preenchendo o corpo em inglês) era ignorado e
+  // o editor ficava vazio. Só troca quando o HTML de fora difere do que já está
+  // aqui — assim digitar não entra em laço nem faz o cursor pular.
+  useEffect(() => {
+    if (!editor) return;
+    const novo = value || '';
+    if (novo === editor.getHTML()) return;
+    editor.commands.setContent(novo, false); // false = não dispara onUpdate
+  }, [value, editor]);
 
   async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
