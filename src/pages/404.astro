@@ -1,0 +1,48 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { usarT, localizar, type Lang } from '../i18n';
+
+export const prerender = false;
+
+const lang: Lang = Astro.locals.lang ?? 'pt';
+const t = usarT(lang);
+const lz = (href: string) => localizar(href, lang);
+
+const copy = lang === 'en'
+  ? {
+      eyebrow: 'Error 404',
+      titulo: 'This page does not exist',
+      texto: 'The link may be broken or the page may have moved. Nothing is lost — here is the way back.',
+      inicio: 'Back to home',
+      blog: 'Read the blog',
+    }
+  : {
+      eyebrow: 'Erro 404',
+      titulo: 'Esta página não existe',
+      texto: 'O link pode estar quebrado ou a página pode ter mudado de lugar. Nada se perde — aqui está o caminho de volta.',
+      inicio: 'Voltar ao início',
+      blog: 'Ler o blog',
+    };
+---
+<BaseLayout title={copy.titulo} descricao={copy.texto}>
+  <Header />
+  <main class="min-h-[62vh] flex items-center">
+    <div class="max-w-3xl mx-auto px-6 py-20 text-center">
+      <p class="text-[12px] font-semibold uppercase tracking-[0.12em] text-apple-accent mb-5">{copy.eyebrow}</p>
+      <p class="text-[110px] md:text-[150px] font-bold text-apple-label tracking-tight leading-none mb-2 select-none">404</p>
+      <h1 class="text-2xl md:text-3xl font-bold text-apple-label tracking-tight mb-4">{copy.titulo}</h1>
+      <p class="text-[16px] text-apple-secondary leading-relaxed max-w-md mx-auto mb-9">{copy.texto}</p>
+      <div class="flex flex-wrap justify-center gap-3">
+        <a href={lz('/')} class="inline-flex items-center gap-2 px-6 py-3 bg-apple-label text-white rounded-full text-[15px] font-medium transition-colors duration-200 hover:bg-black">
+          {copy.inicio}
+        </a>
+        <a href={lz('/posts')} class="inline-flex items-center gap-2 px-6 py-3 bg-apple-fill text-apple-label rounded-full text-[15px] font-medium border border-apple-separator transition-colors duration-200 hover:bg-apple-separator-light">
+          {copy.blog}
+        </a>
+      </div>
+    </div>
+  </main>
+  <Footer />
+</BaseLayout>
