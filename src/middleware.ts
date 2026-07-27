@@ -4,9 +4,19 @@ import { defineMiddleware } from 'astro:middleware';
 // No dev, o Astro gera um wrapper do middleware e dependências CJS/Node no
 // grafo estático quebram esse wrapper ("sequence is not a function").
 // Por isso a sessão é carregada via import() dinâmico dentro do request.
+// Produto padrão servido na raiz do subdomínio lp. (por enquanto, um só).
+const LP_PADRAO = 'bastidor';
+
 export const onRequest = defineMiddleware(async (context, next) => {
   const { url, cookies, locals, redirect } = context;
   const path = url.pathname;
+
+  // ───── Landing pages (subdomínio lp.) ─────
+  // lp.brunomassa.online/<slug> serve a página src/pages/[produto].astro.
+  // A raiz do subdomínio manda pro produto atual.
+  if (url.host.startsWith('lp.') && path === '/') {
+    return redirect(`/${LP_PADRAO}`, 302);
+  }
 
   // ───── Idioma ─────
   // '/en/algo' é uma rota real (src/pages/en/*), mas de 4 linhas: ela só

@@ -359,6 +359,36 @@ export const conhecimentoMateriais = pgTable('conhecimento_materiais', {
   updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' }).defaultNow().notNull(),
 });
 
+// ───────────────────────── Landing Pages (mentorias/produtos) ─────────────────────────
+// Reusável: 1 registro = 1 produto, servido em lp.brunomassa.online/<slug>.
+// O conteúdo mora em `dados` (jsonb) porque uma página de venda tem estrutura
+// própria, fora do CRUD genérico do Painel.
+
+export const landingPages = pgTable('landing_pages', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  slug: text('slug').notNull().unique(),
+  nome: text('nome').notNull(),
+  status: text('status').notNull().default('rascunho'), // rascunho | publicado
+  dados: jsonb('dados'),
+  createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' }).defaultNow().notNull(),
+});
+
+// Candidaturas (fluxo escolhido): formulário na LP → lista no Painel → Bruno
+// seleciona e cobra na mão.
+export const lpLeads = pgTable('lp_leads', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  lpSlug: text('lp_slug').notNull(),
+  nome: text('nome').notNull(),
+  email: text('email'),
+  whatsapp: text('whatsapp'),
+  empresa: text('empresa'),
+  cargo: text('cargo'),
+  desafio: text('desafio'),
+  situacao: text('situacao').notNull().default('novo'), // novo | selecionado | descartado | inscrito
+  createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).defaultNow().notNull(),
+});
+
 // ───────────────────────── Tipos inferidos ─────────────────────────
 
 export type User = typeof users.$inferSelect;
@@ -373,3 +403,5 @@ export type ConhecimentoFase = typeof conhecimentoFases.$inferSelect;
 export type ConhecimentoVideo = typeof conhecimentoVideos.$inferSelect;
 export type ConhecimentoReferencia = typeof conhecimentoReferencias.$inferSelect;
 export type ConhecimentoMaterial = typeof conhecimentoMateriais.$inferSelect;
+export type LandingPage = typeof landingPages.$inferSelect;
+export type LpLead = typeof lpLeads.$inferSelect;
