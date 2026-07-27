@@ -1,0 +1,52 @@
+---
+import PainelLayout from '../../../layouts/PainelLayout.astro';
+import MentoriaAdmin from '../../../components/painel/MentoriaAdmin.tsx';
+import { getLandingPage, getCandidaturas } from '../../../lib/content/lp';
+
+export const prerender = false;
+
+const { slug } = Astro.params;
+const lp = slug ? await getLandingPage(slug) : null;
+if (!lp) return Astro.redirect('/painel/mentorias');
+
+const d = (lp.dados ?? {}) as any;
+const campos = {
+  selo: d.selo ?? '',
+  headline: d.headline ?? '',
+  subheadline: d.subheadline ?? '',
+  preco: d.preco ?? '',
+  precoNota: d.precoNota ?? '',
+  parcelamento: d.parcelamento ?? '',
+  ctaTexto: d.ctaTexto ?? '',
+  ctaNota: d.ctaNota ?? '',
+  fotoUrl: d.fotoUrl ?? '',
+  infoLinha: Array.isArray(d.infoLinha) ? d.infoLinha : [],
+};
+
+const leads = await getCandidaturas(lp.slug);
+const candidaturas = leads.map((l) => ({
+  id: l.id,
+  nome: l.nome,
+  email: l.email,
+  whatsapp: l.whatsapp,
+  empresa: l.empresa,
+  cargo: l.cargo,
+  desafio: l.desafio,
+  situacao: l.situacao,
+  createdAt: (l.createdAt instanceof Date ? l.createdAt : new Date(l.createdAt as any)).toISOString(),
+}));
+---
+<PainelLayout titulo={lp.nome}>
+  <div class="mb-6">
+    <a href="/painel/mentorias" class="text-[13px] text-apple-secondary hover:text-apple-label">← Mentorias</a>
+    <h1 class="text-[22px] font-bold text-apple-label tracking-tight mt-1">{lp.nome}</h1>
+  </div>
+
+  <MentoriaAdmin
+    client:load
+    slug={lp.slug}
+    statusInicial={lp.status}
+    campos={campos}
+    candidaturas={candidaturas}
+  />
+</PainelLayout>

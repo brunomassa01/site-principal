@@ -1,0 +1,47 @@
+---
+import PainelLayout from '../../../layouts/PainelLayout.astro';
+import { getLandingPages, contarCandidaturas } from '../../../lib/content/lp';
+
+export const prerender = false;
+
+const lps = await getLandingPages();
+const contagem = await contarCandidaturas();
+---
+<PainelLayout titulo="Mentorias">
+  <div class="mb-6">
+    <h1 class="text-[22px] font-bold text-apple-label tracking-tight">Mentorias</h1>
+    <p class="text-[14px] text-apple-secondary mt-1">Landing pages dos produtos, servidas em <code>lp.brunomassa.online</code>. Aqui você publica, edita os textos principais e vê as candidaturas.</p>
+  </div>
+
+  {lps.length === 0 ? (
+    <div class="bg-white rounded-2xl shadow-card p-8 text-center">
+      <p class="text-[15px] text-apple-secondary">Nenhuma landing page ainda.</p>
+    </div>
+  ) : (
+    <div class="space-y-3">
+      {lps.map((lp) => {
+        const d = (lp.dados ?? {}) as any;
+        const n = contagem[lp.slug] ?? 0;
+        return (
+          <a href={`/painel/mentorias/${lp.slug}`} class="group block bg-white rounded-2xl shadow-card p-5 transition-all duration-200 hover:shadow-card-hover">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+              <div class="min-w-0">
+                <div class="flex items-center gap-2">
+                  <h2 class="text-[16px] font-semibold text-apple-label group-hover:text-apple-accent transition-colors truncate">{lp.nome}</h2>
+                  <span class={`flex-none inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold border ${
+                    lp.status === 'publicado' ? 'bg-green-50 text-green-700 border-green-200' : 'bg-yellow-50 text-yellow-700 border-yellow-200'
+                  }`}>{lp.status === 'publicado' ? 'Publicado' : 'Rascunho'}</span>
+                </div>
+                <p class="text-[13px] text-apple-tertiary mt-1 truncate">lp.brunomassa.online/{lp.slug}</p>
+              </div>
+              <div class="flex-none text-right">
+                <p class="text-[20px] font-bold text-apple-label leading-none">{n}</p>
+                <p class="text-[11px] text-apple-tertiary uppercase tracking-wide mt-0.5">candidatura{n === 1 ? '' : 's'}</p>
+              </div>
+            </div>
+          </a>
+        );
+      })}
+    </div>
+  )}
+</PainelLayout>
