@@ -295,7 +295,7 @@ const urlCanonica = `https://lp.brunomassa.online/${lp.slug}`;
           <p class="micro">{d.blocoFinal?.micro}</p>
         </div>
         <div>
-          <Candidatura client:load slug={lp.slug} ctaTexto={d.ctaTexto} />
+          <Candidatura client:load slug={lp.slug} ctaTexto={d.ctaTexto} checkoutUrl={d.checkoutUrl} />
         </div>
       </div>
     </section>

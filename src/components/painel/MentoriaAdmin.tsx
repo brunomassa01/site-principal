@@ -10,6 +10,7 @@ type Campos = {
   ctaTexto: string;
   ctaNota: string;
   fotoUrl: string;
+  checkoutUrl: string;
   infoLinha: string[];
 };
 
@@ -158,6 +159,7 @@ export default function MentoriaAdmin({ slug, statusInicial, campos, candidatura
               <div><label className={labelCls}>Nota abaixo do CTA</label><input className={inputCls} value={c.ctaNota} onChange={(e) => setC({ ...c, ctaNota: e.target.value })} /></div>
             </div>
             <div><label className={labelCls}>Foto (URL)</label><input className={inputCls} value={c.fotoUrl} onChange={(e) => setC({ ...c, fotoUrl: e.target.value })} placeholder="/images/bruno.jpg" /></div>
+            <div><label className={labelCls}>Link do checkout (Hotmart)</label><input className={inputCls} value={c.checkoutUrl} onChange={(e) => setC({ ...c, checkoutUrl: e.target.value })} placeholder="https://pay.hotmart.com/..." /><p className="text-[12px] text-apple-tertiary mt-1">Aparece como botão "Garantir minha vaga" logo depois que a pessoa envia o formulário. Vazio = só mostra a mensagem de recebido.</p></div>
             <div className="flex items-center gap-3 pt-1">
               <button onClick={salvarCampos} disabled={salvando} className="px-5 py-2 rounded-full bg-apple-label text-white text-[14px] font-medium hover:bg-black disabled:opacity-60">
                 {salvando ? 'Salvando…' : 'Salvar textos'}

@@ -3,13 +3,14 @@ import { useState } from 'react';
 type Props = {
   slug: string;
   ctaTexto: string;
+  checkoutUrl?: string;
 };
 
 const VERDE = '#C2F03C';
 const PRETO = '#0A0A0B';
 const PAPEL = '#ECECEA';
 
-export default function Candidatura({ slug, ctaTexto }: Props) {
+export default function Candidatura({ slug, ctaTexto, checkoutUrl }: Props) {
   const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
   const [whatsapp, setWhatsapp] = useState('');
@@ -50,14 +51,29 @@ export default function Candidatura({ slug, ctaTexto }: Props) {
   }
 
   if (ok) {
+    const primeiro = nome.split(' ')[0];
     return (
       <div style={{ ...font, background: PRETO, color: PAPEL }} className="p-8 md:p-10 border border-white/10">
         <div style={{ background: VERDE }} className="w-10 h-10 flex items-center justify-center text-black font-bold text-xl mb-5">✓</div>
-        <h3 className="text-[22px] md:text-[26px] font-bold tracking-tight mb-3">Candidatura recebida.</h3>
-        <p className="text-[15px] leading-relaxed text-white/70 max-w-md">
-          Obrigado, {nome.split(' ')[0]}. Vou avaliar sua candidatura conforme a aderência ao perfil e o limite de 10 vagas.
-          Se fizer sentido, entro em contato com o próximo passo (o diagnóstico inicial e a condição de participação).
-        </p>
+        {checkoutUrl ? (
+          <>
+            <h3 className="text-[22px] md:text-[26px] font-bold tracking-tight mb-3">Falta um passo, {primeiro}.</h3>
+            <p className="text-[15px] leading-relaxed text-white/70 max-w-md mb-6">
+              Seus dados estão salvos. Para garantir sua vaga na turma-piloto — são apenas 10 —, conclua sua inscrição pelo checkout seguro:
+            </p>
+            <a href={checkoutUrl} style={{ background: VERDE, color: PRETO }} className="block w-full text-center py-4 font-bold text-[15px] uppercase tracking-wide hover:opacity-90 transition-opacity">
+              Garantir minha vaga →
+            </a>
+            <p className="text-[12px] text-white/40 mt-3 text-center">Pagamento processado pela Hotmart. Vagas limitadas a 10 participantes.</p>
+          </>
+        ) : (
+          <>
+            <h3 className="text-[22px] md:text-[26px] font-bold tracking-tight mb-3">Candidatura recebida.</h3>
+            <p className="text-[15px] leading-relaxed text-white/70 max-w-md">
+              Obrigado, {primeiro}. Vou avaliar sua candidatura conforme a aderência ao perfil e o limite de 10 vagas. Se fizer sentido, entro em contato com o próximo passo.
+            </p>
+          </>
+        )}
       </div>
     );
   }

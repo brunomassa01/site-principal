@@ -8,7 +8,7 @@ export const prerender = false;
 
 // Campos de `dados` editáveis pelo Painel (as alavancas comerciais). O resto do
 // conteúdo longo continua vindo do doc → seed, como combinado.
-const CAMPOS_TEXTO = ['selo', 'headline', 'subheadline', 'preco', 'precoNota', 'parcelamento', 'ctaTexto', 'ctaNota', 'fotoUrl'];
+const CAMPOS_TEXTO = ['selo', 'headline', 'subheadline', 'preco', 'precoNota', 'parcelamento', 'ctaTexto', 'ctaNota', 'fotoUrl', 'checkoutUrl'];
 
 export const PATCH: APIRoute = async ({ params, request }) => {
   const slug = params.slug!;
