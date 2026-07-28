@@ -159,6 +159,27 @@ const urlCanonica = `https://lp.brunomassa.online/${lp.slug}`;
       </div>
     </section>
 
+    <!-- BIBLIOTECA DE APOIO (41 AULAS) -->
+    {d.biblioteca && (
+      <section class="sec dark">
+        <div class="wrap">
+          <p class="eyebrow verde">{d.biblioteca.eyebrow}</p>
+          <h2>{d.biblioteca.titulo}</h2>
+          <p class="bib-intro">{d.biblioteca.texto}</p>
+          <div class="trilhas">
+            {(d.biblioteca.trilhas ?? []).map((t: any) => (
+              <div class="trilha">
+                <span class="trilha-n">{t.n}</span>
+                <span class="trilha-nome">{t.nome}</span>
+                <p class="trilha-desc">{t.desc}</p>
+              </div>
+            ))}
+          </div>
+          {d.biblioteca.nota && <p class="micro" style="margin-top:26px; max-width:64ch;">{d.biblioteca.nota}</p>}
+        </div>
+      </section>
+    )}
+
     <!-- DATAS E FORMATO -->
     {d.datas && (
       <section class="sec">
@@ -452,12 +473,21 @@ const urlCanonica = `https://lp.brunomassa.online/${lp.slug}`;
       .lp .diag-funcoes li { position: relative; padding-left: 26px; margin-bottom: 9px; font-size: 15.5px; color: rgba(236,236,234,.85); }
       .lp .diag-funcoes li::before { content: ''; position: absolute; left: 0; top: 8px; width: 12px; height: 12px; background: var(--verde); border-radius: 2px; }
 
+      /* Biblioteca de apoio (41 aulas) */
+      .lp .bib-intro { font-size: clamp(16px, 2vw, 18px); color: rgba(236,236,234,.75); max-width: 62ch; margin: 0 0 36px; }
+      .lp .trilhas { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+      .lp .trilha { border: 1px solid rgba(236,236,234,.18); padding: 24px 20px; border-radius: 2px; }
+      .lp .trilha-n { display: block; font-size: 34px; font-weight: 800; color: var(--verde); letter-spacing: -0.02em; line-height: 1; }
+      .lp .trilha-n::after { content: ' aulas'; font-size: 12px; font-weight: 600; color: rgba(236,236,234,.5); margin-left: 5px; letter-spacing: 0; }
+      .lp .trilha-nome { display: block; font-size: 15px; font-weight: 700; color: var(--papel); margin-top: 12px; }
+      .lp .trilha-desc { font-size: 13.5px; color: rgba(236,236,234,.7); margin: 8px 0 0; line-height: 1.5; }
+
       /* Responsivo */
       @media (max-width: 820px) {
         .lp .hero-grid, .lp .grid2, .lp .grid-conduz, .lp .grid-final, .lp .ad, .lp .datas-wrap, .lp .acomp { grid-template-columns: 1fr; }
         .lp .hero-foto { order: -1; }
         .lp .hero-foto img { max-height: 280px; }
-        .lp .entregas-grid, .lp .datas-lista { grid-template-columns: 1fr 1fr; }
+        .lp .entregas-grid, .lp .datas-lista, .lp .trilhas { grid-template-columns: 1fr 1fr; }
         .lp .incluido { columns: 1; }
         .lp .sec { padding: 52px 0; }
       }
