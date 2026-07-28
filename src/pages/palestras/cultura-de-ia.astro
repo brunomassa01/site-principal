@@ -1,0 +1,235 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import { getIdentidade } from '../../lib/content/collections';
+import { culturaIa } from '../../i18n/culturaIa';
+import { localizar, type Lang } from '../../i18n';
+
+export const prerender = false;
+
+const lang: Lang = Astro.locals.lang ?? 'pt';
+const pg = culturaIa[lang];
+const lz = (href: string) => localizar(href, lang);
+
+const id = (await getIdentidade(lang)).data;
+
+// WhatsApp comercial. Só o número, com DDI + DDD, sem símbolos (ex.: 5511999998888).
+// Vazio = botão escondido (o e-mail continua funcionando). Bruno preenche depois.
+const WHATSAPP = '';
+
+const mailto = id.email
+  ? `mailto:${id.email}?subject=${encodeURIComponent(pg.assuntoEmail)}`
+  : null;
+const whats = WHATSAPP
+  ? `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(pg.whatsMsg)}`
+  : null;
+---
+<BaseLayout title={`${pg.conduzTitulo} · ${pg.selo}`} descricao={pg.metaDesc}>
+  <Header />
+  <main>
+
+    <!-- Hero -->
+    <section class="bg-white py-16 md:py-24">
+      <div class="max-w-5xl mx-auto px-6">
+        <div class="flex flex-col md:flex-row md:items-center gap-10">
+          <div class="flex-1">
+            <p class="text-[12px] font-semibold uppercase tracking-[0.1em] text-apple-accent mb-4">{pg.selo}</p>
+            <h1 class="text-4xl md:text-6xl font-bold text-apple-label tracking-tight leading-[1.05] mb-5 text-balance">
+              {pg.h1}
+            </h1>
+            <p class="text-[18px] md:text-[20px] text-apple-secondary leading-relaxed max-w-xl mb-8">
+              {pg.subtitulo}
+            </p>
+            <div class="flex flex-wrap items-center gap-3">
+              {mailto && (
+                <a href={mailto} class="inline-flex items-center gap-2 px-7 py-3.5 bg-apple-label text-white rounded-full text-[15px] font-medium transition-colors duration-200 hover:bg-black">
+                  {pg.ctaPrincipal}
+                </a>
+              )}
+              {whats && (
+                <a href={whats} target="_blank" rel="noopener" class="inline-flex items-center gap-2 px-7 py-3.5 bg-apple-fill text-apple-label rounded-full text-[15px] font-medium border border-apple-separator transition-colors duration-200 hover:bg-apple-separator-light">
+                  {pg.ctaWhats}
+                </a>
+              )}
+            </div>
+            <p class="text-[13px] text-apple-tertiary mt-4">{pg.sobConsulta}</p>
+          </div>
+          <div class="flex-none mx-auto md:mx-0">
+            <div class="w-56 md:w-64 rounded-3xl overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.18)]">
+              <img src="/images/bruno.jpg" alt={id.nome} class="w-full h-full object-cover object-top" />
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- O problema -->
+    <section class="border-y border-apple-separator/30 bg-apple-fill py-16 md:py-20">
+      <div class="max-w-3xl mx-auto px-6">
+        <p class="text-[12px] font-semibold uppercase tracking-[0.08em] text-apple-accent mb-3">{pg.problemaEyebrow}</p>
+        <h2 class="text-2xl md:text-[32px] font-bold text-apple-label tracking-tight leading-snug mb-5">{pg.problemaTitulo}</h2>
+        <p class="text-[17px] md:text-[19px] text-apple-secondary leading-relaxed">{pg.problemaTexto}</p>
+      </div>
+    </section>
+
+    <!-- A escada: três degraus -->
+    <section class="py-20">
+      <div class="max-w-5xl mx-auto px-6">
+        <p class="text-[12px] font-semibold uppercase tracking-[0.08em] text-apple-accent mb-2">{pg.escadaEyebrow}</p>
+        <h2 class="text-3xl md:text-4xl font-bold text-apple-label tracking-tight mb-4">{pg.escadaTitulo}</h2>
+        <p class="text-[16px] text-apple-secondary leading-relaxed max-w-2xl mb-10">{pg.escadaIntro}</p>
+
+        <div class="flex flex-col gap-4">
+          {pg.degraus.map((d) => (
+            <div class="bg-apple-surface rounded-2xl shadow-card p-6 md:p-8 transition-all duration-300 hover:shadow-card-hover">
+              <div class="flex flex-col md:flex-row md:gap-8">
+                <div class="flex-none md:w-48 mb-4 md:mb-0">
+                  <div class="flex items-baseline gap-3 md:block">
+                    <span class="text-[40px] md:text-[52px] font-bold text-apple-accent leading-none tracking-tight">{d.n}</span>
+                    <p class="text-[11px] font-semibold uppercase tracking-[0.08em] text-apple-tertiary md:mt-3">{d.tag}</p>
+                  </div>
+                  <h3 class="text-[22px] font-bold text-apple-label tracking-tight leading-snug mt-2">{d.nome}</h3>
+                  <p class="text-[13px] text-apple-secondary mt-0.5">{d.duracao}</p>
+                </div>
+                <div class="flex-1">
+                  <p class="text-[15px] md:text-[16px] text-apple-secondary leading-relaxed mb-5">{d.texto}</p>
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 border-t border-apple-separator/40 pt-4">
+                    <div>
+                      <p class="text-[11px] font-semibold uppercase tracking-[0.06em] text-apple-tertiary mb-1">{pg.degrauQuem}</p>
+                      <p class="text-[14px] text-apple-label leading-snug">{d.quem}</p>
+                    </div>
+                    <div>
+                      <p class="text-[11px] font-semibold uppercase tracking-[0.06em] text-apple-tertiary mb-1">{pg.degrauEntrega}</p>
+                      <p class="text-[14px] text-apple-label leading-snug">{d.entrega}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <!-- O método: quatro movimentos -->
+    <section class="bg-white py-20">
+      <div class="max-w-5xl mx-auto px-6">
+        <p class="text-[12px] font-semibold uppercase tracking-[0.08em] text-apple-accent mb-2">{pg.metodoEyebrow}</p>
+        <h2 class="text-3xl md:text-4xl font-bold text-apple-label tracking-tight mb-4">{pg.metodoTitulo}</h2>
+        <p class="text-[16px] text-apple-secondary leading-relaxed max-w-2xl mb-10">{pg.metodoIntro}</p>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {pg.passos.map((p, i) => (
+            <div class="bg-apple-fill rounded-2xl p-6">
+              <span class="text-[13px] font-bold text-apple-accent">{String(i + 1).padStart(2, '0')}</span>
+              <h3 class="text-[16px] font-semibold text-apple-label tracking-tight mt-2 mb-2 leading-snug">{p.nome}</h3>
+              <p class="text-[14px] text-apple-secondary leading-relaxed">{p.texto}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <!-- Segurança: módulo inegociável -->
+    <section class="py-20">
+      <div class="max-w-5xl mx-auto px-6">
+        <div class="bg-apple-label rounded-2xl p-8 md:p-12">
+          <p class="text-[11px] font-semibold uppercase tracking-[0.1em] text-apple-accent mb-3">{pg.segEyebrow}</p>
+          <h2 class="text-[24px] md:text-[30px] font-bold text-white tracking-tight leading-snug mb-4 max-w-2xl">{pg.segTitulo}</h2>
+          <p class="text-[15px] md:text-[16px] text-white/70 leading-relaxed max-w-2xl">{pg.segTexto}</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- O que a empresa recebe -->
+    <section class="bg-white py-20">
+      <div class="max-w-5xl mx-auto px-6">
+        <p class="text-[12px] font-semibold uppercase tracking-[0.08em] text-apple-accent mb-2">{pg.recebeEyebrow}</p>
+        <h2 class="text-3xl md:text-4xl font-bold text-apple-label tracking-tight mb-10">{pg.recebeTitulo}</h2>
+        <ul class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4">
+          {pg.recebeItens.map((item) => (
+            <li class="flex items-start gap-3">
+              <span class="flex-none mt-1.5 w-1.5 h-1.5 rounded-full bg-apple-accent"></span>
+              <span class="text-[16px] text-apple-label leading-snug">{item}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+
+    <!-- Por que funciona -->
+    <section class="py-20">
+      <div class="max-w-5xl mx-auto px-6">
+        <p class="text-[12px] font-semibold uppercase tracking-[0.08em] text-apple-accent mb-2">{pg.porqueEyebrow}</p>
+        <h2 class="text-3xl md:text-4xl font-bold text-apple-label tracking-tight mb-10">{pg.porqueTitulo}</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {pg.porqueItens.map((item) => (
+            <div class="bg-apple-surface rounded-2xl shadow-card p-6">
+              <h3 class="text-[18px] font-bold text-apple-label tracking-tight leading-snug mb-2">{item.t}</h3>
+              <p class="text-[14px] text-apple-secondary leading-relaxed">{item.d}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <!-- O que não é -->
+    <section class="bg-apple-fill border-y border-apple-separator/30 py-16 md:py-20">
+      <div class="max-w-3xl mx-auto px-6">
+        <p class="text-[12px] font-semibold uppercase tracking-[0.08em] text-apple-accent mb-3">{pg.naoEyebrow}</p>
+        <h2 class="text-2xl md:text-[32px] font-bold text-apple-label tracking-tight mb-6">{pg.naoTitulo}</h2>
+        <ul class="space-y-2 mb-6">
+          {pg.naoItens.map((item) => (
+            <li class="text-[17px] text-apple-secondary leading-relaxed">{item}</li>
+          ))}
+        </ul>
+        <p class="text-[18px] md:text-[20px] font-semibold text-apple-label leading-snug">{pg.naoFecho}</p>
+      </div>
+    </section>
+
+    <!-- Quem conduz -->
+    <section class="bg-white py-20">
+      <div class="max-w-5xl mx-auto px-6">
+        <div class="flex flex-col md:flex-row md:items-start gap-10">
+          <div class="flex-none mx-auto md:mx-0">
+            <div class="w-44 rounded-3xl overflow-hidden shadow-[0_16px_48px_rgba(0,0,0,0.16)]">
+              <img src="/images/bruno.jpg" alt={id.nome} class="w-full h-full object-cover object-top" />
+            </div>
+          </div>
+          <div class="flex-1">
+            <p class="text-[12px] font-semibold uppercase tracking-[0.08em] text-apple-accent mb-2">{pg.conduzEyebrow}</p>
+            <h2 class="text-3xl md:text-4xl font-bold text-apple-label tracking-tight mb-5">{pg.conduzTitulo}</h2>
+            <div class="space-y-4 max-w-2xl">
+              {pg.conduzParagrafos.map((p) => (
+                <p class="text-[16px] text-apple-secondary leading-relaxed">{p}</p>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA final -->
+    <section class="border-t border-apple-separator/30 py-20">
+      <div class="max-w-3xl mx-auto px-6 text-center">
+        <h2 class="text-3xl md:text-4xl font-bold text-apple-label tracking-tight mb-4">{pg.ctaFinalTitulo}</h2>
+        <p class="text-[16px] text-apple-secondary leading-relaxed mb-8">{pg.ctaFinalTexto}</p>
+        <div class="flex flex-wrap justify-center gap-3">
+          {mailto && (
+            <a href={mailto} class="inline-flex items-center gap-2 px-8 py-4 bg-apple-label text-white rounded-full text-[16px] font-semibold transition-colors duration-200 hover:bg-black">
+              {id.email}
+            </a>
+          )}
+          {whats && (
+            <a href={whats} target="_blank" rel="noopener" class="inline-flex items-center gap-2 px-8 py-4 bg-apple-fill text-apple-label rounded-full text-[16px] font-medium border border-apple-separator transition-colors duration-200 hover:bg-apple-separator-light">
+              {pg.ctaWhats}
+            </a>
+          )}
+        </div>
+        <p class="text-[13px] text-apple-tertiary mt-6">{pg.sobConsulta}</p>
+      </div>
+    </section>
+
+  </main>
+  <Footer />
+</BaseLayout>

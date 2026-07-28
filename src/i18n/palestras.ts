@@ -10,6 +10,7 @@ import type { Lang } from './index';
 
 type Tema = { tag: string; titulo: string; tese: string; leva: string; quem: string };
 type Formato = { nome: string; desc: string };
+type Destaque = { eyebrow: string; titulo: string; texto: string; cta: string; href: string };
 
 type Pagina = {
   metaDesc: string;
@@ -20,6 +21,7 @@ type Pagina = {
   ctaLinkedin: string;
   assuntoEmail: string;
   cred: { valor: string; desc: string }[];
+  destaque: Destaque;
   temasEyebrow: string;
   temasTitulo: string;
   praQuem: string;
@@ -50,6 +52,13 @@ export const palestras: Record<Lang, Pagina> = {
       { valor: '1 método', desc: 'o INK, índice autoral pra medir narrativa de marca' },
       { valor: 'Selo7', desc: 'minha agência de marketing, onde o método roda na prática' },
     ],
+    destaque: {
+      eyebrow: 'Novo · Programa corporativo',
+      titulo: 'Cultura de IA para Empresas',
+      texto: 'Sua empresa já usa IA. O problema é como. Palestra, treinamento in-company e programa de implantação para nivelar suas lideranças no uso seguro e produtivo de IA — método, segurança e governança desde o primeiro dia.',
+      cta: 'Conhecer o programa →',
+      href: '/palestras/cultura-de-ia',
+    },
     temasEyebrow: 'Temas',
     temasTitulo: 'Três conversas que eu levo pro palco',
     praQuem: 'Pra quem:',
@@ -105,6 +114,13 @@ export const palestras: Record<Lang, Pagina> = {
       { valor: '1 method', desc: 'INK, an original index to measure brand narrative' },
       { valor: 'Selo7', desc: 'my marketing agency, where the method runs in practice' },
     ],
+    destaque: {
+      eyebrow: 'New · Corporate programme',
+      titulo: 'AI Culture for Companies',
+      texto: 'Your company already uses AI. The problem is how. A talk, in-company training and an implementation programme to level up your leadership on safe, productive use of AI — method, security and governance from day one.',
+      cta: 'See the programme →',
+      href: '/palestras/cultura-de-ia',
+    },
     temasEyebrow: 'Topics',
     temasTitulo: 'Three conversations I take to the stage',
     praQuem: 'For:',

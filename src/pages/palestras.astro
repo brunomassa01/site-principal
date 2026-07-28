@@ -65,6 +65,24 @@ const mailto = `mailto:${id.email}?subject=${encodeURIComponent(pg.assuntoEmail)
       </div>
     </section>
 
+    <!-- Destaque: programa corporativo de Cultura de IA -->
+    <section class="py-14">
+      <div class="max-w-5xl mx-auto px-6">
+        <a href={lz(pg.destaque.href)} class="group block rounded-3xl bg-apple-surface shadow-card ring-1 ring-apple-accent/25 p-8 md:p-10 transition-all duration-300 hover:shadow-card-hover hover:-translate-y-0.5">
+          <div class="flex flex-col md:flex-row md:items-center gap-6">
+            <div class="flex-1">
+              <p class="text-[11px] font-semibold uppercase tracking-[0.12em] text-apple-accent mb-3">{pg.destaque.eyebrow}</p>
+              <h2 class="text-[26px] md:text-[32px] font-bold text-apple-label tracking-tight leading-[1.1] mb-3">{pg.destaque.titulo}</h2>
+              <p class="text-[15px] md:text-[16px] text-apple-secondary leading-relaxed max-w-2xl">{pg.destaque.texto}</p>
+            </div>
+            <div class="flex-none">
+              <span class="inline-flex items-center gap-2 px-6 py-3.5 bg-apple-label text-white rounded-full text-[15px] font-semibold transition-colors duration-200 group-hover:bg-black whitespace-nowrap">{pg.destaque.cta}</span>
+            </div>
+          </div>
+        </a>
+      </div>
+    </section>
+
     <!-- Temas -->
     <section class="py-20">
       <div class="max-w-5xl mx-auto px-6">
