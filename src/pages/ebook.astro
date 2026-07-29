@@ -1,0 +1,411 @@
+---
+export const prerender = false;
+
+// LP do ebook "Marketing com Estrategia nao e discurso". Pagina autoral do
+// Bruno, portada como esta: identidade propria (papel/serifa/verde) e chatbot
+// guiado. So serve no subdominio lp., igual as demais landing pages.
+const host = Astro.url.host;
+const ehLp = host.startsWith('lp.') || Astro.url.searchParams.has('preview');
+if (!ehLp) return new Response('Not Found', { status: 404 });
+
+// CONFIGURACAO: cole aqui o link real do checkout Hotmart do ebook.
+// Vazio = rascunho: pagina noindex e botao de compra desligado.
+const CHECKOUT_URL = '';
+const PUBLICADO = CHECKOUT_URL.length > 0;
+
+const urlCanonica = 'https://lp.brunomassa.online/ebook';
+const titulo = 'Marketing com Estrategia nao e discurso | Ebook de Bruno Massa';
+const descricao =
+  'Um metodo direto para transformar estrategia de palavra bonita em criterio de decisao na rotina de marketing. Ebook de Bruno Massa, Mente do Mercado. R$ 67.';
+---
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>{titulo}</title>
+<meta name="description" content={descricao} />
+{!PUBLICADO && <meta name="robots" content="noindex, nofollow" />}
+<link rel="canonical" href={urlCanonica} />
+<link rel="icon" type="image/png" href="/favicon.png" />
+<meta property="og:title" content="Marketing com Estrategia nao e discurso" />
+<meta property="og:description" content={descricao} />
+<meta property="og:type" content="website" />
+<meta property="og:url" content={urlCanonica} />
+<link rel="stylesheet" href="https://static.hotmart.com/css/hotmart-fb.min.css" />
+<script is:inline src="https://static.hotmart.com/checkout/widget.min.js"></script>
+<style is:global>
+  :root{
+    --paper:#f7f4ee;
+    --ink:#1c1a17;
+    --ink-soft:#4c463e;
+    --line:#d9d2c5;
+    --accent:#1f4d3a;
+    --accent-dark:#163a2c;
+    --card:#fffdf9;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:Georgia,'Times New Roman',serif;
+    line-height:1.65;
+    font-size:17px;
+  }
+  .wrap{max-width:720px;margin:0 auto;padding:0 24px;}
+  .eyebrow{
+    font-family:Arial,Helvetica,sans-serif;
+    font-size:12px;letter-spacing:.18em;text-transform:uppercase;
+    color:var(--accent);font-weight:bold;
+  }
+  header.hero{padding:72px 0 56px;border-bottom:1px solid var(--line);}
+  h1{
+    font-size:clamp(34px,6vw,52px);
+    line-height:1.12;
+    font-weight:normal;
+    margin:18px 0 20px;
+  }
+  h1 em{font-style:italic;}
+  .lede{font-size:20px;color:var(--ink-soft);max-width:56ch;}
+  h2{
+    font-size:clamp(24px,4vw,32px);
+    font-weight:normal;line-height:1.25;
+    margin-bottom:18px;
+  }
+  section{padding:56px 0;border-bottom:1px solid var(--line);}
+  p{margin-bottom:16px;max-width:62ch;}
+  .btn{
+    display:inline-block;
+    font-family:Arial,Helvetica,sans-serif;
+    font-size:16px;font-weight:bold;
+    background:var(--accent);color:#fff;
+    padding:16px 28px;border-radius:4px;
+    text-decoration:none;border:none;cursor:pointer;
+    transition:background .15s ease;
+  }
+  .btn:hover{background:var(--accent-dark);}
+  .btn[aria-disabled="true"]{opacity:.45;cursor:not-allowed;}
+  .micro{
+    font-family:Arial,Helvetica,sans-serif;
+    font-size:13px;color:var(--ink-soft);margin-top:12px;
+  }
+  .cta-block{margin-top:28px;}
+  .cols{display:grid;grid-template-columns:1fr 1fr;gap:28px;margin-top:8px;}
+  @media(max-width:640px){.cols{grid-template-columns:1fr;}}
+  .col-card{
+    background:var(--card);border:1px solid var(--line);
+    border-radius:6px;padding:24px;
+  }
+  .col-card h3{
+    font-family:Arial,Helvetica,sans-serif;
+    font-size:13px;letter-spacing:.14em;text-transform:uppercase;
+    margin-bottom:14px;color:var(--accent);
+  }
+  ul.plain{list-style:none;}
+  ul.plain li{
+    padding:9px 0 9px 26px;position:relative;
+    border-bottom:1px dotted var(--line);
+  }
+  ul.plain li:last-child{border-bottom:none;}
+  ul.plain li::before{
+    content:"";position:absolute;left:2px;top:18px;
+    width:10px;height:2px;background:var(--accent);
+  }
+  .price-box{
+    background:var(--card);border:1px solid var(--line);
+    border-radius:6px;padding:32px;text-align:center;
+    max-width:420px;margin:24px auto 0;
+  }
+  .price-box .valor{
+    font-size:44px;line-height:1;margin:10px 0 4px;
+  }
+  .price-box .valor small{font-size:18px;vertical-align:top;}
+  details{
+    border-bottom:1px solid var(--line);padding:14px 0;
+  }
+  details summary{
+    cursor:pointer;font-weight:bold;
+    font-family:Arial,Helvetica,sans-serif;font-size:15px;
+    list-style:none;position:relative;padding-right:28px;
+  }
+  details summary::after{
+    content:"+";position:absolute;right:4px;top:0;
+    color:var(--accent);font-size:18px;
+  }
+  details[open] summary::after{content:"-";}
+  details p{margin-top:10px;font-size:16px;color:var(--ink-soft);}
+  footer{padding:40px 0 120px;text-align:center;
+    font-family:Arial,Helvetica,sans-serif;font-size:13px;color:var(--ink-soft);}
+
+  .rascunho-bar{
+    background:var(--accent);color:#fff;text-align:center;
+    font-family:Arial,Helvetica,sans-serif;font-size:12px;font-weight:bold;
+    letter-spacing:.05em;text-transform:uppercase;padding:9px 16px;
+  }
+
+  /* ===== Chat widget ===== */
+  #chat-toggle{
+    position:fixed;right:20px;bottom:20px;z-index:60;
+    font-family:Arial,Helvetica,sans-serif;font-size:14px;font-weight:bold;
+    background:var(--ink);color:#fff;border:none;border-radius:999px;
+    padding:14px 20px;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.25);
+  }
+  #chat-panel{
+    position:fixed;right:20px;bottom:78px;z-index:60;
+    width:min(360px,calc(100vw - 40px));
+    background:var(--card);border:1px solid var(--line);border-radius:10px;
+    box-shadow:0 10px 34px rgba(0,0,0,.22);
+    display:none;flex-direction:column;overflow:hidden;
+    font-family:Arial,Helvetica,sans-serif;
+  }
+  #chat-panel.open{display:flex;}
+  #chat-head{
+    background:var(--ink);color:#fff;padding:14px 16px;
+    font-size:14px;font-weight:bold;display:flex;justify-content:space-between;align-items:center;
+  }
+  #chat-head button{background:none;border:none;color:#fff;font-size:18px;cursor:pointer;}
+  #chat-log{
+    padding:14px;overflow-y:auto;max-height:340px;font-size:14px;line-height:1.5;
+  }
+  .msg{margin-bottom:10px;max-width:92%;}
+  .msg.bot{
+    background:var(--paper);border:1px solid var(--line);
+    border-radius:8px 8px 8px 2px;padding:10px 12px;
+  }
+  .msg.user{
+    background:var(--accent);color:#fff;
+    border-radius:8px 8px 2px 8px;padding:10px 12px;margin-left:auto;
+  }
+  #chat-opts{padding:0 14px 14px;display:flex;flex-wrap:wrap;gap:8px;}
+  #chat-opts button{
+    font-family:Arial,Helvetica,sans-serif;font-size:13px;
+    background:none;border:1px solid var(--accent);color:var(--accent);
+    border-radius:999px;padding:8px 14px;cursor:pointer;
+  }
+  #chat-opts button:hover{background:var(--accent);color:#fff;}
+  #chat-opts button.buy{background:var(--accent);color:#fff;}
+</style>
+</head>
+<body>
+
+{!PUBLICADO && (
+  <div class="rascunho-bar">Rascunho, visivel so por link. Cole o link do checkout Hotmart para publicar.</div>
+)}
+
+<header class="hero">
+  <div class="wrap">
+    <span class="eyebrow">Ebook, Mente do Mercado</span>
+    <h1>Marketing com Estratégia <em>não é discurso</em></h1>
+    <p class="lede">Um método direto para transformar estratégia de palavra bonita em critério de decisão na sua rotina de marketing.</p>
+    <div class="cta-block">
+      <a href="#" class="btn js-checkout">Quero o ebook por R$ 67</a>
+      <p class="micro">Acesso digital imediato pela Hotmart. Garantia de 7 dias.</p>
+    </div>
+  </div>
+</header>
+
+<section>
+  <div class="wrap">
+    <span class="eyebrow">O problema</span>
+    <h2>A palavra que todo mundo usa e quase ninguém pratica</h2>
+    <p>Estratégia aparece em toda reunião, em toda proposta e em todo perfil de LinkedIn. Mas na segunda-feira de manhã a rotina é outra: pedidos chegando de todo lado, urgência atropelando prioridade e o marketing tratado como central de produção de peças.</p>
+    <p>O problema não é falta de conhecimento. É falta de critério aplicado. Saber o conceito de posicionamento não resolve quando o diretor pede um post para amanhã e você não tem argumento para dizer o que entra na frente do quê.</p>
+    <p>Este ebook trata exatamente dessa distância: a que separa o discurso de estratégia da prática de decidir com critério.</p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <span class="eyebrow">Público</span>
+    <h2>Para quem é. E para quem não é.</h2>
+    <div class="cols">
+      <div class="col-card">
+        <h3>É para você se</h3>
+        <ul class="plain">
+          <li>Trabalha com marketing em empresa real, de analista a coordenador ou gerente</li>
+          <li>Está cansado de ser tratado como quem só faz post e campanha</li>
+          <li>Quer sustentar decisões com argumento, não com opinião</li>
+          <li>Prefere método aplicável a inspiração de palco</li>
+        </ul>
+      </div>
+      <div class="col-card">
+        <h3>Não é para você se</h3>
+        <ul class="plain">
+          <li>Busca fórmula rápida de dinheiro ou promessa de resultado garantido</li>
+          <li>Nunca trabalhou em uma operação de marketing de verdade</li>
+          <li>Quer template pronto para copiar sem pensar</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <span class="eyebrow">Conteúdo</span>
+    <h2>O que você leva</h2>
+    <ul class="plain">
+      <li>Critério para priorizar demandas quando tudo parece urgente</li>
+      <li>Como transformar estratégia de slide em decisão de rotina</li>
+      <li>Argumentos para sustentar suas escolhas diante de chefe e diretoria</li>
+      <li>O caminho para sair do modo central de pedidos sem criar guerra interna</li>
+      <li>Método usado em operação de marketing real, não teoria de palco</li>
+    </ul>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <span class="eyebrow">Quem escreve</span>
+    <h2>Bruno Massa</h2>
+    <p>Executivo de marketing com carreira construída dentro de operação real, não de palco. Criador do Mente do Mercado, canal sobre marketing, negócios, marcas e comportamento do consumidor.</p>
+    <p>O que está no ebook vem do bastidor corporativo: decisões defendidas em diretoria, orçamento disputado, prioridade negociada. É esse repertório, organizado em método, que você recebe.</p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <span class="eyebrow">Investimento</span>
+    <h2>Preço honesto, sem teatro</h2>
+    <p>R$ 67 é o preço cheio. Sem desconto fictício, sem contador regressivo, sem "últimas unidades" de um produto digital que não tem estoque. Você decide com calma.</p>
+    <div class="price-box">
+      <span class="eyebrow">Ebook completo</span>
+      <div class="valor"><small>R$</small> 67</div>
+      <p class="micro">Pagamento único. Acesso imediato pela Hotmart.</p>
+      <div class="cta-block">
+        <a href="#" class="btn js-checkout">Comprar o ebook</a>
+        <p class="micro">Se não for para você, reembolso integral em até 7 dias, direto pela Hotmart.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <span class="eyebrow">Dúvidas</span>
+    <h2>Perguntas frequentes</h2>
+    <details>
+      <summary>Como recebo o ebook depois da compra?</summary>
+      <p>A compra é processada pela Hotmart. Assim que o pagamento é aprovado, você recebe por e-mail o acesso à área de membros para baixar o material. No cartão a aprovação costuma ser imediata.</p>
+    </details>
+    <details>
+      <summary>E se eu comprar e não gostar?</summary>
+      <p>Você tem 7 dias de garantia, como manda o Código de Defesa do Consumidor. O pedido de reembolso é feito direto na Hotmart, sem precisar justificar e sem burocracia.</p>
+    </details>
+    <details>
+      <summary>Já consumo muito conteúdo grátis sobre marketing. Por que pagar?</summary>
+      <p>Conteúdo grátis, inclusive o do canal Mente do Mercado, ensina em pedaços. O ebook organiza o método em sequência aplicável, do diagnóstico ao argumento. É a diferença entre assistir aulas soltas e ter o mapa inteiro.</p>
+    </details>
+    <details>
+      <summary>Sou iniciante. Vale para mim?</summary>
+      <p>Se você ainda não trabalha em uma operação de marketing, provavelmente não é o momento. O material assume que você vive a rotina de demandas de uma empresa real. Prefiro que você não compre agora a comprar e não aproveitar.</p>
+    </details>
+    <details>
+      <summary>Isso promete que vou ser promovido ou ganhar mais?</summary>
+      <p>Não. Promoção e salário dependem de fatores que nenhum ebook controla. O que o material entrega é método: critério para decidir e argumento para sustentar decisões. O resto é trabalho seu.</p>
+    </details>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p>Mente do Mercado, Bruno Massa</p>
+    <p>Compra processada com segurança pela Hotmart.</p>
+  </div>
+</footer>
+
+<!-- ===== Assistente de duvidas ===== -->
+<button id="chat-toggle">Dúvidas sobre o ebook?</button>
+<div id="chat-panel" role="dialog" aria-label="Assistente de duvidas">
+  <div id="chat-head">
+    <span>Assistente do ebook</span>
+    <button id="chat-close" aria-label="Fechar">×</button>
+  </div>
+  <div id="chat-log"></div>
+  <div id="chat-opts"></div>
+</div>
+
+<script is:inline set:html={`var CHECKOUT_URL = ${JSON.stringify(CHECKOUT_URL)};`}></script>
+<script is:inline>
+(function(){
+  var configurado = typeof CHECKOUT_URL === 'string' && CHECKOUT_URL.length > 0;
+
+  document.querySelectorAll('.js-checkout').forEach(function(a){
+    if(configurado){
+      a.setAttribute('href', CHECKOUT_URL);
+      a.classList.add('hotmart-fb','hotmart__button-checkout');
+    } else {
+      a.setAttribute('href', '#');
+      a.setAttribute('aria-disabled', 'true');
+      a.addEventListener('click', function(e){ e.preventDefault(); });
+    }
+  });
+
+  var FLOWS = {
+    start: {
+      text: "Olá. Posso te ajudar a decidir se este ebook faz sentido para você. Sobre o que quer saber?",
+      opts: [["oque","O que é o ebook"],["pra_mim","É para mim?"],["preco","Preço e garantia"],["entrega","Como recebo o acesso"],["comprar","Quero comprar"]]
+    },
+    oque: {
+      text: "Marketing com Estratégia não é discurso é um ebook de Bruno Massa, criador do canal Mente do Mercado. Ele organiza em método o caminho para sair do modo central de pedidos: critério para priorizar, argumento para sustentar decisões e prática de rotina, não teoria de palco.",
+      opts: [["pra_mim","É para mim?"],["preco","Preço e garantia"],["comprar","Quero comprar"],["start","Voltar"]]
+    },
+    pra_mim: {
+      text: "É para quem trabalha com marketing em empresa real, de analista a coordenador ou gerente, e quer ser tratado como gente de negócio. Não é para quem busca fórmula rápida de dinheiro nem para quem nunca viveu uma operação de marketing. Se esse for o seu caso, sinceramente, não compre agora.",
+      opts: [["oque","O que é o ebook"],["preco","Preço e garantia"],["comprar","Sou o perfil, quero comprar"],["start","Voltar"]]
+    },
+    preco: {
+      text: "R$ 67, pagamento único, preço cheio e sem desconto de mentira. Você tem 7 dias de garantia pelo Código de Defesa do Consumidor: se não gostar, pede reembolso integral direto na Hotmart, sem justificar.",
+      opts: [["entrega","Como recebo o acesso"],["comprar","Quero comprar"],["start","Voltar"]]
+    },
+    entrega: {
+      text: "A compra é processada pela Hotmart. Aprovado o pagamento, você recebe por e-mail o acesso para baixar o ebook. No cartão a aprovação costuma ser imediata.",
+      opts: [["preco","Preço e garantia"],["comprar","Quero comprar"],["start","Voltar"]]
+    },
+    comprar: {
+      text: "Ótimo. O botão abaixo abre o checkout seguro da Hotmart. Qualquer dúvida depois da compra, o suporte da Hotmart e o e-mail do produtor resolvem.",
+      opts: [["__checkout","Abrir o checkout"],["start","Voltar"]]
+    }
+  };
+
+  var panel=document.getElementById('chat-panel'),
+      log=document.getElementById('chat-log'),
+      opts=document.getElementById('chat-opts'),
+      toggle=document.getElementById('chat-toggle');
+
+  function addMsg(text,who){
+    var d=document.createElement('div');
+    d.className='msg '+who;
+    d.textContent=text;
+    log.appendChild(d);
+    log.scrollTop=log.scrollHeight;
+  }
+
+  function show(key){
+    var f=FLOWS[key];
+    addMsg(f.text,'bot');
+    opts.innerHTML='';
+    f.opts.forEach(function(o){
+      var b=document.createElement('button');
+      b.textContent=o[1];
+      if(o[0]==='__checkout'){
+        b.className='buy';
+        b.onclick=function(){ if(configurado){ window.open(CHECKOUT_URL,'_blank'); } };
+      } else {
+        b.onclick=function(){ addMsg(o[1],'user'); show(o[0]); };
+      }
+      opts.appendChild(b);
+    });
+  }
+
+  var started=false;
+  toggle.onclick=function(){
+    panel.classList.toggle('open');
+    if(panel.classList.contains('open') && !started){ started=true; show('start'); }
+  };
+  document.getElementById('chat-close').onclick=function(){ panel.classList.remove('open'); };
+})();
+</script>
+</body>
+</html>
