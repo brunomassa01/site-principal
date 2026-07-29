@@ -8,9 +8,10 @@ const host = Astro.url.host;
 const ehLp = host.startsWith('lp.') || Astro.url.searchParams.has('preview');
 if (!ehLp) return new Response('Not Found', { status: 404 });
 
-// CONFIGURACAO: cole aqui o link real do checkout Hotmart do ebook.
+// CONFIGURACAO: link real do checkout Hotmart do ebook.
+// checkoutMode=2 abre o popup embutido; sck=lp_ebook atribui a venda a esta LP.
 // Vazio = rascunho: pagina noindex e botao de compra desligado.
-const CHECKOUT_URL = '';
+const CHECKOUT_URL = 'https://pay.hotmart.com/D106924275J?checkoutMode=2&sck=lp_ebook';
 const PUBLICADO = CHECKOUT_URL.length > 0;
 
 const urlCanonica = 'https://lp.brunomassa.online/ebook';
