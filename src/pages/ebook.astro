@@ -37,7 +37,9 @@ const descricao =
 <script is:inline src="https://static.hotmart.com/checkout/widget.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<!-- Inter = a LP. Hanken Grotesk + Space Mono = as fontes da capa do ebook,
+     usadas so dentro do mockup (e nos numeros do indice). -->
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:ital,wght@0,800;1,300&family=Inter:wght@400;500;600;700;800&family=Space+Mono&display=swap" rel="stylesheet" />
 <style is:global>
   :root{
     --bg:#ffffff;
@@ -149,6 +151,132 @@ const descricao =
     font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;padding:9px 16px;
   }
 
+  /* ===== Heroi em duas colunas: promessa a esquerda, produto a direita =====
+     No celular vira uma coluna e o livro entra ENTRE a promessa e o botao,
+     para a pessoa ver o que esta comprando antes de decidir. */
+  .hero-grid{
+    display:grid;
+    grid-template-columns:minmax(0,1fr) auto;
+    grid-template-areas:"texto livro" "cta livro";
+    align-items:center;
+    gap:26px 52px;
+  }
+  .hero-texto{grid-area:texto;align-self:end;}
+  .hero-cta{grid-area:cta;align-self:start;margin-top:0;}
+  .hero-livro{grid-area:livro;}
+  @media(max-width:760px){
+    .hero-grid{
+      grid-template-columns:1fr;
+      grid-template-areas:"texto" "livro" "cta";
+      gap:32px;
+    }
+    /* so o livro encolhe para a propria largura, para a legenda ficar
+       centrada sob a capa. O texto continua ocupando a linha inteira. */
+    .hero-livro{justify-self:start;}
+  }
+
+  /* ===== Mockup do ebook =====
+     A capa e desenhada em HTML com as fontes e as cores reais do arquivo
+     (preto #0A0A0B, lime #C2F03C). Nao e imagem: fica nitida em qualquer
+     tela e acompanha o texto se o titulo mudar. As duas cores do ebook
+     existem SO aqui dentro. */
+  .livro{
+    --cw:clamp(196px,26vw,268px);
+    --ink:#0a0a0b;
+    --lime:#c2f03c;
+    width:var(--cw);
+    transition:transform .45s cubic-bezier(.2,.7,.2,1),filter .45s ease;
+  }
+  .livro:hover{transform:translateY(-6px);filter:saturate(1.05);}
+  .capa{
+    position:relative;
+    width:100%;
+    aspect-ratio:1 / 1.414;      /* A4, igual ao PDF */
+    background:var(--ink);
+    border-radius:3px 6px 6px 3px;
+    padding:11.5% 11% 8%;
+    display:flex;
+    flex-direction:column;
+    font-family:'Hanken Grotesk','Inter',sans-serif;
+    box-shadow:0 26px 50px -22px rgba(0,0,0,.5),0 6px 16px rgba(0,0,0,.12);
+  }
+  /* lombada: brilho no vinco esquerdo */
+  .capa::before{
+    content:"";position:absolute;left:0;top:0;bottom:0;width:15px;
+    background:linear-gradient(90deg,rgba(255,255,255,.14),rgba(255,255,255,0));
+    border-radius:3px 0 0 3px;pointer-events:none;
+  }
+  /* miolo: a pilha de paginas aparecendo na borda direita */
+  .capa::after{
+    content:"";position:absolute;right:-6px;top:5px;bottom:5px;width:6px;
+    background:linear-gradient(90deg,#d5d5d2,#f7f7f5 55%,#c9c9c6);
+    border-radius:0 3px 3px 0;
+  }
+  .capa-marca{
+    font-family:'Space Mono',ui-monospace,monospace;
+    font-size:calc(var(--cw) * .0165);
+    letter-spacing:.22em;text-transform:uppercase;color:#8b8b93;
+  }
+  .capa-titulo{margin-top:auto;}
+  .capa-t1{
+    display:block;font-style:italic;font-weight:300;color:#fff;
+    font-size:calc(var(--cw) * .042);line-height:1.15;letter-spacing:-.01em;
+  }
+  .capa-t2{
+    display:block;font-weight:800;color:var(--lime);
+    font-size:calc(var(--cw) * .094);line-height:1.05;letter-spacing:-.035em;
+  }
+  .capa-sub{
+    margin:calc(var(--cw) * .05) 0 0;max-width:none;
+    font-size:calc(var(--cw) * .0225);line-height:1.65;color:#e8e8e6;font-weight:400;
+  }
+  .capa-sub em{font-style:normal;color:var(--lime);}
+  .capa-pe{
+    margin-top:auto;padding-top:calc(var(--cw) * .09);
+    display:flex;justify-content:space-between;gap:10px;
+    font-family:'Space Mono',ui-monospace,monospace;
+    font-size:calc(var(--cw) * .0165);color:#8b8b93;letter-spacing:.06em;
+  }
+  .livro-meta{
+    margin:18px 0 0;max-width:none;
+    font-family:'Space Mono',ui-monospace,monospace;
+    font-size:12px;letter-spacing:.06em;color:var(--tertiary);text-align:center;
+  }
+  @media(prefers-reduced-motion:reduce){
+    .livro,.livro:hover{transition:none;transform:none;}
+  }
+
+  /* ===== Indice real do ebook =====
+     A numeracao aqui carrega informacao: as duas partes sao uma sequencia
+     (diagnosticar a operacao, depois defende-la na diretoria). Os numeros
+     usam a mono da capa para amarrar pagina e produto. */
+  .indice{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:12px;}
+  @media(max-width:760px){.indice{grid-template-columns:1fr;}}
+  .parte{
+    background:var(--surface);border:1px solid var(--separator);
+    border-radius:18px;padding:28px;box-shadow:var(--shadow-card);
+  }
+  .parte h3{
+    font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+    color:var(--accent);margin-bottom:8px;
+  }
+  .parte .parte-nome{
+    margin:0 0 18px;max-width:none;
+    font-size:17px;font-weight:600;color:var(--label);line-height:1.3;
+  }
+  .parte ol{list-style:none;}
+  .parte li{
+    display:grid;grid-template-columns:auto 1fr;gap:12px;
+    padding:11px 0;border-bottom:1px solid var(--separator-light);
+    font-size:15.5px;line-height:1.4;color:var(--label);
+  }
+  .parte li:last-child{border-bottom:none;}
+  .parte li span{
+    font-family:'Space Mono',ui-monospace,monospace;
+    font-size:12.5px;color:var(--tertiary);padding-top:2px;
+  }
+  .indice-nota{margin:22px 0 0;font-size:15px;color:var(--tertiary);}
+
   /* ===== Chat widget ===== */
   #chat-toggle{
     position:fixed;right:20px;bottom:20px;z-index:60;
@@ -193,11 +321,32 @@ const descricao =
 )}
 
 <header class="hero">
-  <div class="wrap">
-    <span class="eyebrow">Ebook · Mente do Mercado</span>
-    <h1>Marketing com Estratégia <em>não é discurso</em></h1>
-    <p class="lede">Um método direto para transformar estratégia de palavra bonita em critério de decisão na sua rotina de marketing.</p>
-    <div class="cta-block">
+  <div class="wrap hero-grid">
+    <div class="hero-texto">
+      <span class="eyebrow">Ebook · Mente do Mercado</span>
+      <h1>Marketing com Estratégia <em>não é discurso</em></h1>
+      <p class="lede">Um método direto para transformar estratégia de palavra bonita em critério de decisão na sua rotina de marketing.</p>
+    </div>
+
+    <div class="hero-livro">
+      <div class="livro" role="img" aria-label="Capa do ebook Estratégia não é discurso, de Bruno Massa">
+        <div class="capa">
+          <span class="capa-marca">Ebook · Bruno Massa</span>
+          <div class="capa-titulo">
+            <span class="capa-t1">Estratégia não é</span>
+            <span class="capa-t2">discurso.</span>
+          </div>
+          <p class="capa-sub">O diagnóstico da operação e a conversa executiva. O método de quem responde por <em>operação, orçamento e resultado</em>.</p>
+          <div class="capa-pe">
+            <span>Bruno Massa</span>
+            <span>brunomassa.online</span>
+          </div>
+        </div>
+      </div>
+      <p class="livro-meta">PDF · 52 páginas · 20 capítulos</p>
+    </div>
+
+    <div class="hero-cta cta-block">
       <a href="#" class="btn js-checkout">Quero o ebook por R$ 67</a>
       <p class="micro">Acesso digital imediato pela Hotmart. Garantia de 7 dias.</p>
     </div>
@@ -244,13 +393,34 @@ const descricao =
   <div class="wrap">
     <span class="eyebrow">Conteúdo</span>
     <h2>O que você leva</h2>
-    <ul class="plain">
-      <li>Critério para priorizar demandas quando tudo parece urgente</li>
-      <li>Como transformar estratégia de slide em decisão de rotina</li>
-      <li>Argumentos para sustentar suas escolhas diante de chefe e diretoria</li>
-      <li>O caminho para sair do modo central de pedidos sem criar guerra interna</li>
-      <li>Método usado em operação de marketing real, não teoria de palco</li>
-    </ul>
+    <p>Vinte capítulos em duas partes, na ordem em que o problema aparece na vida real: primeiro você enxerga a própria operação, depois defende suas decisões na frente de quem manda. Alguns dos temas:</p>
+    <div class="indice">
+      <div class="parte">
+        <h3>Parte 1</h3>
+        <p class="parte-nome">O papel do marketing e o diagnóstico da operação</p>
+        <ol>
+          <li><span>03</span>Atividade, entrega, efeito e resultado</li>
+          <li><span>04</span>Por que o marketing se transforma em uma central de pedidos</li>
+          <li><span>07</span>Gargalos, dependências e retrabalho</li>
+          <li><span>08</span>Critérios de priorização</li>
+          <li><span>09</span>Capacidade disponível e custo de oportunidade</li>
+          <li><span>10</span>Como aceitar, negociar, adiar ou recusar uma demanda</li>
+        </ol>
+      </div>
+      <div class="parte">
+        <h3>Parte 2</h3>
+        <p class="parte-nome">Análise, reporte e a conversa executiva</p>
+        <ol>
+          <li><span>01</span>Por que relatórios de marketing não convencem</li>
+          <li><span>03</span>Dado, informação, análise e argumento</li>
+          <li><span>05</span>A estrutura de uma análise executiva</li>
+          <li><span>07</span>Como reportar o que não funcionou</li>
+          <li><span>08</span>Como apresentar: a conversa executiva</li>
+          <li><span>09</span>O plano de 90 dias</li>
+        </ol>
+      </div>
+    </div>
+    <p class="indice-nota">Outros oito capítulos completam as duas partes, mais a abertura e o fechamento. Cada capítulo traz uma aplicação hipotética em empresa real e uma pergunta para você responder sobre a sua operação.</p>
   </div>
 </section>
 
